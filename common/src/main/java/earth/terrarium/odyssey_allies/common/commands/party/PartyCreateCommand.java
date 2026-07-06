@@ -6,8 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import earth.terrarium.odyssey_allies.api.teams.party.Party;
 import earth.terrarium.odyssey_allies.api.teams.party.PartyApi;
 import earth.terrarium.odyssey_allies.common.commands.TeamExceptions;
-import earth.terrarium.odyssey_allies.common.compat.roles.AlliesPermissions;
-import earth.terrarium.odyssey_allies.common.compat.roles.RolesCompat;
+
 import earth.terrarium.odyssey_allies.common.utils.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -36,8 +35,6 @@ public final class PartyCreateCommand {
     private static void create(CommandSourceStack source, String name) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         if (PartyApi.API.getPlayerParty(player).isPresent()) throw TeamExceptions.ALREADY_IN_PARTY.create();
-        if (earth.terrarium.odyssey_allies.OdysseyAllies.IS_ROLES_LOADED && !RolesCompat.hasPermission(player, AlliesPermissions.CREATE_PARTY)) throw TeamExceptions.NO_PERMISSION_CREATE_PARTY.create();
-
         Party party = new Party(player.getUUID(), name);
         PartyApi.API.create(source.getLevel(), party);
 

@@ -145,8 +145,6 @@
     "gamerule.maxGuildMembers.description": "Max Guild Members",
     "gamerule.maxPartyMembers.description": "Max Party Members",
 
-    "option.prometheus.odyssey_allies/v1": "Odyssey Allies",
-
     "gui.odyssey_allies.party_chat.title": "Party Chat",
     "gui.odyssey_allies.party_members.title": "Party Members",
     "gui.odyssey_allies.party_settings.title": "Party Settings",

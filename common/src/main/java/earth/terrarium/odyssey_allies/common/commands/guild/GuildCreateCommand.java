@@ -6,8 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import earth.terrarium.odyssey_allies.api.teams.guild.Guild;
 import earth.terrarium.odyssey_allies.api.teams.guild.GuildApi;
 import earth.terrarium.odyssey_allies.common.commands.TeamExceptions;
-import earth.terrarium.odyssey_allies.common.compat.roles.AlliesPermissions;
-import earth.terrarium.odyssey_allies.common.compat.roles.RolesCompat;
+
 import earth.terrarium.odyssey_allies.common.utils.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -35,8 +34,6 @@ public final class GuildCreateCommand {
     private static void create(CommandSourceStack source, String name) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         if (GuildApi.API.getPlayerGuild(player).isPresent()) throw TeamExceptions.ALREADY_IN_GUILD.create();
-        if (earth.terrarium.odyssey_allies.OdysseyAllies.IS_ROLES_LOADED && !RolesCompat.hasPermission(player, AlliesPermissions.CREATE_GUILD)) throw TeamExceptions.NO_PERMISSION_CREATE_GUILD.create();
-
         Guild guild = new Guild(player.getUUID(), name);
         GuildApi.API.create(source.getLevel(), guild);
 

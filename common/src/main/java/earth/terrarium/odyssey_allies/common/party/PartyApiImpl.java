@@ -1,12 +1,12 @@
 package earth.terrarium.odyssey_allies.common.party;
 
-import earth.terrarium.odyssey_allies.OdysseyAllies;
+
 import earth.terrarium.odyssey_allies.api.events.AlliesEvents;
 import earth.terrarium.odyssey_allies.api.teams.MemberStatus;
 import earth.terrarium.odyssey_allies.api.teams.party.Party;
 import earth.terrarium.odyssey_allies.api.teams.party.PartyApi;
 import earth.terrarium.odyssey_allies.api.teams.settings.Setting;
-import earth.terrarium.odyssey_allies.common.compat.roles.RolesCompat;
+
 import earth.terrarium.odyssey_allies.common.network.NetworkHandler;
 import earth.terrarium.odyssey_allies.common.network.packets.*;
 import earth.terrarium.odyssey_allies.common.utils.AlliesGameRules;
@@ -120,10 +120,6 @@ public class PartyApiImpl implements PartyApi {
 
     @Override
     public int getMaxPartyMembers(Level level, UUID ownerID) {
-        int max = level.getGameRules().getInt(AlliesGameRules.MAX_PARTY_MEMBERS);
-        if (OdysseyAllies.IS_ROLES_LOADED) {
-            max = Math.min(max, RolesCompat.getMaxPartyMembers(level, ownerID));
-        }
-        return max;
+        return level.getGameRules().getInt(AlliesGameRules.MAX_PARTY_MEMBERS);
     }
 }

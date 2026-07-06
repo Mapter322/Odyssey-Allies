@@ -1,8 +1,6 @@
 package earth.terrarium.odyssey_allies.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import earth.terrarium.odyssey_allies.OdysseyAllies;
-import earth.terrarium.odyssey_allies.client.compat.prometheus.PrometheusClientCompat;
 import earth.terrarium.odyssey_allies.client.screens.chat.ChatScreen;
 import earth.terrarium.odyssey_allies.common.chat.ChatHandler;
 import earth.terrarium.odyssey_allies.common.constants.ConstantComponents;
@@ -25,9 +23,6 @@ public class OdysseyAlliesClient {
         ConstantComponents.ODYSSEY_CATEGORY.getString());
 
     public static void init() {
-        if (OdysseyAllies.IS_ROLES_LOADED) {
-            PrometheusClientCompat.init();
-        }
     }
 
     public static void clientTick() {

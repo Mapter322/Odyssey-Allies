@@ -6,8 +6,7 @@ import earth.terrarium.odyssey_allies.api.events.AlliesEvents;
 import earth.terrarium.odyssey_allies.api.teams.party.Party;
 import earth.terrarium.odyssey_allies.api.teams.party.PartyApi;
 import earth.terrarium.odyssey_allies.common.commands.TeamExceptions;
-import earth.terrarium.odyssey_allies.common.compat.roles.AlliesPermissions;
-import earth.terrarium.odyssey_allies.common.compat.roles.RolesCompat;
+
 import earth.terrarium.odyssey_allies.common.permissions.Permissions;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -31,8 +30,6 @@ public final class PartyWarpCommand {
         Party party = PartyApi.API.getPlayerParty(player).orElse(null);
         if (party == null) throw TeamExceptions.NOT_IN_PARTY.create();
         if (!party.hasPermission(player.getUUID(), Permissions.TELEPORT_MEMBERS)) throw TeamExceptions.NO_PERMISSION_TELEPORT_MEMBERS.create();
-        if (earth.terrarium.odyssey_allies.OdysseyAllies.IS_ROLES_LOADED && !RolesCompat.hasPermission(player, AlliesPermissions.TELEPORT)) throw TeamExceptions.NO_PERMISSION_TELEPORT.create();
-
         party.onlineMembers(source.getLevel())
             .stream()
             .filter(target -> !target.getUUID().equals(player.getUUID()))

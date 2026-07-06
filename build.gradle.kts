@@ -47,7 +47,6 @@ subprojects {
     dependencies {
         val resourcefulLibVersion: String by project
         val cadmusVersion: String by project
-        val prometheusVersion: String by project
         val heraclesVersion: String by project
         val reiVersion: String by project
 
@@ -76,16 +75,9 @@ subprojects {
                 isTransitive = false
             }
 
-            "modCompileOnly"(group = "earth.terrarium.prometheus", name = "prometheus-$modLoader-$minecraftVersion", version = prometheusVersion) {
-                isTransitive = false
-            }
-
             "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-api", version = reiVersion)
             "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-default-plugin", version = reiVersion)
         } else {
-            "modCompileOnly"(group = "earth.terrarium.prometheus", name = "prometheus-$modLoader-$minecraftVersion", version = prometheusVersion) {
-                isTransitive = false
-            }
 //            "modLocalRuntime"(group = "earth.terrarium.heracles", name = "heracles-$modLoader-1.20.1", version = heraclesVersion)
 
             "modRuntimeOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-$modLoader", version = reiVersion)

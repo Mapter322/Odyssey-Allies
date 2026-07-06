@@ -7,8 +7,7 @@ import earth.terrarium.odyssey_allies.api.teams.guild.Guild;
 import earth.terrarium.odyssey_allies.api.teams.guild.GuildApi;
 import earth.terrarium.odyssey_allies.common.commands.TeamExceptions;
 import earth.terrarium.odyssey_allies.common.commands.TeamSuggestionProviders;
-import earth.terrarium.odyssey_allies.common.compat.roles.AlliesPermissions;
-import earth.terrarium.odyssey_allies.common.compat.roles.RolesCompat;
+
 import earth.terrarium.odyssey_allies.common.permissions.Permissions;
 import earth.terrarium.odyssey_allies.common.settings.Settings;
 import net.minecraft.commands.CommandSourceStack;
@@ -38,8 +37,6 @@ public final class GuildTpCommand {
         if (guild == null) throw TeamExceptions.NOT_IN_GUILD.create();
         if (!guild.hasPermission(player.getUUID(), Permissions.TELEPORT)) throw TeamExceptions.NO_PERMISSION_TELEPORT.create();
         if (!Settings.PASSIVE_TELEPORT.get(guild)) throw TeamExceptions.PASSIVE_TELEPORT_DISABLED.create();
-        if (earth.terrarium.odyssey_allies.OdysseyAllies.IS_ROLES_LOADED && !RolesCompat.hasPermission(player, AlliesPermissions.TELEPORT)) throw TeamExceptions.NO_PERMISSION_TELEPORT.create();
-
         if (AlliesEvents.OnTeleport.fire(player, target.blockPosition())) {
             player.teleportTo(target.serverLevel(), target.getX(), target.getY(), target.getZ(), target.getYRot(), target.getXRot());
         }
