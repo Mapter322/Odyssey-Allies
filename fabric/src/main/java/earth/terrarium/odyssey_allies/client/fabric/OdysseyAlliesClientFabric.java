@@ -4,10 +4,12 @@ import earth.terrarium.odyssey_allies.api.teams.guild.GuildApi;
 import earth.terrarium.odyssey_allies.api.teams.party.PartyApi;
 import earth.terrarium.odyssey_allies.client.OdysseyAlliesClient;
 import earth.terrarium.odyssey_allies.client.screens.chat.ChatScreen;
+import earth.terrarium.odyssey_allies.client.screens.info.TeamInfoScreen;
 import earth.terrarium.odyssey_allies.client.screens.members.MembersScreen;
 import earth.terrarium.odyssey_allies.client.screens.settings.SettingsScreen;
 import earth.terrarium.odyssey_allies.common.commands.TeamExceptions;
 import net.fabricmc.api.ClientModInitializer;
+import net.minecraft.client.Minecraft;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -67,6 +69,24 @@ public class OdysseyAlliesClientFabric implements ClientModInitializer {
                 SettingsScreen.openParty();
                 return 0;
             }))));
+
+            // Info screen
+            dispatcher.register(ClientCommandManager.literal("guildc").executes(context -> {
+                GuildApi.API.getPlayerGuild(context.getSource().getPlayer()).ifPresent(guild ->
+                    Minecraft.getInstance().tell(() ->
+                        Minecraft.getInstance().setScreen(new TeamInfoScreen("guild", guild))
+                    )
+                );
+                return 0;
+            }));
+            dispatcher.register(ClientCommandManager.literal("partyc").executes(context -> {
+                PartyApi.API.getPlayerParty(context.getSource().getPlayer()).ifPresent(party ->
+                    Minecraft.getInstance().tell(() ->
+                        Minecraft.getInstance().setScreen(new TeamInfoScreen("party", party))
+                    )
+                );
+                return 0;
+            }));
         });
     }
 }

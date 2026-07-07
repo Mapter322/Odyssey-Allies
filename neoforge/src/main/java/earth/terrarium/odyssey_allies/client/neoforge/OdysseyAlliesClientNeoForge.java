@@ -5,6 +5,7 @@ import earth.terrarium.odyssey_allies.api.teams.guild.GuildApi;
 import earth.terrarium.odyssey_allies.api.teams.party.PartyApi;
 import earth.terrarium.odyssey_allies.client.OdysseyAlliesClient;
 import earth.terrarium.odyssey_allies.client.screens.chat.ChatScreen;
+import earth.terrarium.odyssey_allies.client.screens.info.TeamInfoScreen;
 import earth.terrarium.odyssey_allies.client.screens.members.MembersScreen;
 import earth.terrarium.odyssey_allies.client.screens.settings.SettingsScreen;
 import earth.terrarium.odyssey_allies.common.commands.TeamExceptions;
@@ -83,5 +84,23 @@ public class OdysseyAlliesClientNeoForge {
             SettingsScreen.openParty();
             return 0;
         }))));
+
+        // Info screen
+        event.getDispatcher().register(Commands.literal("guild").executes(context -> {
+            GuildApi.API.getPlayerGuild(Minecraft.getInstance().player).ifPresent(guild ->
+                Minecraft.getInstance().tell(() ->
+                    Minecraft.getInstance().setScreen(new TeamInfoScreen("guild", guild))
+                )
+            );
+            return 0;
+        }));
+        event.getDispatcher().register(Commands.literal("party").executes(context -> {
+            PartyApi.API.getPlayerParty(Minecraft.getInstance().player).ifPresent(party ->
+                Minecraft.getInstance().tell(() ->
+                    Minecraft.getInstance().setScreen(new TeamInfoScreen("party", party))
+                )
+            );
+            return 0;
+        }));
     }
 }
