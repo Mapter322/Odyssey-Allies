@@ -48,8 +48,11 @@ public class MembersScreen extends BaseScreen {
             .stream()
             .filter(member -> !member.getValue().status().isFakePlayer())
             .map(Map.Entry::getKey)
-            .map(id -> Objects.requireNonNull(Minecraft.getInstance().getConnection()).getPlayerInfo(id))
-            .map(Objects::requireNonNull)
+            .map(id -> {
+                var conn = Minecraft.getInstance().getConnection();
+                return conn != null ? conn.getPlayerInfo(id) : null;
+            })
+            .filter(Objects::nonNull)
             .toList()
         );
     }

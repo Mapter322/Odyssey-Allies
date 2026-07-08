@@ -24,7 +24,11 @@ public class PartyApiImpl implements PartyApi {
     @Override
     public void create(Level level, Party party) {
         PARTIES.put(party.id(), party);
-        PARTIES_BY_PLAYER.put(party.getOwner(), party);
+        party.members().forEach((memberId, member) -> {
+            if (member.status().isMember()) {
+                PARTIES_BY_PLAYER.put(memberId, party);
+            }
+        });
         if (level instanceof ServerLevel serverLevel) {
             NetworkHandler.sendToAllClientPlayers(new ClientboundAddPartyPacket(party), serverLevel.getServer());
         }

@@ -24,7 +24,11 @@ public class GuildApiImpl implements GuildApi {
     public void create(Level level, Guild guild) {
         var data = GuildSaveData.read(level);
         data.guilds().put(guild.id(), guild);
-        data.guildsByPlayer().put(guild.getOwner(), guild);
+        guild.members().forEach((memberId, member) -> {
+            if (member.status().isMember()) {
+                data.guildsByPlayer().put(memberId, guild);
+            }
+        });
         if (level instanceof ServerLevel serverLevel) {
             data.setDirty();
             NetworkHandler.sendToAllClientPlayers(new ClientboundAddGuildPacket(guild), serverLevel.getServer());
