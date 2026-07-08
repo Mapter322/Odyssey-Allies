@@ -112,6 +112,10 @@ public class MembersScreen extends BaseScreen {
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
         graphics.drawString(font, title, this.titleLabelX, this.titleLabelY, 0x404040, false);
+        int online = team.onlineMembers(Objects.requireNonNull(Minecraft.getInstance().level)).size();
+        int total = team.realMembersCount();
+        Component onlineText = Component.translatable("gui.odyssey_allies.online_members", online, total);
+        graphics.drawString(font, onlineText, this.imageWidth - 8 - font.width(onlineText), this.titleLabelY, 0x404040, false);
     }
 
     @Override

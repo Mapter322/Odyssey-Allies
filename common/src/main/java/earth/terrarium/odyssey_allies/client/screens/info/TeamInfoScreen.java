@@ -14,6 +14,7 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.Objects;
 import java.util.UUID;
 
 public class TeamInfoScreen extends Screen {
@@ -25,6 +26,7 @@ public class TeamInfoScreen extends Screen {
     private static final int CLOSE_Y = 6;
     private static final int CLOSE_SIZE = 10;
     private final boolean guild;
+    private final Team team;
     private final Component teamName;
     private final String ownerName;
     private final int memberCount;
@@ -35,6 +37,7 @@ public class TeamInfoScreen extends Screen {
 
     public TeamInfoScreen(String teamType, Team team) {
         super(Component.empty());
+        this.team = team;
         this.guild = "guild".equals(teamType);
         this.ownerName = getOwnerName(team.getOwner());
         this.memberCount = team.realMembersCount();
@@ -43,7 +46,6 @@ public class TeamInfoScreen extends Screen {
             ? Config.maxGuildMembers
             : Config.maxPartyMembers;
 
-        // Color: guild = gold, party = green
         int color = guild ? 0xFFAA00 : 0x55FF55;
         this.teamName = team.displayName().copy().withStyle(style -> style.withColor(color));
     }
@@ -105,7 +107,7 @@ public class TeamInfoScreen extends Screen {
         int px = x + 12;
         int py = y + 28;
         int pw = WIDTH - 24;
-        int ph = 50;
+        int ph = 68;
 
         graphics.fill(px, py, px + pw, py + ph, 0xC0101010);
         graphics.fill(px + 1, py + 1, px + pw - 1, py + ph - 1, 0xC0252525);
@@ -113,13 +115,18 @@ public class TeamInfoScreen extends Screen {
         int tx = px + 6;
         int ty = py + 6;
 
+        int onlineCount = team.onlineMembers(Objects.requireNonNull(Minecraft.getInstance().level)).size();
+
         graphics.drawString(font, teamName, tx, ty, 0xFFFFFF, false);
         graphics.drawString(font,
             Component.translatable("gui.odyssey_allies.info.owner", ownerName),
-            tx, ty + 16, 0xA0A0A0, false);
+            tx, ty + 16, 0xFFFFFF, false);
         graphics.drawString(font,
             Component.translatable("gui.odyssey_allies.info.members", memberCount, maxMembers),
-            tx, ty + 32, 0xA0A0A0, false);
+            tx, ty + 32, 0xFFFFFF, false);
+        graphics.drawString(font,
+            Component.translatable("gui.odyssey_allies.online_members", onlineCount, maxMembers),
+            tx, ty + 48, 0xFFFFFF, false);
     }
 
     @Override
