@@ -27,10 +27,11 @@ import java.util.*;
 public class MembersScreen extends BaseScreen {
 
     private static final ResourceLocation CONTAINER_BACKGROUND = OdysseyAllies.id("textures/gui/members.png");
+    private static final Map<UUID, String> NAME_CACHE = new HashMap<>();
 
     private final Team team;
     private final Set<String> permissions;
-    private final List<PlayerInfo> members = new ArrayList<>();
+    private final List<MembersList.EntryData> members = new ArrayList<>();
 
     private final UUID selfId;
 
@@ -44,17 +45,23 @@ public class MembersScreen extends BaseScreen {
         this.team = team;
         this.permissions = permissions;
         this.selfId = Minecraft.getInstance().getGameProfile().getId();
-        this.members.addAll(team.members().entrySet()
-            .stream()
-            .filter(member -> !member.getValue().status().isFakePlayer())
-            .map(Map.Entry::getKey)
-            .map(id -> {
-                var conn = Minecraft.getInstance().getConnection();
-                return conn != null ? conn.getPlayerInfo(id) : null;
-            })
-            .filter(Objects::nonNull)
-            .toList()
-        );
+
+        var conn = Minecraft.getInstance().getConnection();
+        var skinManager = Minecraft.getInstance().getSkinManager();
+
+        team.members().forEach((uuid, member) -> {
+            if (member.status().isFakePlayer()) return;
+
+            PlayerInfo info = conn != null ? conn.getPlayerInfo(uuid) : null;
+            if (info != null) {
+                NAME_CACHE.put(uuid, info.getProfile().getName());
+                this.members.add(new MembersList.EntryData(info.getProfile(), info.getSkin().texture(), info));
+            } else {
+                String name = NAME_CACHE.getOrDefault(uuid, uuid.toString().substring(0, 8));
+                GameProfile profile = new GameProfile(uuid, name);
+                this.members.add(new MembersList.EntryData(profile, skinManager.getInsecureSkin(profile).texture(), null));
+            }
+        });
     }
 
     @Override
@@ -63,7 +70,7 @@ public class MembersScreen extends BaseScreen {
 
         addRenderableWidget(new MembersList(this.leftPos + 8, this.topPos + 29, 70, 180, 20, this.members, entry -> {
             if (entry != null) {
-                this.selectedProfile = entry.playerInfo().getProfile();
+                this.selectedProfile = entry.profile();
                 this.selectedMember = this.team.members().get(this.selectedProfile.getId());
                 rebuildWidgets();
             }

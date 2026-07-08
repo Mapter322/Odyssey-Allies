@@ -1,5 +1,6 @@
 package earth.terrarium.odyssey_allies.client.screens.members;
 
+import com.mojang.authlib.GameProfile;
 import com.teamresourceful.resourcefullib.client.components.selection.ListEntry;
 import com.teamresourceful.resourcefullib.client.components.selection.SelectionList;
 import com.teamresourceful.resourcefullib.client.scissor.ScissorBoxStack;
@@ -25,13 +26,9 @@ public class MembersList extends SelectionList<MembersList.Entry> {
 
     private Entry selected;
 
-    public MembersList(int x, int y, int width, int height, int itemHeight, List<PlayerInfo> members, Consumer<@Nullable Entry> onSelection) {
+    public MembersList(int x, int y, int width, int height, int itemHeight, List<EntryData> data, Consumer<@Nullable Entry> onSelection) {
         super(x, y, width, height, itemHeight, onSelection, true);
-        update(members);
-    }
-
-    public void update(List<PlayerInfo> members) {
-        updateEntries(members.stream().map(Entry::new).toList());
+        updateEntries(data.stream().map(d -> new Entry(d.profile, d.skin, d.playerInfo)).toList());
     }
 
     @Override
@@ -40,14 +37,19 @@ public class MembersList extends SelectionList<MembersList.Entry> {
         this.selected = entry;
     }
 
+    public record EntryData(GameProfile profile, ResourceLocation skin, @Nullable PlayerInfo playerInfo) {}
+
     public class Entry extends ListEntry {
 
-        private final PlayerInfo member;
+        private final GameProfile profile;
         private final ResourceLocation skin;
+        @Nullable
+        private final PlayerInfo playerInfo;
 
-        public Entry(PlayerInfo member) {
-            this.member = member;
-            this.skin = member.getSkin().texture();
+        public Entry(GameProfile profile, ResourceLocation skin, @Nullable PlayerInfo playerInfo) {
+            this.profile = profile;
+            this.skin = skin;
+            this.playerInfo = playerInfo;
         }
 
         @Override
@@ -59,13 +61,13 @@ public class MembersList extends SelectionList<MembersList.Entry> {
             try (var ignored = RenderUtils.createScissorBoxStack(scissorStack, Minecraft.getInstance(), graphics.pose(), left + 20, top + 2, width - 24, height - 4)) {
                 graphics.drawString(
                     Minecraft.getInstance().font,
-                    member.getProfile().getName(), left + 21, top + 5, 0xFFFFFF,
+                    profile.getName(), left + 21, top + 5, 0xFFFFFF,
                     false
                 );
             }
 
             if (hovered) {
-                ScreenUtils.setTooltip(Component.literal(member.getProfile().getName()));
+                ScreenUtils.setTooltip(Component.literal(profile.getName()));
                 if (Minecraft.getInstance().screen instanceof CursorScreen cursorScreen) {
                     cursorScreen.setCursor(CursorScreen.Cursor.POINTER);
                 }
@@ -80,8 +82,13 @@ public class MembersList extends SelectionList<MembersList.Entry> {
             return this == selected;
         }
 
+        public GameProfile profile() {
+            return this.profile;
+        }
+
+        @Nullable
         public PlayerInfo playerInfo() {
-            return this.member;
+            return this.playerInfo;
         }
     }
 }
