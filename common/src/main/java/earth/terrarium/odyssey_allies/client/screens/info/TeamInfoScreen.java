@@ -2,9 +2,8 @@ package earth.terrarium.odyssey_allies.client.screens.info;
 
 import earth.terrarium.odyssey_allies.OdysseyAllies;
 import earth.terrarium.odyssey_allies.api.teams.Team;
-import earth.terrarium.odyssey_allies.api.teams.guild.GuildApi;
-import earth.terrarium.odyssey_allies.api.teams.party.PartyApi;
 import earth.terrarium.odyssey_allies.client.screens.chat.ChatScreen;
+import earth.terrarium.odyssey_allies.common.utils.Config;
 import earth.terrarium.odyssey_allies.client.screens.members.MembersScreen;
 import earth.terrarium.odyssey_allies.client.screens.settings.SettingsScreen;
 import net.minecraft.client.Minecraft;
@@ -37,11 +36,9 @@ public class TeamInfoScreen extends Screen {
         this.ownerName = getOwnerName(team.getOwner());
         this.memberCount = team.realMembersCount();
 
-        var level = Minecraft.getInstance().level;
-        var ownerId = team.getOwner();
         this.maxMembers = guild
-            ? GuildApi.API.getMaxGuildMembers(level, ownerId)
-            : PartyApi.API.getMaxPartyMembers(level, ownerId);
+            ? Config.maxGuildMembers
+            : Config.maxPartyMembers;
 
         // Color: guild = gold, party = green
         int color = guild ? 0xFFAA00 : 0x55FF55;

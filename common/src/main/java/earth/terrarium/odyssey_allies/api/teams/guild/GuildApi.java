@@ -125,12 +125,4 @@ public interface GuildApi {
      */
     Map<UUID, Guild> getAllGuildsByPlayer(Level level);
 
-    /**
-     * Gets the maximum number members per guild.
-     *
-     * @param level   the level
-     * @param ownerID the owner ID
-     * @return the maximum number of members
-     */
-    int getMaxGuildMembers(Level level, UUID ownerID);
 }

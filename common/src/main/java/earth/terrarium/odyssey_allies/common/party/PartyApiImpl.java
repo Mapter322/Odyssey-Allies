@@ -9,7 +9,6 @@ import earth.terrarium.odyssey_allies.api.teams.settings.Setting;
 
 import earth.terrarium.odyssey_allies.common.network.NetworkHandler;
 import earth.terrarium.odyssey_allies.common.network.packets.*;
-import earth.terrarium.odyssey_allies.common.utils.AlliesGameRules;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -118,8 +117,4 @@ public class PartyApiImpl implements PartyApi {
         return PARTIES_BY_PLAYER;
     }
 
-    @Override
-    public int getMaxPartyMembers(Level level, UUID ownerID) {
-        return level.getGameRules().getInt(AlliesGameRules.MAX_PARTY_MEMBERS);
-    }
 }

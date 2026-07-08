@@ -119,12 +119,4 @@ public interface PartyApi {
      */
     Map<UUID, Party> getAllPartiesByPlayer(Level level);
 
-    /**
-     * Gets the maximum number of party members.
-     *
-     * @param level   the level
-     * @param ownerID the owner ID
-     * @return the maximum number of party members
-     */
-    int getMaxPartyMembers(Level level, UUID ownerID);
 }

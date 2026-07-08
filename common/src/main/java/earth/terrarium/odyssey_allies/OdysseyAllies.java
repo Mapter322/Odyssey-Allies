@@ -12,7 +12,7 @@ import earth.terrarium.odyssey_allies.common.network.packets.ClientboundSyncGuil
 import earth.terrarium.odyssey_allies.common.network.packets.ClientboundSyncPartiesPacket;
 import earth.terrarium.odyssey_allies.common.permissions.Permissions;
 import earth.terrarium.odyssey_allies.common.settings.Settings;
-import earth.terrarium.odyssey_allies.common.utils.AlliesGameRules;
+import earth.terrarium.odyssey_allies.common.utils.Config;
 import earth.terrarium.odyssey_allies.common.utils.ModUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -25,12 +25,17 @@ public class OdysseyAllies {
     public static final boolean IS_CLAIMS_LOADED = ModInfoUtils.isModLoaded("odyssey_claims");
     public static final boolean IS_QUESTS_LOADED = ModInfoUtils.isModLoaded("odyssey_quests");
 
-    public static final int DEFAULT_MAX_GUILD_MEMBERS = 50;
-    public static final int DEFAULT_MAX_PARTY_MEMBERS = 50;
+    public static final int MIN_GUILD_MEMBERS = 6;
+    public static final int MAX_GUILD_MEMBERS = 64;
+    public static final int DEFAULT_MAX_GUILD_MEMBERS = 16;
+
+    public static final int MIN_PARTY_MEMBERS = 2;
+    public static final int MAX_PARTY_MEMBERS = 8;
+    public static final int DEFAULT_MAX_PARTY_MEMBERS = 4;
 
     public static void init() {
         NetworkHandler.init();
-        AlliesGameRules.init();
+        Config.load();
         Settings.init();
         Permissions.init();
         if (IS_CLAIMS_LOADED) ClaimsCompat.init();

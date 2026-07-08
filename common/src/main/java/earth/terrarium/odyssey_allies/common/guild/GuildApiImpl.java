@@ -9,7 +9,6 @@ import earth.terrarium.odyssey_allies.api.teams.settings.Setting;
 
 import earth.terrarium.odyssey_allies.common.network.NetworkHandler;
 import earth.terrarium.odyssey_allies.common.network.packets.*;
-import earth.terrarium.odyssey_allies.common.utils.AlliesGameRules;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 
@@ -124,8 +123,4 @@ public class GuildApiImpl implements GuildApi {
         return GuildSaveData.read(level).guildsByPlayer();
     }
 
-    @Override
-    public int getMaxGuildMembers(Level level, UUID ownerID) {
-        return level.getGameRules().getInt(AlliesGameRules.MAX_GUILD_MEMBERS);
-    }
 }

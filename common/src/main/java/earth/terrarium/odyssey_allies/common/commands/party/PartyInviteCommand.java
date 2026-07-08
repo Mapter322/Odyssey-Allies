@@ -7,6 +7,7 @@ import earth.terrarium.odyssey_allies.api.teams.party.Party;
 import earth.terrarium.odyssey_allies.api.teams.party.PartyApi;
 import earth.terrarium.odyssey_allies.common.commands.TeamExceptions;
 import earth.terrarium.odyssey_allies.common.constants.ConstantComponents;
+import earth.terrarium.odyssey_allies.common.utils.Config;
 import earth.terrarium.odyssey_allies.common.utils.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -38,7 +39,7 @@ public final class PartyInviteCommand {
         if (player.getUUID().equals(targetPlayer.getUUID())) throw TeamExceptions.CANT_INVITE_YOURSELF.create();
         if (!party.isPublic() && !party.canManageMembers(player.getUUID())) throw TeamExceptions.NO_PERMISSION_MANAGE_MEMBERS.create();
         if (party.isMember(targetPlayer.getUUID())) throw TeamExceptions.PLAYER_IS_PARTY_MEMBER.create();
-        if (party.realMembersCount() >= PartyApi.API.getMaxPartyMembers(source.getLevel(), player.getUUID())) throw TeamExceptions.PARTY_FULL.create();
+        if (party.realMembersCount() >= Config.maxPartyMembers) throw TeamExceptions.PARTY_FULL.create();
 
         PartyApi.API.modifyMember(source.getLevel(), party, targetPlayer.getUUID(), MemberStatus.INVITED);
 
