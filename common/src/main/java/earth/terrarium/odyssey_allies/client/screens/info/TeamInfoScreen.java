@@ -21,6 +21,9 @@ public class TeamInfoScreen extends Screen {
     private static final ResourceLocation CLAIM_MENU = OdysseyAllies.id("textures/gui/claim-menu.png");
     private static final int WIDTH = 180;
     private static final int HEIGHT = 180;
+    private static final int CLOSE_X = 8;
+    private static final int CLOSE_Y = 6;
+    private static final int CLOSE_SIZE = 10;
     private final boolean guild;
     private final Component teamName;
     private final String ownerName;
@@ -87,11 +90,16 @@ public class TeamInfoScreen extends Screen {
         int x = this.leftPos;
         int y = this.topPos;
 
-        // Title
         Component title = guild
             ? Component.translatable("gui.odyssey_allies.guild_info.title")
             : Component.translatable("gui.odyssey_allies.party_info.title");
-        graphics.drawCenteredString(font, title, x + WIDTH / 2, y + 8, 0xFFFFFF);
+        graphics.drawString(font, title, x + 18, y + 6, 0x404040, false);
+
+        int relMx = mouseX - this.leftPos;
+        int relMy = mouseY - this.topPos;
+        boolean closeHovered = relMx >= CLOSE_X && relMx < CLOSE_X + CLOSE_SIZE
+            && relMy >= CLOSE_Y && relMy < CLOSE_Y + CLOSE_SIZE;
+        graphics.drawString(font, "\u2715", x + CLOSE_X, y + CLOSE_Y, closeHovered ? 0xFFFFFF : 0xAAAAAA, false);
 
         // Info panel
         int px = x + 12;
@@ -121,6 +129,18 @@ public class TeamInfoScreen extends Screen {
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean mouseClicked(double mx, double my, int button) {
+        double relMx = mx - this.leftPos;
+        double relMy = my - this.topPos;
+        if (relMx >= CLOSE_X && relMx < CLOSE_X + CLOSE_SIZE
+            && relMy >= CLOSE_Y && relMy < CLOSE_Y + CLOSE_SIZE) {
+            this.onClose();
+            return true;
+        }
+        return super.mouseClicked(mx, my, button);
     }
 
     @Override

@@ -13,6 +13,10 @@ import org.lwjgl.glfw.GLFW;
 
 public abstract class BaseScreen extends BaseCursorScreen implements ScreenHistory {
 
+    protected static final int CLOSE_X = 8;
+    protected static final int CLOSE_Y = 6;
+    protected static final int CLOSE_SIZE = 10;
+
     protected final int imageWidth;
     protected final int imageHeight;
     protected int leftPos;
@@ -27,7 +31,7 @@ public abstract class BaseScreen extends BaseCursorScreen implements ScreenHisto
         super(displayName);
         this.imageWidth = imageWidth;
         this.imageHeight = imageHeight;
-        this.titleLabelX = 8;
+        this.titleLabelX = 18;
         this.titleLabelY = 6;
         this.lastScreen = Minecraft.getInstance().screen;
     }
@@ -46,8 +50,30 @@ public abstract class BaseScreen extends BaseCursorScreen implements ScreenHisto
         try (var pose = new CloseablePoseStack(graphics)) {
             pose.translate(this.leftPos, this.topPos, 0.0F);
             this.renderLabels(graphics, mouseX, mouseY);
+
+            int relMx = mouseX - this.leftPos;
+            int relMy = mouseY - this.topPos;
+            boolean closeHovered = relMx >= CLOSE_X && relMx < CLOSE_X + CLOSE_SIZE
+                && relMy >= CLOSE_Y && relMy < CLOSE_Y + CLOSE_SIZE;
+            graphics.drawString(font, "\u2715", CLOSE_X, CLOSE_Y, closeHovered ? 0xFFFFFF : 0xAAAAAA, false);
         }
         RenderSystem.enableDepthTest();
+    }
+
+    @Override
+    public boolean mouseClicked(double mx, double my, int button) {
+        double relMx = mx - this.leftPos;
+        double relMy = my - this.topPos;
+        if (relMx >= CLOSE_X && relMx < CLOSE_X + CLOSE_SIZE
+            && relMy >= CLOSE_Y && relMy < CLOSE_Y + CLOSE_SIZE) {
+            if (this.canGoBack()) {
+                this.goBack();
+            } else {
+                this.onClose();
+            }
+            return true;
+        }
+        return super.mouseClicked(mx, my, button);
     }
 
     @Override
