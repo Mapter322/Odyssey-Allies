@@ -5,14 +5,14 @@ import earth.terrarium.odyssey_allies.api.teams.settings.Setting;
 import earth.terrarium.odyssey_allies.api.teams.settings.TeamSettingsApi;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class TeamSettingsApiImpl implements TeamSettingsApi {
 
-    private static final Map<String, Setting<?>> SETTINGS = new HashMap<>();
-    private static final Map<String, Setting<?>> PARTY_SETTINGS = new HashMap<>();
-    private static final Map<String, Setting<?>> GUILD_SETTINGS = new HashMap<>();
+    private static final Map<String, Setting<?>> SETTINGS = new LinkedHashMap<>();
+    private static final Map<String, Setting<?>> PARTY_SETTINGS = new LinkedHashMap<>();
+    private static final Map<String, Setting<?>> GUILD_SETTINGS = new LinkedHashMap<>();
 
     @Override
     public void register(Setting<?> defaultValue) {

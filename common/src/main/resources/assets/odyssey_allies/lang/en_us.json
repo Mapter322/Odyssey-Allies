@@ -147,8 +147,9 @@
 
     "gui.odyssey_allies.guild_info.title": "Guild Menu",
     "gui.odyssey_allies.party_info.title": "Party Menu",
-    "gui.odyssey_allies.info.owner": "Owner: %s",
-    "gui.odyssey_allies.info.members": "Members: %s/%s",
+    "gui.odyssey_allies.info.owner": "Owner:",
+    "gui.odyssey_allies.info.members": "Members:",
+    "gui.odyssey_allies.info.online": "Online:",
     "gui.odyssey_allies.info.members_button": "Members",
     "gui.odyssey_allies.info.chat_button": "Chat",
     "gui.odyssey_allies.info.settings_button": "Settings",

@@ -46,8 +46,7 @@ public class TeamInfoScreen extends Screen {
             ? Config.maxGuildMembers
             : Config.maxPartyMembers;
 
-        int color = guild ? 0xFFAA00 : 0x55FF55;
-        this.teamName = team.displayName().copy().withStyle(style -> style.withColor(color));
+        this.teamName = team.displayName().copy();
     }
 
     @Override
@@ -117,16 +116,21 @@ public class TeamInfoScreen extends Screen {
 
         int onlineCount = team.onlineMembers(Objects.requireNonNull(Minecraft.getInstance().level)).size();
 
-        graphics.drawString(font, teamName, tx, ty, 0xFFFFFF, false);
-        graphics.drawString(font,
-            Component.translatable("gui.odyssey_allies.info.owner", ownerName),
-            tx, ty + 16, 0xFFFFFF, false);
-        graphics.drawString(font,
-            Component.translatable("gui.odyssey_allies.info.members", memberCount, maxMembers),
-            tx, ty + 32, 0xFFFFFF, false);
-        graphics.drawString(font,
-            Component.translatable("gui.odyssey_allies.online_members", onlineCount, maxMembers),
-            tx, ty + 48, 0xFFFFFF, false);
+
+        String typeLabel = guild ? "Guild:" : "Party:";
+        graphics.drawString(font, typeLabel, tx, ty, 0xAAAAAA, false);
+        graphics.drawString(font, teamName, tx + font.width(typeLabel) + 4, ty, team.color().getValue(), false);
+
+        graphics.drawString(font, Component.translatable("gui.odyssey_allies.info.owner"), tx, ty + 16, 0xAAAAAA, false);
+        graphics.drawString(font, ownerName, tx + font.width(Component.translatable("gui.odyssey_allies.info.owner")) + 4, ty + 16, 0xFFFFFF, false);
+
+        String membersValue = memberCount + "/" + maxMembers;
+        graphics.drawString(font, Component.translatable("gui.odyssey_allies.info.members"), tx, ty + 32, 0xAAAAAA, false);
+        graphics.drawString(font, membersValue, tx + font.width(Component.translatable("gui.odyssey_allies.info.members")) + 4, ty + 32, 0xFFFFFF, false);
+
+        String onlineValue = onlineCount + "/" + maxMembers;
+        graphics.drawString(font, Component.translatable("gui.odyssey_allies.info.online"), tx, ty + 48, 0xAAAAAA, false);
+        graphics.drawString(font, onlineValue, tx + font.width(Component.translatable("gui.odyssey_allies.info.online")) + 4, ty + 48, 0xFFFFFF, false);
     }
 
     @Override
