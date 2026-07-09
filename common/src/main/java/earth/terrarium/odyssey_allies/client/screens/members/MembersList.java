@@ -54,14 +54,19 @@ public class MembersList extends SelectionList<MembersList.Entry> {
 
         @Override
         protected void render(@NotNull GuiGraphics graphics, @NotNull ScissorBoxStack scissorStack, int id, int left, int top, int width, int height, int mouseX, int mouseY, boolean hovered, float partialTick, boolean selected) {
+            boolean online = this.playerInfo != null;
             graphics.blit(CONTAINER_BACKGROUND, left, top, 276, hovered ? 20 : 0, 70, 20, 512, 512);
+
+            if (!online) {
+                graphics.fill(left, top, left + width, top + height, 0x80000000);
+            }
 
             PlayerFaceRenderer.draw(graphics, this.skin, left + 2, top + 2, 16);
 
             try (var ignored = RenderUtils.createScissorBoxStack(scissorStack, Minecraft.getInstance(), graphics.pose(), left + 20, top + 2, width - 24, height - 4)) {
                 graphics.drawString(
                     Minecraft.getInstance().font,
-                    profile.getName(), left + 21, top + 5, 0xFFFFFF,
+                    profile.getName(), left + 21, top + 5, online ? 0xFFFFFF : 0xAAAAAA,
                     false
                 );
             }
