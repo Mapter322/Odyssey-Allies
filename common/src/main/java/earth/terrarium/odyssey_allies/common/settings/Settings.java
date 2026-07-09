@@ -6,6 +6,7 @@ import earth.terrarium.odyssey_allies.api.teams.settings.types.BooleanSetting;
 import earth.terrarium.odyssey_allies.api.teams.settings.types.ColorSettings;
 import earth.terrarium.odyssey_allies.api.teams.settings.types.OptionalGlobalPosSetting;
 import earth.terrarium.odyssey_allies.api.teams.settings.types.StringSetting;
+import earth.terrarium.odyssey_allies.common.utils.Config;
 import earth.terrarium.olympus.client.constants.MinecraftColors;
 
 import java.util.Optional;
@@ -37,9 +38,12 @@ public class Settings {
         TeamSettingsApi.API.add(FRIENDLY_FIRE);
         TeamSettingsApi.API.add(ANNOUNCE_JOIN);
         TeamSettingsApi.API.add(ANNOUNCE_LEAVE);
-        TeamSettingsApi.API.add(PASSIVE_TELEPORT);
+
+        if (Config.teleportEnabled) {
+            TeamSettingsApi.API.add(PASSIVE_TELEPORT);
+            TeamSettingsApi.API.addGuildSetting(HEADQUARTERS);
+        }
 
         TeamSettingsApi.API.addGuildSetting(MOTD);
-        TeamSettingsApi.API.addGuildSetting(HEADQUARTERS);
     }
 }

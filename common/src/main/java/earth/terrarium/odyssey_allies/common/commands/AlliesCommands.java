@@ -3,6 +3,7 @@ package earth.terrarium.odyssey_allies.common.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import earth.terrarium.odyssey_allies.common.commands.guild.*;
 import earth.terrarium.odyssey_allies.common.commands.party.*;
+import earth.terrarium.odyssey_allies.common.utils.Config;
 import net.minecraft.commands.CommandSourceStack;
 
 public class AlliesCommands {
@@ -20,8 +21,10 @@ public class AlliesCommands {
         GuildLeaveCommand.register(dispatcher);
         GuildMemberCommands.register(dispatcher);
         GuildPermissionCommands.register(dispatcher);
-        GuildTpCommand.register(dispatcher);
-        GuildHeadquartersCommand.register(dispatcher);
+        if (Config.teleportEnabled) {
+            GuildTpCommand.register(dispatcher);
+            GuildHeadquartersCommand.register(dispatcher);
+        }
         GuildFakePlayerCommands.register(dispatcher);
         GuildAdminCommands.register(dispatcher);
 
@@ -36,7 +39,9 @@ public class AlliesCommands {
         PartyLeaveCommand.register(dispatcher);
         PartyMemberCommands.register(dispatcher);
         PartyPermissionCommands.register(dispatcher);
-        PartyTpCommand.register(dispatcher);
-        PartyWarpCommand.register(dispatcher);
+        if (Config.teleportEnabled) {
+            PartyTpCommand.register(dispatcher);
+            PartyWarpCommand.register(dispatcher);
+        }
     }
 }

@@ -1,6 +1,7 @@
 package earth.terrarium.odyssey_allies.common.permissions;
 
 import earth.terrarium.odyssey_allies.api.teams.permissions.MemberPermissionsApi;
+import earth.terrarium.odyssey_allies.common.utils.Config;
 
 public class Permissions {
 
@@ -17,8 +18,10 @@ public class Permissions {
         MemberPermissionsApi.API.register(MANAGE_MEMBERS, false);
         MemberPermissionsApi.API.register(MANAGE_SETTINGS, false);
         MemberPermissionsApi.API.register(MANAGE_PERMISSIONS, false);
-        MemberPermissionsApi.API.register(TELEPORT, true);
 
-        MemberPermissionsApi.API.registerPartyPermission(TELEPORT_MEMBERS, false);
+        if (Config.teleportEnabled) {
+            MemberPermissionsApi.API.register(TELEPORT, true);
+            MemberPermissionsApi.API.registerPartyPermission(TELEPORT_MEMBERS, false);
+        }
     }
 }

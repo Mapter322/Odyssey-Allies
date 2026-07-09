@@ -17,6 +17,7 @@ public final class Config {
 
     public static int maxGuildMembers = OdysseyAllies.DEFAULT_MAX_GUILD_MEMBERS;
     public static int maxPartyMembers = OdysseyAllies.DEFAULT_MAX_PARTY_MEMBERS;
+    public static boolean teleportEnabled = false;
 
     private Config() {}
 
@@ -26,6 +27,7 @@ public final class Config {
             OdysseyAllies.MIN_GUILD_MEMBERS, OdysseyAllies.MAX_GUILD_MEMBERS);
         maxPartyMembers = clamp("maxPartyMembers", data.maxPartyMembers,
             OdysseyAllies.MIN_PARTY_MEMBERS, OdysseyAllies.MAX_PARTY_MEMBERS);
+        teleportEnabled = data.teleportEnabled;
         if (!Files.exists(CONFIG_PATH)) {
             save();
         }
@@ -54,7 +56,7 @@ public final class Config {
     private static void save() {
         try {
             Files.createDirectories(CONFIG_PATH.getParent());
-            Files.writeString(CONFIG_PATH, GSON.toJson(new ConfigData(maxGuildMembers, maxPartyMembers)));
+            Files.writeString(CONFIG_PATH, GSON.toJson(new ConfigData(maxGuildMembers, maxPartyMembers, teleportEnabled)));
         } catch (Exception e) {
             LOGGER.error("Failed to save config", e);
         }
@@ -63,12 +65,14 @@ public final class Config {
     private static final class ConfigData {
         int maxGuildMembers = OdysseyAllies.DEFAULT_MAX_GUILD_MEMBERS;
         int maxPartyMembers = OdysseyAllies.DEFAULT_MAX_PARTY_MEMBERS;
+        boolean teleportEnabled = false;
 
         ConfigData() {}
 
-        ConfigData(int maxGuildMembers, int maxPartyMembers) {
+        ConfigData(int maxGuildMembers, int maxPartyMembers, boolean teleportEnabled) {
             this.maxGuildMembers = maxGuildMembers;
             this.maxPartyMembers = maxPartyMembers;
+            this.teleportEnabled = teleportEnabled;
         }
     }
 }
