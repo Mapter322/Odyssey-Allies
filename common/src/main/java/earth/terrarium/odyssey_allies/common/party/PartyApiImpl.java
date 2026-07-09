@@ -2,6 +2,7 @@ package earth.terrarium.odyssey_allies.common.party;
 
 
 import earth.terrarium.odyssey_allies.api.events.AlliesEvents;
+import earth.terrarium.odyssey_allies.api.teams.Member;
 import earth.terrarium.odyssey_allies.api.teams.MemberStatus;
 import earth.terrarium.odyssey_allies.api.teams.party.Party;
 import earth.terrarium.odyssey_allies.api.teams.party.PartyApi;
@@ -21,6 +22,26 @@ public class PartyApiImpl implements PartyApi {
     private static final Map<UUID, Party> PARTIES = new HashMap<>();
     private static final Map<UUID, Party> PARTIES_BY_PLAYER = new HashMap<>();
 
+    private static void resolveMemberNames(ServerLevel serverLevel, Map<UUID, Member> members) {
+        var cache = serverLevel.getServer().getProfileCache();
+        if (cache == null) return;
+        members.forEach((uuid, member) -> {
+            if (member.name().isEmpty()) {
+                cache.get(uuid).ifPresent(profile -> member.setName(profile.getName()));
+            }
+        });
+    }
+
+    private static void resolveMemberName(ServerLevel serverLevel, Map<UUID, Member> members, UUID playerId) {
+        var member = members.get(playerId);
+        if (member != null && member.name().isEmpty()) {
+            var cache = serverLevel.getServer().getProfileCache();
+            if (cache != null) {
+                cache.get(playerId).ifPresent(profile -> member.setName(profile.getName()));
+            }
+        }
+    }
+
     @Override
     public void create(Level level, Party party) {
         PARTIES.put(party.id(), party);
@@ -30,6 +51,7 @@ public class PartyApiImpl implements PartyApi {
             }
         });
         if (level instanceof ServerLevel serverLevel) {
+            resolveMemberNames(serverLevel, party.members());
             NetworkHandler.sendToAllClientPlayers(new ClientboundAddPartyPacket(party), serverLevel.getServer());
         }
         AlliesEvents.CreatePartyEvent.fire(level, party);
@@ -69,6 +91,7 @@ public class PartyApiImpl implements PartyApi {
             PARTIES_BY_PLAYER.put(playerId, party);
         }
         if (level instanceof ServerLevel serverLevel) {
+            resolveMemberName(serverLevel, party.members(), playerId);
             NetworkHandler.sendToAllClientPlayers(new ClientboundModifyPartyMemberPacket(party.id(), playerId, status), serverLevel.getServer());
         }
         AlliesEvents.ModifyPartyMemberEvent.fire(level, party, playerId, status);
@@ -81,6 +104,7 @@ public class PartyApiImpl implements PartyApi {
             PARTIES_BY_PLAYER.put(playerId, party);
         }
         if (level instanceof ServerLevel serverLevel) {
+            resolveMemberName(serverLevel, party.members(), playerId);
             NetworkHandler.sendToAllClientPlayers(new ClientboundModifyPartyPermissionPacket(party.id(), playerId, permission, value), serverLevel.getServer());
         }
         AlliesEvents.ModifyPartyMemberEvent.fire(level, party, playerId, party.getOrCreateMember(playerId).status());

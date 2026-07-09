@@ -15,15 +15,24 @@ public class Member {
         new MapCodec<>(ByteCodec.STRING, ByteCodec.BOOLEAN)
             .map(map -> (Object2BooleanMap<String>) new Object2BooleanOpenHashMap<>(map), map -> map
             ).fieldOf(Member::permissions),
+        ByteCodec.STRING.fieldOf(Member::name),
         Member::new
     );
 
     private MemberStatus status;
     private final Object2BooleanMap<String> permissions;
+    private String name;
 
     public Member(MemberStatus status, Object2BooleanMap<String> permissions) {
         this.status = status;
         this.permissions = new Object2BooleanOpenHashMap<>(permissions);
+        this.name = "";
+    }
+
+    public Member(MemberStatus status, Object2BooleanMap<String> permissions, String name) {
+        this.status = status;
+        this.permissions = new Object2BooleanOpenHashMap<>(permissions);
+        this.name = name;
     }
 
     public boolean isOwner() {
@@ -36,6 +45,14 @@ public class Member {
 
     public void setStatus(MemberStatus status) {
         this.status = status;
+    }
+
+    public String name() {
+        return this.name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Object2BooleanMap<String> permissions() {
@@ -56,18 +73,20 @@ public class Member {
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (Member) obj;
         return Objects.equals(this.status, that.status) &&
-            Objects.equals(this.permissions, that.permissions);
+            Objects.equals(this.permissions, that.permissions) &&
+            Objects.equals(this.name, that.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(status, permissions);
+        return Objects.hash(status, permissions, name);
     }
 
     @Override
     public String toString() {
         return "Member[" +
             "status=" + status + ", " +
-            "permissions=" + permissions + ']';
+            "permissions=" + permissions + ", " +
+            "name=" + name + ']';
     }
 }

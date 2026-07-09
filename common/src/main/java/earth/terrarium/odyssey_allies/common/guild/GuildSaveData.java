@@ -38,7 +38,9 @@ public class GuildSaveData extends SaveHandler {
                 CompoundTag permissionsTag = memberTag.getCompound("permissions");
                 Object2BooleanMap<String> permissions = new Object2BooleanOpenHashMap<>();
                 permissionsTag.getAllKeys().forEach(permission -> permissions.put(permission, permissionsTag.getBoolean(permission)));
-                members.put(uuid, new Member(status, permissions));
+                Member member = new Member(status, permissions);
+                member.setName(memberTag.getString("name"));
+                members.put(uuid, member);
             });
 
             CompoundTag settingsTag = guildTag.getCompound("settings");
@@ -68,6 +70,7 @@ public class GuildSaveData extends SaveHandler {
                 if (!member.status().isInvited()) {
                     CompoundTag memberTag = new CompoundTag();
                     memberTag.putString("status", member.status().name().toLowerCase(Locale.ROOT));
+                    memberTag.putString("name", member.name());
                     CompoundTag permissionsTag = new CompoundTag();
                     member.permissions().forEach(permissionsTag::putBoolean);
                     memberTag.put("permissions", permissionsTag);

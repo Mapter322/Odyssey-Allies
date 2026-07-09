@@ -2,6 +2,7 @@ package earth.terrarium.odyssey_allies.common.guild;
 
 
 import earth.terrarium.odyssey_allies.api.events.AlliesEvents;
+import earth.terrarium.odyssey_allies.api.teams.Member;
 import earth.terrarium.odyssey_allies.api.teams.MemberStatus;
 import earth.terrarium.odyssey_allies.api.teams.guild.Guild;
 import earth.terrarium.odyssey_allies.api.teams.guild.GuildApi;
@@ -20,6 +21,26 @@ import java.util.stream.Collectors;
 
 public class GuildApiImpl implements GuildApi {
 
+    private static void resolveMemberNames(ServerLevel serverLevel, Map<UUID, Member> members) {
+        var cache = serverLevel.getServer().getProfileCache();
+        if (cache == null) return;
+        members.forEach((uuid, member) -> {
+            if (member.name().isEmpty()) {
+                cache.get(uuid).ifPresent(profile -> member.setName(profile.getName()));
+            }
+        });
+    }
+
+    private static void resolveMemberName(ServerLevel serverLevel, Map<UUID, Member> members, UUID playerId) {
+        var member = members.get(playerId);
+        if (member != null && member.name().isEmpty()) {
+            var cache = serverLevel.getServer().getProfileCache();
+            if (cache != null) {
+                cache.get(playerId).ifPresent(profile -> member.setName(profile.getName()));
+            }
+        }
+    }
+
     @Override
     public void create(Level level, Guild guild) {
         var data = GuildSaveData.read(level);
@@ -30,6 +51,7 @@ public class GuildApiImpl implements GuildApi {
             }
         });
         if (level instanceof ServerLevel serverLevel) {
+            resolveMemberNames(serverLevel, guild.members());
             data.setDirty();
             NetworkHandler.sendToAllClientPlayers(new ClientboundAddGuildPacket(guild), serverLevel.getServer());
         }
@@ -76,6 +98,7 @@ public class GuildApiImpl implements GuildApi {
         }
         if (level instanceof
             ServerLevel serverLevel) {
+            resolveMemberName(serverLevel, guild.members(), playerId);
             data.setDirty();
             NetworkHandler.sendToAllClientPlayers(new ClientboundModifyGuildMemberPacket(guild.id(), playerId, status), serverLevel.getServer());
         }
@@ -90,6 +113,7 @@ public class GuildApiImpl implements GuildApi {
             data.guildsByPlayer().put(playerId, guild);
         }
         if (level instanceof ServerLevel serverLevel) {
+            resolveMemberName(serverLevel, guild.members(), playerId);
             data.setDirty();
             NetworkHandler.sendToAllClientPlayers(new ClientboundModifyGuildPermissionPacket(guild.id(), playerId, permission, value), serverLevel.getServer());
         }

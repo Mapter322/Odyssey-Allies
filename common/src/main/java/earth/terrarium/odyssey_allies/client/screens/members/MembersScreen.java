@@ -27,7 +27,6 @@ import java.util.*;
 public class MembersScreen extends BaseScreen {
 
     private static final ResourceLocation CONTAINER_BACKGROUND = OdysseyAllies.id("textures/gui/members.png");
-    private static final Map<UUID, String> NAME_CACHE = new HashMap<>();
 
     private final Team team;
     private final Set<String> permissions;
@@ -54,10 +53,9 @@ public class MembersScreen extends BaseScreen {
 
             PlayerInfo info = conn != null ? conn.getPlayerInfo(uuid) : null;
             if (info != null) {
-                NAME_CACHE.put(uuid, info.getProfile().getName());
                 this.members.add(new MembersList.EntryData(info.getProfile(), info.getSkin().texture(), info));
             } else {
-                String name = NAME_CACHE.getOrDefault(uuid, uuid.toString().substring(0, 8));
+                String name = !member.name().isEmpty() ? member.name() : uuid.toString().substring(0, 8);
                 GameProfile profile = new GameProfile(uuid, name);
                 this.members.add(new MembersList.EntryData(profile, skinManager.getInsecureSkin(profile).texture(), null));
             }
