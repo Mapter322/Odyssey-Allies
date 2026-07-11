@@ -43,7 +43,7 @@ public record ClientboundModifyPartySettingPacket(
 
         @Override
         public Runnable handle(ClientboundModifyPartySettingPacket packet) {
-            return () -> PartyApi.API.get(packet.id()).ifPresent(party ->
+            return () -> PartyApi.API.get(OdysseyAlliesClient.level(), packet.id()).ifPresent(party ->
                 PartyApi.API.modifySetting(OdysseyAlliesClient.level(), party, packet.setting, packet.settingId));
         }
     }

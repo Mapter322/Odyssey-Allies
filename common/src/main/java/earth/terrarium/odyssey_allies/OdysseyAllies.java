@@ -52,7 +52,7 @@ public class OdysseyAllies {
         }
 
         if (NetworkHandler.CHANNEL.canSendToPlayer(player, ClientboundSyncPartiesPacket.TYPE)) {
-            NetworkHandler.CHANNEL.sendToPlayer(new ClientboundSyncPartiesPacket(PartyApi.API.getAll()), player);
+            NetworkHandler.CHANNEL.sendToPlayer(new ClientboundSyncPartiesPacket(PartyApi.API.getAll(player.level())), player);
         }
 
         GuildApi.API.getPlayerGuild(player).ifPresent(guild -> {
@@ -66,10 +66,5 @@ public class OdysseyAllies {
     }
 
     public static void onPlayerLeave(ServerPlayer player) {
-        PartyApi.API.getPlayerParty(player).ifPresent(party -> {
-            if (party.isOwner(player.getUUID())) {
-                PartyApi.API.disband(player.level(), party);
-            }
-        });
     }
 }

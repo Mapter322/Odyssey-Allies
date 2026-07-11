@@ -16,7 +16,8 @@ import java.util.UUID;
 public record ClientboundModifyPartyMemberPacket(
     UUID id,
     UUID playerId,
-    MemberStatus status
+    MemberStatus status,
+    String playerName
 ) implements Packet<ClientboundModifyPartyMemberPacket> {
 
     public static final ClientboundPacketType<ClientboundModifyPartyMemberPacket> TYPE = new Type();
@@ -36,6 +37,7 @@ public record ClientboundModifyPartyMemberPacket(
                     ByteCodec.UUID.fieldOf(ClientboundModifyPartyMemberPacket::id),
                     ByteCodec.UUID.fieldOf(ClientboundModifyPartyMemberPacket::playerId),
                     MemberStatus.BYTE_CODEC.fieldOf(ClientboundModifyPartyMemberPacket::status),
+                    ByteCodec.STRING.fieldOf(ClientboundModifyPartyMemberPacket::playerName),
                     ClientboundModifyPartyMemberPacket::new
                 )
             );
@@ -43,8 +45,12 @@ public record ClientboundModifyPartyMemberPacket(
 
         @Override
         public Runnable handle(ClientboundModifyPartyMemberPacket packet) {
-            return () -> PartyApi.API.get(packet.id()).ifPresent(party ->
-                PartyApi.API.modifyMember(OdysseyAlliesClient.level(), party, packet.playerId(), packet.status()));
+            return () -> PartyApi.API.get(OdysseyAlliesClient.level(), packet.id()).ifPresent(party -> {
+                PartyApi.API.modifyMember(OdysseyAlliesClient.level(), party, packet.playerId(), packet.status());
+                if (!packet.playerName().isEmpty()) {
+                    party.members().get(packet.playerId()).setName(packet.playerName());
+                }
+            });
         }
     }
 }

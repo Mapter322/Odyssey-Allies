@@ -25,7 +25,7 @@ public class AlliesPlaceholders {
         Placeholders.register(OdysseyAllies.id("party"), (ctx, arg) -> {
             if (!ctx.hasPlayer()) return PlaceholderResult.invalid("No Player");
 
-            var party = PartyApi.API.getPlayerParty(Objects.requireNonNull(ctx.player()).getUUID()).orElse(null);
+            var party = PartyApi.API.getPlayerParty(Objects.requireNonNull(ctx.player())).orElse(null);
             if (party == null) return PlaceholderResult.invalid("No Party");
 
             return PlaceholderResult.value(party.displayName());

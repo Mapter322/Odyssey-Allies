@@ -44,7 +44,7 @@ public record ClientboundModifyPartyPermissionPacket(
 
         @Override
         public Runnable handle(ClientboundModifyPartyPermissionPacket packet) {
-            return () -> PartyApi.API.get(packet.id()).ifPresent(party ->
+            return () -> PartyApi.API.get(OdysseyAlliesClient.level(), packet.id()).ifPresent(party ->
                 PartyApi.API.modifyPermission(OdysseyAlliesClient.level(), party, packet.playerId(), packet.permission(), packet.value()));
         }
     }

@@ -49,7 +49,7 @@ public record ClientboundSendMessagePacket(
             return () -> {
                 Level level = OdysseyAlliesClient.level();
                 GuildApi.API.get(level, packet.id).ifPresent(guild -> ChatHandler.sendMessage(level, guild, packet.message));
-                PartyApi.API.get(packet.id).ifPresent(party -> ChatHandler.sendMessage(level, party, packet.message));
+                PartyApi.API.get(level, packet.id).ifPresent(party -> ChatHandler.sendMessage(level, party, packet.message));
 
                 if (Minecraft.getInstance().screen instanceof ChatScreen screen) {
                     screen.addMessage(packet.message);

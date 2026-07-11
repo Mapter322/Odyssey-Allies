@@ -40,7 +40,7 @@ public record ClientboundRemovePartyPacket(
         @Override
         public Runnable handle(ClientboundRemovePartyPacket packet) {
             return () -> {
-                PartyApi.API.get(packet.id()).ifPresent(party ->
+                PartyApi.API.get(OdysseyAlliesClient.level(), packet.id()).ifPresent(party ->
                     PartyApi.API.disband(OdysseyAlliesClient.level(), party));
                 ChatHandler.removeChannel(packet.id());
             };

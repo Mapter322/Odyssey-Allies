@@ -40,7 +40,7 @@ public record ClientboundLeavePartyPacket(
 
         @Override
         public Runnable handle(ClientboundLeavePartyPacket packet) {
-            return () -> PartyApi.API.get(packet.id()).ifPresent(party ->
+            return () -> PartyApi.API.get(OdysseyAlliesClient.level(), packet.id()).ifPresent(party ->
                 PartyApi.API.leave(OdysseyAlliesClient.level(), party, packet.playerId()));
         }
     }

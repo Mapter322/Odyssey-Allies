@@ -23,7 +23,7 @@ public abstract class PlayerMixin extends Entity {
     public void odyssey_allies$canHarmPlayer(Player other, CallbackInfoReturnable<Boolean> cir) {
         if (this.level().isClientSide()) return;
 
-        PartyApi.API.getPlayerParty(this.getUUID()).ifPresent(party -> {
+        PartyApi.API.getPlayerParty(this.level(), this.getUUID()).ifPresent(party -> {
             if (party.isMember(other.getUUID()) && !Settings.FRIENDLY_FIRE.get(party)) {
                 cir.setReturnValue(false);
             }
