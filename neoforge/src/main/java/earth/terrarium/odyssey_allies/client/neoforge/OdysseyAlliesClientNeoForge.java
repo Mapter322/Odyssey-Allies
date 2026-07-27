@@ -17,6 +17,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
@@ -27,11 +28,23 @@ public class OdysseyAlliesClientNeoForge {
         NeoForge.EVENT_BUS.addListener(OdysseyAlliesClientNeoForge::onClientTick);
         NeoForge.EVENT_BUS.addListener(OdysseyAlliesClientNeoForge::onPlayerLoggedOut);
         NeoForge.EVENT_BUS.addListener(OdysseyAlliesClientNeoForge::onRegisterClientCommands);
+        NeoForge.EVENT_BUS.addListener(OdysseyAlliesClientNeoForge::onScreenInit);
+        NeoForge.EVENT_BUS.addListener(OdysseyAlliesClientNeoForge::onMouseClickPre);
         OdysseyAlliesClient.init();
     }
 
     public static void onClientTick(ClientTickEvent.Pre event) {
         OdysseyAlliesClient.clientTick();
+    }
+
+    public static void onScreenInit(ScreenEvent.Init.Post event) {
+        OdysseyAlliesClient.setupInventoryButtons(event.getScreen());
+    }
+
+    public static void onMouseClickPre(ScreenEvent.MouseButtonPressed.Pre event) {
+        if (OdysseyAlliesClient.handleInventoryClick(event.getScreen(), event.getMouseX(), event.getMouseY(), event.getButton())) {
+            event.setCanceled(true);
+        }
     }
 
     @SubscribeEvent

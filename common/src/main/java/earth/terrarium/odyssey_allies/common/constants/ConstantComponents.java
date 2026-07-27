@@ -40,4 +40,7 @@ public class ConstantComponents {
 
     public static final Component MAX_GUILD_MEMBERS = Component.translatable("gui.odyssey_allies.max_guild_members");
     public static final Component MAX_PARTY_MEMBERS = Component.translatable("gui.odyssey_allies.max_party_members");
+
+    public static final Component INVENTORY_GUILD_BUTTON = Component.translatable("gui.odyssey_allies.inventory.guild_button");
+    public static final Component INVENTORY_PARTY_BUTTON = Component.translatable("gui.odyssey_allies.inventory.party_button");
 }

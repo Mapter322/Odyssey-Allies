@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 
 public class OdysseyAlliesClientFabric implements ClientModInitializer {
 
@@ -26,6 +27,10 @@ public class OdysseyAlliesClientFabric implements ClientModInitializer {
         KeyBindingHelper.registerKeyBinding(OdysseyAlliesClient.KEY_OPEN_PARTY_CHAT);
         KeyBindingHelper.registerKeyBinding(OdysseyAlliesClient.KEY_OPEN_GUILD_CHAT);
         registerClientCommands();
+
+        ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) ->
+            OdysseyAlliesClient.setupInventoryButtons(screen)
+        );
     }
 
     // Fabric is really dumb and doesn't merge commands, so the head node needs to have a different name than the server so the `c` was added.

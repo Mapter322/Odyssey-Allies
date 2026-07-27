@@ -2,6 +2,7 @@ package earth.terrarium.odyssey_allies.client.screens.info;
 
 import earth.terrarium.odyssey_allies.OdysseyAllies;
 import earth.terrarium.odyssey_allies.api.teams.Team;
+import earth.terrarium.odyssey_allies.client.screens.BaseScreen;
 import earth.terrarium.odyssey_allies.client.screens.chat.ChatScreen;
 import earth.terrarium.odyssey_allies.common.utils.Config;
 import earth.terrarium.odyssey_allies.client.screens.members.MembersScreen;
@@ -9,7 +10,6 @@ import earth.terrarium.odyssey_allies.client.screens.settings.SettingsScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -17,14 +17,11 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.Objects;
 import java.util.UUID;
 
-public class TeamInfoScreen extends Screen {
+public class TeamInfoScreen extends BaseScreen {
 
     private static final ResourceLocation CLAIM_MENU = OdysseyAllies.id("textures/gui/claim-menu.png");
     private static final int WIDTH = 180;
     private static final int HEIGHT = 180;
-    private static final int CLOSE_X = 8;
-    private static final int CLOSE_Y = 6;
-    private static final int CLOSE_SIZE = 10;
     private final boolean guild;
     private final Team team;
     private final Component teamName;
@@ -32,11 +29,8 @@ public class TeamInfoScreen extends Screen {
     private final int memberCount;
     private final int maxMembers;
 
-    private int leftPos;
-    private int topPos;
-
     public TeamInfoScreen(String teamType, Team team) {
-        super(Component.empty());
+        super(Component.empty(), WIDTH, HEIGHT);
         this.team = team;
         this.guild = "guild".equals(teamType);
         this.ownerName = getOwnerName(team.getOwner());
@@ -79,32 +73,19 @@ public class TeamInfoScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         graphics.blit(CLAIM_MENU, this.leftPos, this.topPos, 0, 0, WIDTH, HEIGHT, 180, 180);
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
-
-        int x = this.leftPos;
-        int y = this.topPos;
-
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
         Component title = guild
             ? Component.translatable("gui.odyssey_allies.guild_info.title")
             : Component.translatable("gui.odyssey_allies.party_info.title");
-        graphics.drawString(font, title, x + 18, y + 6, 0x404040, false);
+        graphics.drawString(font, title, 18, 6, 0x404040, false);
 
-        int relMx = mouseX - this.leftPos;
-        int relMy = mouseY - this.topPos;
-        boolean closeHovered = relMx >= CLOSE_X && relMx < CLOSE_X + CLOSE_SIZE
-            && relMy >= CLOSE_Y && relMy < CLOSE_Y + CLOSE_SIZE;
-        graphics.drawString(font, "\u2715", x + CLOSE_X, y + CLOSE_Y, closeHovered ? 0xFFFFFF : 0xAAAAAA, false);
-
-        // Info panel
-        int px = x + 12;
-        int py = y + 28;
+        int px = 12;
+        int py = 28;
         int pw = WIDTH - 24;
         int ph = 68;
 
@@ -115,7 +96,6 @@ public class TeamInfoScreen extends Screen {
         int ty = py + 6;
 
         int onlineCount = team.onlineMembers(Objects.requireNonNull(Minecraft.getInstance().level)).size();
-
 
         String typeLabel = guild ? "Guild:" : "Party:";
         graphics.drawString(font, typeLabel, tx, ty, 0xAAAAAA, false);
@@ -140,18 +120,6 @@ public class TeamInfoScreen extends Screen {
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
-    }
-
-    @Override
-    public boolean mouseClicked(double mx, double my, int button) {
-        double relMx = mx - this.leftPos;
-        double relMy = my - this.topPos;
-        if (relMx >= CLOSE_X && relMx < CLOSE_X + CLOSE_SIZE
-            && relMy >= CLOSE_Y && relMy < CLOSE_Y + CLOSE_SIZE) {
-            this.onClose();
-            return true;
-        }
-        return super.mouseClicked(mx, my, button);
     }
 
     @Override

@@ -172,6 +172,8 @@
 
     "gui.odyssey_allies.max_guild_members": "Max Guild Members",
     "gui.odyssey_allies.max_party_members": "Max Party Members",
+    "gui.odyssey_allies.inventory.guild_button": "Guild",
+    "gui.odyssey_allies.inventory.party_button": "Party",
 
     "rei.sections.project_odyssey": "Project Odyssey",
     "rei.odyssey_allies.party_chat.tooltip": "Open Party Chat",
