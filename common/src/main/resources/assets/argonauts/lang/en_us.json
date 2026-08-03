@@ -166,6 +166,7 @@
     "gui.argonauts.member_permissions": "Permissions",
     "gui.argonauts.member_actions": "Actions",
     "gui.argonauts.settings": "Settings",
+    "gui.argonauts.save": "Save",
 
     "gui.argonauts.remove_member": "Remove Member",
     "gui.argonauts.remove": "Remove",

@@ -34,6 +34,7 @@ public class ConstantComponents {
     public static final Component MEMBER_PERMISSIONS = Component.translatable("gui.argonauts.member_permissions");
     public static final Component MEMBER_ACTIONS = Component.translatable("gui.argonauts.member_actions");
     public static final Component SETTINGS = Component.translatable("gui.argonauts.settings");
+    public static final Component SAVE = Component.translatable("gui.argonauts.save");
 
     public static final Component REMOVE_MEMBER = Component.translatable("gui.argonauts.remove_member");
     public static final Component REMOVE = Component.translatable("gui.argonauts.remove");
