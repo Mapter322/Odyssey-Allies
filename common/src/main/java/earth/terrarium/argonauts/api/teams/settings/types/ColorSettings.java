@@ -16,7 +16,7 @@ public record ColorSettings(String id, Color value) implements Setting<Color> {
     public static final SimpleCommandExceptionType INVALID_COLOR = new SimpleCommandExceptionType(() -> "Invalid color");
 
     public ArgumentBuilder<CommandSourceStack, ?> createArgument(String argument) {
-        return Commands.argument(argument, StringArgumentType.word());
+        return Commands.argument(argument, StringArgumentType.greedyString());
     }
 
     public Setting<Color> getFromArgument(String argument, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
