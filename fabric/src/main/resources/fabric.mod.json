@@ -1,9 +1,9 @@
 {
     "schemaVersion": 1,
-    "id": "odyssey_allies",
+    "id": "argonauts",
     "version": "${version}",
-    "name": "Odyssey Allies",
-    "description": "A guild and party mod to work and play together with your teammates on a server!",
+    "name": "Argonauts Teams",
+    "description": "A guild and party mod to work and play together with your teammates on a server! [Argonauts Teams fork]",
     "authors": [
         "Alex Nijjar",
         "ThatGravyBoat",
@@ -12,26 +12,26 @@
     "contributors": [
     ],
     "contact": {
-        "website": "https://modrinth.com/mod/odyssey_allies",
-        "repo": "https://github.com/terrarium-earth/odyssey_allies",
-        "issues": "https://github.com/terrarium-earth/odyssey_allies/issues"
+        "website": "https://modrinth.com/mod/argonauts",
+        "repo": "https://github.com/terrarium-earth/argonauts",
+        "issues": "https://github.com/terrarium-earth/argonauts/issues"
     },
     "license": "MIT",
     "icon": "icon.png",
     "environment": "*",
     "entrypoints": {
         "main": [
-            "earth.terrarium.odyssey_allies.fabric.OdysseyAlliesFabric"
+            "earth.terrarium.argonauts.fabric.ArgonautsFabric"
         ],
         "client": [
-            "earth.terrarium.odyssey_allies.client.fabric.OdysseyAlliesClientFabric"
+            "earth.terrarium.argonauts.client.fabric.ArgonautsClientFabric"
         ],
         "rei_client": [
-            "earth.terrarium.odyssey_allies.client.compat.rei.AlliesREIClientPlugin"
+            "earth.terrarium.argonauts.client.compat.rei.ArgonautsReiClientPlugin"
         ]
     },
     "mixins": [
-        "odyssey_allies-common.mixins.json"
+        "argonauts-common.mixins.json"
     ],
     "depends": {
         "fabric-api": "*",

@@ -49,7 +49,7 @@ jobs:
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
 
           files: ./neoforge/build/libs/!(*-@(dev|sources|dev-shadow)).jar
-          name: "[NeoForge] Odyssey Allies ${{ steps.properties.outputs.version }}"
+          name: "[NeoForge] Argonauts Teams ${{ steps.properties.outputs.version }}"
           version: ${{ steps.properties.outputs.version }}
           version-type: release
           changelog-file: changelog.md
@@ -72,7 +72,7 @@ jobs:
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
 
           files: ./fabric/build/libs/!(*-@(dev|sources|dev-shadow)).jar
-          name: "[Fabric] Odyssey Allies ${{ steps.properties.outputs.version }}"
+          name: "[Fabric] Argonauts Teams ${{ steps.properties.outputs.version }}"
           version: ${{ steps.properties.outputs.version }}
           version-type: release
           changelog-file: changelog.md

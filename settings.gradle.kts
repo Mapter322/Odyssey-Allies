@@ -1,6 +1,6 @@
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
-rootProject.name = "odyssey_allies"
+rootProject.name = "argonauts"
 
 pluginManagement {
     repositories {
