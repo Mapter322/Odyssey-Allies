@@ -15,17 +15,18 @@ import net.minecraft.server.level.ServerPlayer;
 public final class GuildKickCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("guild")
-            .then(Commands.literal("kick")
-                .then(Commands.argument("player", EntityArgument.player())
-                    .suggests(TeamSuggestionProviders.CURRENT_GUILD_MEMBERS_SUGGESTION_PROVIDER)
-                    .executes(context -> {
-                        kick(context.getSource(), EntityArgument.getPlayer(context, "player"));
-                        return 1;
-                    })
+        dispatcher.register(Commands.literal("argonauts")
+            .then(Commands.literal("guild")
+                .then(Commands.literal("kick")
+                    .then(Commands.argument("player", EntityArgument.player())
+                        .suggests(TeamSuggestionProviders.CURRENT_GUILD_MEMBERS_SUGGESTION_PROVIDER)
+                        .executes(context -> {
+                            kick(context.getSource(), EntityArgument.getPlayer(context, "player"));
+                            return 1;
+                        })
+                    )
                 )
-            )
-        );
+            ));
     }
 
     private static void kick(CommandSourceStack source, ServerPlayer targetPlayer) throws CommandSyntaxException {

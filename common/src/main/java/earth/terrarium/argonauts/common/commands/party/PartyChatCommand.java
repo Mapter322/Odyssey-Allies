@@ -17,16 +17,17 @@ import java.time.Instant;
 public final class PartyChatCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("party")
-            .then(Commands.literal("chat")
-                .then(Commands.argument("message", StringArgumentType.greedyString())
-                    .executes(context -> {
-                        sendMessage(context.getSource(), StringArgumentType.getString(context, "message"));
-                        return 1;
-                    })
+        dispatcher.register(Commands.literal("argonauts")
+            .then(Commands.literal("party")
+                .then(Commands.literal("chat")
+                    .then(Commands.argument("message", StringArgumentType.greedyString())
+                        .executes(context -> {
+                            sendMessage(context.getSource(), StringArgumentType.getString(context, "message"));
+                            return 1;
+                        })
+                    )
                 )
-            )
-        );
+            ));
     }
 
     private static void sendMessage(CommandSourceStack source, String message) throws CommandSyntaxException {

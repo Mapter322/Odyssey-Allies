@@ -18,24 +18,25 @@ public final class GuildSettingsCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         TeamSettingsApi.API.getGuildSettings().forEach((id, setting) ->
-            dispatcher.register(Commands.literal("guild")
-                .then(Commands.literal("settings")
-                    .then(Commands.literal(id)
-                        .then(setting.createArgument("value")
+            dispatcher.register(Commands.literal("argonauts")
+                .then(Commands.literal("guild")
+                    .then(Commands.literal("settings")
+                        .then(Commands.literal(id)
+                            .then(setting.createArgument("value")
+                                .executes(context -> {
+                                    Setting<?> value = setting.getFromArgument("value", context);
+                                    set(context.getSource(), value, id);
+                                    return 1;
+                                })
+                            )
                             .executes(context -> {
-                                Setting<?> value = setting.getFromArgument("value", context);
-                                set(context.getSource(), value, id);
+                                get(context.getSource(), id);
                                 return 1;
                             })
                         )
-                        .executes(context -> {
-                            get(context.getSource(), id);
-                            return 1;
-                        })
                     )
                 )
-            )
-        );
+        ));
     }
 
     private static void set(CommandSourceStack source, Setting<?> setting, String settingId) throws CommandSyntaxException {

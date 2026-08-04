@@ -14,20 +14,21 @@ import net.minecraft.server.players.GameProfileCache;
 public final class PartyMemberCommands {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("party")
-            .then(Commands.literal("members")
-                .then(Commands.literal("list")
+        dispatcher.register(Commands.literal("argonauts")
+            .then(Commands.literal("party")
+                .then(Commands.literal("members")
+                    .then(Commands.literal("list")
+                        .executes(context -> {
+                            list(context.getSource());
+                            return 1;
+                        })
+                    )
                     .executes(context -> {
                         list(context.getSource());
                         return 1;
                     })
                 )
-                .executes(context -> {
-                    list(context.getSource());
-                    return 1;
-                })
-            )
-        );
+            ));
     }
 
     private static void list(CommandSourceStack source) throws CommandSyntaxException {

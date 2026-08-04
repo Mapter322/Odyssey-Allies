@@ -18,20 +18,21 @@ import net.minecraft.server.level.ServerPlayer;
 public final class GuildHeadquartersCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("guild")
-            .then(Commands.literal("headquarters")
-                .executes(context -> {
-                    teleportToHeadquarters(context.getSource());
-                    return 1;
-                })
-            )
-            .then(Commands.literal("hq")
-                .executes(context -> {
-                    teleportToHeadquarters(context.getSource());
-                    return 1;
-                })
-            )
-        );
+        dispatcher.register(Commands.literal("argonauts")
+            .then(Commands.literal("guild")
+                .then(Commands.literal("headquarters")
+                    .executes(context -> {
+                        teleportToHeadquarters(context.getSource());
+                        return 1;
+                    })
+                )
+                .then(Commands.literal("hq")
+                    .executes(context -> {
+                        teleportToHeadquarters(context.getSource());
+                        return 1;
+                    })
+                )
+            ));
     }
 
     private static void teleportToHeadquarters(CommandSourceStack source) throws CommandSyntaxException {

@@ -17,22 +17,25 @@ import java.time.Instant;
 public final class GuildChatCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("guild")
-            .then(Commands.literal("chat")
+        dispatcher.register(Commands.literal("argonauts")
+            .then(Commands.literal("guild")
+                .then(Commands.literal("chat")
+                    .then(Commands.argument("message", StringArgumentType.greedyString())
+                        .executes(context -> {
+                            sendMessage(context.getSource(), StringArgumentType.getString(context, "message"));
+                            return 1;
+                        })
+                    )
+                )
+            ));
+        dispatcher.register(Commands.literal("argonauts")
+            .then(Commands.literal("gc")
                 .then(Commands.argument("message", StringArgumentType.greedyString())
                     .executes(context -> {
                         sendMessage(context.getSource(), StringArgumentType.getString(context, "message"));
                         return 1;
                     })
                 )
-            )
-        );
-        dispatcher.register(Commands.literal("gc")
-            .then(Commands.argument("message", StringArgumentType.greedyString())
-                .executes(context -> {
-                    sendMessage(context.getSource(), StringArgumentType.getString(context, "message"));
-                    return 1;
-                })
             )
         );
     }

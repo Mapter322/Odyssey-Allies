@@ -93,7 +93,7 @@ public class MembersScreen extends BaseScreen {
                     description,
                     member.hasPermission(permission),
                     member.status().isMember() && team.canManagePermissions(this.selfId) && !team.isOwner(profile.getId()),
-                    newValue -> ScreenUtils.sendCommand("%s permissions set %s %s %s".formatted(team.type(), permission, profile.getName(), newValue))
+                    newValue -> ScreenUtils.sendCommand("argonauts %s permissions set %s %s %s".formatted(team.type(), permission, profile.getName(), newValue))
                 )
             );
         });
@@ -102,7 +102,7 @@ public class MembersScreen extends BaseScreen {
         list.addEntry(new CommandEntry(
             ConstantComponents.REMOVE_MEMBER,
             ConstantComponents.REMOVE,
-            "%s kick %s".formatted(team.type(), profile.getName()),
+            "argonauts %s kick %s".formatted(team.type(), profile.getName()),
             team.canManageMembers(this.selfId) && !team.isOwner(profile.getId())
         ));
     }

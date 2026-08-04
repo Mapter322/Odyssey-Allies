@@ -17,17 +17,18 @@ import net.minecraft.server.level.ServerPlayer;
 public final class GuildTransferCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("guild")
-            .then(Commands.literal("transfer")
-                .then(Commands.argument("player", EntityArgument.player())
-                    .suggests(TeamSuggestionProviders.CURRENT_GUILD_MEMBERS_SUGGESTION_PROVIDER)
-                    .executes(context -> {
-                        transfer(context.getSource(), EntityArgument.getPlayer(context, "player"));
-                        return 1;
-                    })
+        dispatcher.register(Commands.literal("argonauts")
+            .then(Commands.literal("guild")
+                .then(Commands.literal("transfer")
+                    .then(Commands.argument("player", EntityArgument.player())
+                        .suggests(TeamSuggestionProviders.CURRENT_GUILD_MEMBERS_SUGGESTION_PROVIDER)
+                        .executes(context -> {
+                            transfer(context.getSource(), EntityArgument.getPlayer(context, "player"));
+                            return 1;
+                        })
+                    )
                 )
-            )
-        );
+            ));
     }
 
     private static void transfer(CommandSourceStack source, ServerPlayer targetPlayer) throws CommandSyntaxException {

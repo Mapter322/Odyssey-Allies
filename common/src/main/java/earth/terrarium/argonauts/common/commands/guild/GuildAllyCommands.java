@@ -30,37 +30,38 @@ public final class GuildAllyCommands {
     };
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("guild")
-            .then(Commands.literal("allies")
-                .then(Commands.literal("add")
-                    .then(Commands.argument("player", EntityArgument.player())
+        dispatcher.register(Commands.literal("argonauts")
+            .then(Commands.literal("guild")
+                .then(Commands.literal("allies")
+                    .then(Commands.literal("add")
+                        .then(Commands.argument("player", EntityArgument.player())
+                            .executes(context -> {
+                                add(context.getSource(), EntityArgument.getPlayer(context, "player"));
+                                return 1;
+                            })
+                        )
+                    )
+                    .then(Commands.literal("remove")
+                        .then(Commands.argument("player", EntityArgument.player())
+                            .suggests(CURRENT_GUILD_ALLIES_SUGGESTION_PROVIDER)
+                            .executes(context -> {
+                                remove(context.getSource(), EntityArgument.getPlayer(context, "player"));
+                                return 1;
+                            })
+                        )
+                    )
+                    .then(Commands.literal("list")
                         .executes(context -> {
-                            add(context.getSource(), EntityArgument.getPlayer(context, "player"));
+                            list(context.getSource());
                             return 1;
                         })
                     )
-                )
-                .then(Commands.literal("remove")
-                    .then(Commands.argument("player", EntityArgument.player())
-                        .suggests(CURRENT_GUILD_ALLIES_SUGGESTION_PROVIDER)
-                        .executes(context -> {
-                            remove(context.getSource(), EntityArgument.getPlayer(context, "player"));
-                            return 1;
-                        })
-                    )
-                )
-                .then(Commands.literal("list")
                     .executes(context -> {
                         list(context.getSource());
                         return 1;
                     })
                 )
-                .executes(context -> {
-                    list(context.getSource());
-                    return 1;
-                })
-            )
-        );
+            ));
     }
 
     private static void add(CommandSourceStack source, ServerPlayer targetPlayer) throws CommandSyntaxException {

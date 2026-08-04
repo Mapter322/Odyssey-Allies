@@ -19,45 +19,46 @@ public final class GuildPermissionCommands {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         MemberPermissionsApi.API.getGuildPermissions().forEach((permission, defaultValue) ->
-            dispatcher.register(Commands.literal("guild")
-                .then(Commands.literal("permissions")
-                    .then(Commands.literal("set")
-                        .then(Commands.literal(permission)
-                            .then(Commands.argument("player", EntityArgument.player())
-                                .suggests(TeamSuggestionProviders.CURRENT_GUILD_MEMBERS_SUGGESTION_PROVIDER)
-                                .then(Commands.argument("value", BoolArgumentType.bool())
+            dispatcher.register(Commands.literal("argonauts")
+                .then(Commands.literal("guild")
+                    .then(Commands.literal("permissions")
+                        .then(Commands.literal("set")
+                            .then(Commands.literal(permission)
+                                .then(Commands.argument("player", EntityArgument.player())
+                                    .suggests(TeamSuggestionProviders.CURRENT_GUILD_MEMBERS_SUGGESTION_PROVIDER)
+                                    .then(Commands.argument("value", BoolArgumentType.bool())
+                                        .executes(context -> {
+                                            boolean value = BoolArgumentType.getBool(context, "value");
+                                            set(context.getSource(), EntityArgument.getPlayer(context, "player"), permission, value);
+                                            return 1;
+                                        })
+                                    )
+                                )
+                            )
+                        )
+                        .then(Commands.literal("get")
+                            .then(Commands.literal(permission)
+                                .then(Commands.argument("player", EntityArgument.player())
+                                    .suggests(TeamSuggestionProviders.CURRENT_GUILD_MEMBERS_SUGGESTION_PROVIDER)
                                     .executes(context -> {
-                                        boolean value = BoolArgumentType.getBool(context, "value");
-                                        set(context.getSource(), EntityArgument.getPlayer(context, "player"), permission, value);
+                                        get(context.getSource(), EntityArgument.getPlayer(context, "player"), permission);
                                         return 1;
                                     })
                                 )
                             )
                         )
-                    )
-                    .then(Commands.literal("get")
-                        .then(Commands.literal(permission)
+                        .then(Commands.literal("list")
                             .then(Commands.argument("player", EntityArgument.player())
                                 .suggests(TeamSuggestionProviders.CURRENT_GUILD_MEMBERS_SUGGESTION_PROVIDER)
                                 .executes(context -> {
-                                    get(context.getSource(), EntityArgument.getPlayer(context, "player"), permission);
+                                    list(context.getSource(), EntityArgument.getPlayer(context, "player"));
                                     return 1;
                                 })
                             )
                         )
                     )
-                    .then(Commands.literal("list")
-                        .then(Commands.argument("player", EntityArgument.player())
-                            .suggests(TeamSuggestionProviders.CURRENT_GUILD_MEMBERS_SUGGESTION_PROVIDER)
-                            .executes(context -> {
-                                list(context.getSource(), EntityArgument.getPlayer(context, "player"));
-                                return 1;
-                            })
-                        )
-                    )
                 )
-            )
-        );
+        ));
     }
 
     private static void set(CommandSourceStack source, ServerPlayer target, String permission, boolean value) throws CommandSyntaxException {

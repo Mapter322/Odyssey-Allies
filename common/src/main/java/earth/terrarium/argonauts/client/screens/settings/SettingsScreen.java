@@ -271,7 +271,7 @@ public class SettingsScreen extends BaseScreen {
             } else {
                 commandValue = String.valueOf(current);
             }
-            ScreenUtils.sendCommand("%s settings %s %s".formatted(this.team.type(), id, commandValue));
+            ScreenUtils.sendCommand("argonauts %s settings %s %s".formatted(this.team.type(), id, commandValue));
         });
         this.onClose();
     }

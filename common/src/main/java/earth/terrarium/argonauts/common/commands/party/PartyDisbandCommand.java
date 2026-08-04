@@ -14,14 +14,15 @@ public final class PartyDisbandCommand {
 
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("party")
-            .then(Commands.literal("disband")
-                .executes(context -> {
-                    disband(context.getSource());
-                    return 1;
-                })
-            )
-        );
+        dispatcher.register(Commands.literal("argonauts")
+            .then(Commands.literal("party")
+                .then(Commands.literal("disband")
+                    .executes(context -> {
+                        disband(context.getSource());
+                        return 1;
+                    })
+                )
+            ));
     }
 
     private static void disband(CommandSourceStack source) throws CommandSyntaxException {

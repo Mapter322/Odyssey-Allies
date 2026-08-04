@@ -29,35 +29,36 @@ public class GuildAdminCommands {
         );
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("guild")
-            .requires(source -> source.hasPermission(2))
-            .then(Commands.literal("admin")
-                .then(Commands.literal("join")
-                    .then(Commands.argument("id", UuidArgument.uuid())
-                        .suggests(GUILDS_SUGGESTION_PROVIDER)
+        dispatcher.register(Commands.literal("argonauts")
+            .then(Commands.literal("guild")
+                .requires(source -> source.hasPermission(2))
+                .then(Commands.literal("admin")
+                    .then(Commands.literal("join")
+                        .then(Commands.argument("id", UuidArgument.uuid())
+                            .suggests(GUILDS_SUGGESTION_PROVIDER)
+                            .executes(context -> {
+                                join(context.getSource(), UuidArgument.getUuid(context, "id"));
+                                return 1;
+                            })
+                        )
+                    )
+                    .then(Commands.literal("disband")
+                        .then(Commands.argument("id", UuidArgument.uuid())
+                            .suggests(GUILDS_SUGGESTION_PROVIDER)
+                            .executes(context -> {
+                                disband(context.getSource(), UuidArgument.getUuid(context, "id"));
+                                return 1;
+                            })
+                        )
+                    )
+                    .then(Commands.literal("disbandall")
                         .executes(context -> {
-                            join(context.getSource(), UuidArgument.getUuid(context, "id"));
+                            disbandAll(context.getSource());
                             return 1;
                         })
                     )
                 )
-                .then(Commands.literal("disband")
-                    .then(Commands.argument("id", UuidArgument.uuid())
-                        .suggests(GUILDS_SUGGESTION_PROVIDER)
-                        .executes(context -> {
-                            disband(context.getSource(), UuidArgument.getUuid(context, "id"));
-                            return 1;
-                        })
-                    )
-                )
-                .then(Commands.literal("disbandall")
-                    .executes(context -> {
-                        disbandAll(context.getSource());
-                        return 1;
-                    })
-                )
-            )
-        );
+            ));
     }
 
     private static void join(CommandSourceStack source, UUID id) throws CommandSyntaxException {

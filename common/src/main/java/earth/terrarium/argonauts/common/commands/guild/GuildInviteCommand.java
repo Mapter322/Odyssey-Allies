@@ -20,16 +20,17 @@ import net.minecraft.server.level.ServerPlayer;
 public final class GuildInviteCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("guild")
-            .then(Commands.literal("invite")
-                .then(Commands.argument("player", EntityArgument.player())
-                    .executes(context -> {
-                        invite(context.getSource(), EntityArgument.getPlayer(context, "player"));
-                        return 1;
-                    })
+        dispatcher.register(Commands.literal("argonauts")
+            .then(Commands.literal("guild")
+                .then(Commands.literal("invite")
+                    .then(Commands.argument("player", EntityArgument.player())
+                        .executes(context -> {
+                            invite(context.getSource(), EntityArgument.getPlayer(context, "player"));
+                            return 1;
+                        })
+                    )
                 )
-            )
-        );
+            ));
     }
 
     private static void invite(CommandSourceStack source, ServerPlayer targetPlayer) throws CommandSyntaxException {
@@ -47,6 +48,6 @@ public final class GuildInviteCommand {
         targetPlayer.displayClientMessage(ModUtils.translatableWithStyle("command.argonauts.guild_invited", player.getName(), guild.displayName()), false);
         targetPlayer.displayClientMessage(ConstantComponents.CLICK_TO_ACCEPT.copy().withStyle(Style.EMPTY
             .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, ModUtils.translatableWithStyle("command.argonauts.join", guild.displayName())))
-            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/guild join " + player.getGameProfile().getName()))), false);
+            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/argonauts guild join " + player.getGameProfile().getName()))), false);
     }
 }

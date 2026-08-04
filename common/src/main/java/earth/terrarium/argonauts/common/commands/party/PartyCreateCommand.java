@@ -16,20 +16,21 @@ public final class PartyCreateCommand {
 
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("party")
-            .then(Commands.literal("create")
-                .then(Commands.argument("name", StringArgumentType.greedyString())
+        dispatcher.register(Commands.literal("argonauts")
+            .then(Commands.literal("party")
+                .then(Commands.literal("create")
+                    .then(Commands.argument("name", StringArgumentType.greedyString())
+                        .executes(context -> {
+                            create(context.getSource(), ModUtils.formatTextColors(StringArgumentType.getString(context, "name")));
+                            return 1;
+                        }))
                     .executes(context -> {
-                        create(context.getSource(), ModUtils.formatTextColors(StringArgumentType.getString(context, "name")));
+                        String name = ModUtils.translatableWithStyle("command.argonauts.party_name", context.getSource().getPlayerOrException().getName()).getString();
+                        create(context.getSource(), name);
                         return 1;
-                    }))
-                .executes(context -> {
-                    String name = ModUtils.translatableWithStyle("command.argonauts.party_name", context.getSource().getPlayerOrException().getName()).getString();
-                    create(context.getSource(), name);
-                    return 1;
-                })
-            )
-        );
+                    })
+                )
+            ));
     }
 
     private static void create(CommandSourceStack source, String name) throws CommandSyntaxException {

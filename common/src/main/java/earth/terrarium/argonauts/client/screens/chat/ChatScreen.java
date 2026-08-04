@@ -96,7 +96,7 @@ public class ChatScreen extends BaseScreen {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (this.getFocused() instanceof EditBox editBox) {
             if (keyCode == InputConstants.KEY_RETURN && !editBox.getValue().isEmpty()) {
-                ScreenUtils.sendCommand(this.team.type() + " chat " + editBox.getValue());
+                ScreenUtils.sendCommand("argonauts " + this.team.type() + " chat " + editBox.getValue());
                 editBox.setValue("");
                 return true;
             }

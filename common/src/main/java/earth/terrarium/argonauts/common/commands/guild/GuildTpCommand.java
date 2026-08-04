@@ -18,17 +18,18 @@ import net.minecraft.server.level.ServerPlayer;
 public final class GuildTpCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("guild")
-            .then(Commands.literal("tp")
-                .then(Commands.argument("player", EntityArgument.player())
-                    .suggests(TeamSuggestionProviders.CURRENT_GUILD_MEMBERS_SUGGESTION_PROVIDER)
-                    .executes(context -> {
-                        tp(context.getSource(), EntityArgument.getPlayer(context, "player"));
-                        return 1;
-                    })
+        dispatcher.register(Commands.literal("argonauts")
+            .then(Commands.literal("guild")
+                .then(Commands.literal("tp")
+                    .then(Commands.argument("player", EntityArgument.player())
+                        .suggests(TeamSuggestionProviders.CURRENT_GUILD_MEMBERS_SUGGESTION_PROVIDER)
+                        .executes(context -> {
+                            tp(context.getSource(), EntityArgument.getPlayer(context, "player"));
+                            return 1;
+                        })
+                    )
                 )
-            )
-        );
+            ));
     }
 
     private static void tp(CommandSourceStack source, ServerPlayer target) throws CommandSyntaxException {

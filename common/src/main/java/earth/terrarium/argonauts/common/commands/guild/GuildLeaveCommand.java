@@ -14,14 +14,15 @@ import net.minecraft.server.level.ServerPlayer;
 public final class GuildLeaveCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("guild")
-            .then(Commands.literal("leave")
-                .executes(context -> {
-                    leave(context.getSource());
-                    return 1;
-                })
-            )
-        );
+        dispatcher.register(Commands.literal("argonauts")
+            .then(Commands.literal("guild")
+                .then(Commands.literal("leave")
+                    .executes(context -> {
+                        leave(context.getSource());
+                        return 1;
+                    })
+                )
+            ));
     }
 
     private static void leave(CommandSourceStack source) throws CommandSyntaxException {

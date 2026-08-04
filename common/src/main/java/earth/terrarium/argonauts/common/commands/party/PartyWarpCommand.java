@@ -15,14 +15,15 @@ import net.minecraft.server.level.ServerPlayer;
 public final class PartyWarpCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("party")
-            .then(Commands.literal("warp")
-                .executes(context -> {
-                    warp(context.getSource());
-                    return 1;
-                })
-            )
-        );
+        dispatcher.register(Commands.literal("argonauts")
+            .then(Commands.literal("party")
+                .then(Commands.literal("warp")
+                    .executes(context -> {
+                        warp(context.getSource());
+                        return 1;
+                    })
+                )
+            ));
     }
 
     private static void warp(CommandSourceStack source) throws CommandSyntaxException {

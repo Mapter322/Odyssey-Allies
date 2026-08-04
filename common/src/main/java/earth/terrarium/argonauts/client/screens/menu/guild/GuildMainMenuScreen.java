@@ -127,9 +127,9 @@ public class GuildMainMenuScreen extends BaseScreen {
         list.add(new DividerWidget());
 
         if (this.isOwner) {
-            list.add(dangerButton(width, ConstantComponents.DISBAND_GUILD, () -> sendCommand("guild disband")));
+            list.add(dangerButton(width, ConstantComponents.DISBAND_GUILD, () -> sendCommand("argonauts guild disband")));
         } else {
-            list.add(dangerButton(width, ConstantComponents.LEAVE_GUILD, () -> sendCommand("guild leave")));
+            list.add(dangerButton(width, ConstantComponents.LEAVE_GUILD, () -> sendCommand("argonauts guild leave")));
         }
     }
 

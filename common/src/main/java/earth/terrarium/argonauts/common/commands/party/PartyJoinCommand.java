@@ -16,17 +16,18 @@ import net.minecraft.server.level.ServerPlayer;
 public final class PartyJoinCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("party")
-            .then(Commands.literal("join")
-                .then(Commands.argument("player", EntityArgument.player())
-                    .suggests(TeamSuggestionProviders.PLAYERS_IN_PARTY_SUGGESTION_PROVIDER)
-                    .executes(context -> {
-                        join(context.getSource(), EntityArgument.getPlayer(context, "player"));
-                        return 1;
-                    })
+        dispatcher.register(Commands.literal("argonauts")
+            .then(Commands.literal("party")
+                .then(Commands.literal("join")
+                    .then(Commands.argument("player", EntityArgument.player())
+                        .suggests(TeamSuggestionProviders.PLAYERS_IN_PARTY_SUGGESTION_PROVIDER)
+                        .executes(context -> {
+                            join(context.getSource(), EntityArgument.getPlayer(context, "player"));
+                            return 1;
+                        })
+                    )
                 )
-            )
-        );
+            ));
     }
 
     private static void join(CommandSourceStack source, ServerPlayer targetPlayer) throws CommandSyntaxException {

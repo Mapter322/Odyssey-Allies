@@ -59,62 +59,110 @@ public class ArgonautsClientNeoForge {
     }
 
     public static void onRegisterClientCommands(RegisterClientCommandsEvent event) {
-        event.getDispatcher().register((Commands.literal("guild").then(Commands.literal("chat").executes(context -> {
-            if (GuildApi.API.getPlayerGuild(Minecraft.getInstance().player).isEmpty()) throw TeamExceptions.NOT_IN_GUILD.create();
-            ChatScreen.openGuild();
-            return 0;
-        }))));
+        event.getDispatcher().register(Commands.literal("argonauts")
+            .then(Commands.literal("guild")
+                .then(Commands.literal("chat")
+                    .executes(context -> {
+                        if (GuildApi.API.getPlayerGuild(Minecraft.getInstance().player).isEmpty()) throw TeamExceptions.NOT_IN_GUILD.create();
+                        ChatScreen.openGuild();
+                        return 0;
+                    })
+                )
+            )
+        );
 
-        event.getDispatcher().register((Commands.literal("party").then(Commands.literal("chat").executes(context -> {
-            if (PartyApi.API.getPlayerParty(Minecraft.getInstance().player).isEmpty()) throw TeamExceptions.NOT_IN_PARTY.create();
-            ChatScreen.openParty();
-            return 0;
-        }))));
+        event.getDispatcher().register(Commands.literal("argonauts")
+            .then(Commands.literal("party")
+                .then(Commands.literal("chat")
+                    .executes(context -> {
+                        if (PartyApi.API.getPlayerParty(Minecraft.getInstance().player).isEmpty()) throw TeamExceptions.NOT_IN_PARTY.create();
+                        ChatScreen.openParty();
+                        return 0;
+                    })
+                )
+            )
+        );
 
-        event.getDispatcher().register(Commands.literal("gc").executes(context -> {
-            if (GuildApi.API.getPlayerGuild(Minecraft.getInstance().player).isEmpty()) throw TeamExceptions.NOT_IN_GUILD.create();
-            ChatScreen.openGuild();
-            return 0;
-        }));
+        event.getDispatcher().register(Commands.literal("argonauts")
+            .then(Commands.literal("gc")
+                .executes(context -> {
+                    if (GuildApi.API.getPlayerGuild(Minecraft.getInstance().player).isEmpty()) throw TeamExceptions.NOT_IN_GUILD.create();
+                    ChatScreen.openGuild();
+                    return 0;
+                })
+            )
+        );
 
-        event.getDispatcher().register((Commands.literal("guild").then(Commands.literal("members").executes(context -> {
-            if (GuildApi.API.getPlayerGuild(Minecraft.getInstance().player).isEmpty()) throw TeamExceptions.NOT_IN_GUILD.create();
-            MembersScreen.openGuild();
-            return 0;
-        }))));
-        event.getDispatcher().register((Commands.literal("party").then(Commands.literal("members").executes(context -> {
-            if (PartyApi.API.getPlayerParty(Minecraft.getInstance().player).isEmpty()) throw TeamExceptions.NOT_IN_PARTY.create();
-            MembersScreen.openParty();
-            return 0;
-        }))));
+        event.getDispatcher().register(Commands.literal("argonauts")
+            .then(Commands.literal("guild")
+                .then(Commands.literal("members")
+                    .executes(context -> {
+                        if (GuildApi.API.getPlayerGuild(Minecraft.getInstance().player).isEmpty()) throw TeamExceptions.NOT_IN_GUILD.create();
+                        MembersScreen.openGuild();
+                        return 0;
+                    })
+                )
+            )
+        );
+        event.getDispatcher().register(Commands.literal("argonauts")
+            .then(Commands.literal("party")
+                .then(Commands.literal("members")
+                    .executes(context -> {
+                        if (PartyApi.API.getPlayerParty(Minecraft.getInstance().player).isEmpty()) throw TeamExceptions.NOT_IN_PARTY.create();
+                        MembersScreen.openParty();
+                        return 0;
+                    })
+                )
+            )
+        );
 
-        event.getDispatcher().register((Commands.literal("guild").then(Commands.literal("settings").executes(context -> {
-            if (GuildApi.API.getPlayerGuild(Minecraft.getInstance().player).isEmpty()) throw TeamExceptions.NOT_IN_GUILD.create();
-            SettingsScreen.openGuild();
-            return 0;
-        }))));
-        event.getDispatcher().register((Commands.literal("party").then(Commands.literal("settings").executes(context -> {
-            if (PartyApi.API.getPlayerParty(Minecraft.getInstance().player).isEmpty()) throw TeamExceptions.NOT_IN_PARTY.create();
-            SettingsScreen.openParty();
-            return 0;
-        }))));
+        event.getDispatcher().register(Commands.literal("argonauts")
+            .then(Commands.literal("guild")
+                .then(Commands.literal("settings")
+                    .executes(context -> {
+                        if (GuildApi.API.getPlayerGuild(Minecraft.getInstance().player).isEmpty()) throw TeamExceptions.NOT_IN_GUILD.create();
+                        SettingsScreen.openGuild();
+                        return 0;
+                    })
+                )
+            )
+        );
+        event.getDispatcher().register(Commands.literal("argonauts")
+            .then(Commands.literal("party")
+                .then(Commands.literal("settings")
+                    .executes(context -> {
+                        if (PartyApi.API.getPlayerParty(Minecraft.getInstance().player).isEmpty()) throw TeamExceptions.NOT_IN_PARTY.create();
+                        SettingsScreen.openParty();
+                        return 0;
+                    })
+                )
+            )
+        );
 
         // Info screen
-        event.getDispatcher().register(Commands.literal("guild").executes(context -> {
-            GuildApi.API.getPlayerGuild(Minecraft.getInstance().player).ifPresent(guild ->
-                Minecraft.getInstance().tell(() ->
-                    Minecraft.getInstance().setScreen(new GuildMainMenuScreen(guild))
-                )
-            );
-            return 0;
-        }));
-        event.getDispatcher().register(Commands.literal("party").executes(context -> {
-            PartyApi.API.getPlayerParty(Minecraft.getInstance().player).ifPresent(party ->
-                Minecraft.getInstance().tell(() ->
-                    Minecraft.getInstance().setScreen(new TeamInfoScreen("party", party))
-                )
-            );
-            return 0;
-        }));
+        event.getDispatcher().register(Commands.literal("argonauts")
+            .then(Commands.literal("guild")
+                .executes(context -> {
+                    GuildApi.API.getPlayerGuild(Minecraft.getInstance().player).ifPresent(guild ->
+                        Minecraft.getInstance().tell(() ->
+                            Minecraft.getInstance().setScreen(new GuildMainMenuScreen(guild))
+                        )
+                    );
+                    return 0;
+                })
+            )
+        );
+        event.getDispatcher().register(Commands.literal("argonauts")
+            .then(Commands.literal("party")
+                .executes(context -> {
+                    PartyApi.API.getPlayerParty(Minecraft.getInstance().player).ifPresent(party ->
+                        Minecraft.getInstance().tell(() ->
+                            Minecraft.getInstance().setScreen(new TeamInfoScreen("party", party))
+                        )
+                    );
+                    return 0;
+                })
+            )
+        );
     }
 }

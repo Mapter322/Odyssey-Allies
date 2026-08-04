@@ -38,61 +38,109 @@ public class ArgonautsClientFabric implements ClientModInitializer {
     // https://github.com/FabricMC/fabric/issues/1721
     private static void registerClientCommands() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            dispatcher.register(ClientCommandManager.literal("guildc").then(ClientCommandManager.literal("chat").executes(context -> {
-                if (GuildApi.API.getPlayerGuild(context.getSource().getPlayer()).isEmpty()) throw TeamExceptions.NOT_IN_GUILD.create();
-                ChatScreen.openGuild();
-                return 0;
-            })));
-            dispatcher.register(ClientCommandManager.literal("partyc").then(ClientCommandManager.literal("chat").executes(context -> {
-                if (PartyApi.API.getPlayerParty(context.getSource().getPlayer()).isEmpty()) throw TeamExceptions.NOT_IN_PARTY.create();
-                ChatScreen.openParty();
-                return 0;
-            })));
-            dispatcher.register(ClientCommandManager.literal("gc").executes(context -> {
-                if (GuildApi.API.getPlayerGuild(context.getSource().getPlayer()).isEmpty()) throw TeamExceptions.NOT_IN_GUILD.create();
-                ChatScreen.openGuild();
-                return 0;
-            }));
+            dispatcher.register(ClientCommandManager.literal("argonauts")
+                .then(ClientCommandManager.literal("guildc")
+                    .then(ClientCommandManager.literal("chat")
+                        .executes(context -> {
+                            if (GuildApi.API.getPlayerGuild(context.getSource().getPlayer()).isEmpty()) throw TeamExceptions.NOT_IN_GUILD.create();
+                            ChatScreen.openGuild();
+                            return 0;
+                        })
+                    )
+                )
+            );
+            dispatcher.register(ClientCommandManager.literal("argonauts")
+                .then(ClientCommandManager.literal("partyc")
+                    .then(ClientCommandManager.literal("chat")
+                        .executes(context -> {
+                            if (PartyApi.API.getPlayerParty(context.getSource().getPlayer()).isEmpty()) throw TeamExceptions.NOT_IN_PARTY.create();
+                            ChatScreen.openParty();
+                            return 0;
+                        })
+                    )
+                )
+            );
+            dispatcher.register(ClientCommandManager.literal("argonauts")
+                .then(ClientCommandManager.literal("gc")
+                    .executes(context -> {
+                        if (GuildApi.API.getPlayerGuild(context.getSource().getPlayer()).isEmpty()) throw TeamExceptions.NOT_IN_GUILD.create();
+                        ChatScreen.openGuild();
+                        return 0;
+                    })
+                )
+            );
 
-            dispatcher.register((ClientCommandManager.literal("guildc").then(ClientCommandManager.literal("members").executes(context -> {
-                if (GuildApi.API.getPlayerGuild(context.getSource().getPlayer()).isEmpty()) throw TeamExceptions.NOT_IN_GUILD.create();
-                MembersScreen.openGuild();
-                return 0;
-            }))));
-            dispatcher.register((ClientCommandManager.literal("partyc").then(ClientCommandManager.literal("members").executes(context -> {
-                if (PartyApi.API.getPlayerParty(context.getSource().getPlayer()).isEmpty()) throw TeamExceptions.NOT_IN_PARTY.create();
-                MembersScreen.openParty();
-                return 0;
-            }))));
+            dispatcher.register(ClientCommandManager.literal("argonauts")
+                .then(ClientCommandManager.literal("guildc")
+                    .then(ClientCommandManager.literal("members")
+                        .executes(context -> {
+                            if (GuildApi.API.getPlayerGuild(context.getSource().getPlayer()).isEmpty()) throw TeamExceptions.NOT_IN_GUILD.create();
+                            MembersScreen.openGuild();
+                            return 0;
+                        })
+                    )
+                )
+            );
+            dispatcher.register(ClientCommandManager.literal("argonauts")
+                .then(ClientCommandManager.literal("partyc")
+                    .then(ClientCommandManager.literal("members")
+                        .executes(context -> {
+                            if (PartyApi.API.getPlayerParty(context.getSource().getPlayer()).isEmpty()) throw TeamExceptions.NOT_IN_PARTY.create();
+                            MembersScreen.openParty();
+                            return 0;
+                        })
+                    )
+                )
+            );
 
-            dispatcher.register((ClientCommandManager.literal("guildc").then(ClientCommandManager.literal("settings").executes(context -> {
-                if (GuildApi.API.getPlayerGuild(context.getSource().getPlayer()).isEmpty()) throw TeamExceptions.NOT_IN_GUILD.create();
-                SettingsScreen.openGuild();
-                return 0;
-            }))));
-            dispatcher.register((ClientCommandManager.literal("partyc").then(ClientCommandManager.literal("settings").executes(context -> {
-                if (PartyApi.API.getPlayerParty(context.getSource().getPlayer()).isEmpty()) throw TeamExceptions.NOT_IN_PARTY.create();
-                SettingsScreen.openParty();
-                return 0;
-            }))));
+            dispatcher.register(ClientCommandManager.literal("argonauts")
+                .then(ClientCommandManager.literal("guildc")
+                    .then(ClientCommandManager.literal("settings")
+                        .executes(context -> {
+                            if (GuildApi.API.getPlayerGuild(context.getSource().getPlayer()).isEmpty()) throw TeamExceptions.NOT_IN_GUILD.create();
+                            SettingsScreen.openGuild();
+                            return 0;
+                        })
+                    )
+                )
+            );
+            dispatcher.register(ClientCommandManager.literal("argonauts")
+                .then(ClientCommandManager.literal("partyc")
+                    .then(ClientCommandManager.literal("settings")
+                        .executes(context -> {
+                            if (PartyApi.API.getPlayerParty(context.getSource().getPlayer()).isEmpty()) throw TeamExceptions.NOT_IN_PARTY.create();
+                            SettingsScreen.openParty();
+                            return 0;
+                        })
+                    )
+                )
+            );
 
             // Info screen
-            dispatcher.register(ClientCommandManager.literal("guildc").executes(context -> {
-                GuildApi.API.getPlayerGuild(context.getSource().getPlayer()).ifPresent(guild ->
-                    Minecraft.getInstance().tell(() ->
-                        Minecraft.getInstance().setScreen(new GuildMainMenuScreen(guild))
-                    )
-                );
-                return 0;
-            }));
-            dispatcher.register(ClientCommandManager.literal("partyc").executes(context -> {
-                PartyApi.API.getPlayerParty(context.getSource().getPlayer()).ifPresent(party ->
-                    Minecraft.getInstance().tell(() ->
-                        Minecraft.getInstance().setScreen(new TeamInfoScreen("party", party))
-                    )
-                );
-                return 0;
-            }));
+            dispatcher.register(ClientCommandManager.literal("argonauts")
+                .then(ClientCommandManager.literal("guildc")
+                    .executes(context -> {
+                        GuildApi.API.getPlayerGuild(context.getSource().getPlayer()).ifPresent(guild ->
+                            Minecraft.getInstance().tell(() ->
+                                Minecraft.getInstance().setScreen(new GuildMainMenuScreen(guild))
+                            )
+                        );
+                        return 0;
+                    })
+                )
+            );
+            dispatcher.register(ClientCommandManager.literal("argonauts")
+                .then(ClientCommandManager.literal("partyc")
+                    .executes(context -> {
+                        PartyApi.API.getPlayerParty(context.getSource().getPlayer()).ifPresent(party ->
+                            Minecraft.getInstance().tell(() ->
+                                Minecraft.getInstance().setScreen(new TeamInfoScreen("party", party))
+                            )
+                        );
+                        return 0;
+                    })
+                )
+            );
         });
     }
 }

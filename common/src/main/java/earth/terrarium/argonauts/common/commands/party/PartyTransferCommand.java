@@ -17,17 +17,18 @@ import net.minecraft.server.level.ServerPlayer;
 public final class PartyTransferCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("party")
-            .then(Commands.literal("transfer")
-                .then(Commands.argument("player", EntityArgument.player())
-                    .suggests(TeamSuggestionProviders.CURRENT_PARTY_MEMBERS_SUGGESTION_PROVIDER)
-                    .executes(context -> {
-                        transfer(context.getSource(), EntityArgument.getPlayer(context, "player"));
-                        return 1;
-                    })
+        dispatcher.register(Commands.literal("argonauts")
+            .then(Commands.literal("party")
+                .then(Commands.literal("transfer")
+                    .then(Commands.argument("player", EntityArgument.player())
+                        .suggests(TeamSuggestionProviders.CURRENT_PARTY_MEMBERS_SUGGESTION_PROVIDER)
+                        .executes(context -> {
+                            transfer(context.getSource(), EntityArgument.getPlayer(context, "player"));
+                            return 1;
+                        })
+                    )
                 )
-            )
-        );
+            ));
     }
 
     private static void transfer(CommandSourceStack source, ServerPlayer targetPlayer) throws CommandSyntaxException {

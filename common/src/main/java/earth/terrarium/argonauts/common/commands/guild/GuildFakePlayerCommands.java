@@ -31,38 +31,39 @@ public final class GuildFakePlayerCommands {
     };
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("guild")
-            .then(Commands.literal("fakeplayers")
-                .then(Commands.literal("add")
-                    .then(Commands.argument("uuid", UuidArgument.uuid())
-                        .suggests(FAKE_PLAYER_SUGGESTION_PROVIDER)
+        dispatcher.register(Commands.literal("argonauts")
+            .then(Commands.literal("guild")
+                .then(Commands.literal("fakeplayers")
+                    .then(Commands.literal("add")
+                        .then(Commands.argument("uuid", UuidArgument.uuid())
+                            .suggests(FAKE_PLAYER_SUGGESTION_PROVIDER)
+                            .executes(context -> {
+                                add(context.getSource(), UuidArgument.getUuid(context, "uuid"));
+                                return 1;
+                            })
+                        )
+                    )
+                    .then(Commands.literal("remove")
+                        .then(Commands.argument("uuid", UuidArgument.uuid())
+                            .suggests(CURRENT_FAKE_PLAYERS_SUGGESTION_PROVIDER)
+                            .executes(context -> {
+                                remove(context.getSource(), UuidArgument.getUuid(context, "uuid"));
+                                return 1;
+                            })
+                        )
+                    )
+                    .then(Commands.literal("list")
                         .executes(context -> {
-                            add(context.getSource(), UuidArgument.getUuid(context, "uuid"));
+                            list(context.getSource());
                             return 1;
                         })
                     )
-                )
-                .then(Commands.literal("remove")
-                    .then(Commands.argument("uuid", UuidArgument.uuid())
-                        .suggests(CURRENT_FAKE_PLAYERS_SUGGESTION_PROVIDER)
-                        .executes(context -> {
-                            remove(context.getSource(), UuidArgument.getUuid(context, "uuid"));
-                            return 1;
-                        })
-                    )
-                )
-                .then(Commands.literal("list")
                     .executes(context -> {
                         list(context.getSource());
                         return 1;
                     })
                 )
-                .executes(context -> {
-                    list(context.getSource());
-                    return 1;
-                })
-            )
-        );
+            ));
     }
 
     private static void add(CommandSourceStack source, UUID fakePlayerId) throws CommandSyntaxException {

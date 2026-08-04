@@ -14,14 +14,15 @@ import net.minecraft.server.level.ServerPlayer;
 public final class PartyLeaveCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("party")
-            .then(Commands.literal("leave")
-                .executes(context -> {
-                    leave(context.getSource());
-                    return 1;
-                })
-            )
-        );
+        dispatcher.register(Commands.literal("argonauts")
+            .then(Commands.literal("party")
+                .then(Commands.literal("leave")
+                    .executes(context -> {
+                        leave(context.getSource());
+                        return 1;
+                    })
+                )
+            ));
     }
 
     private static void leave(CommandSourceStack source) throws CommandSyntaxException {
