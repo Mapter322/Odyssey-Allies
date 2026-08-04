@@ -7,6 +7,7 @@ import earth.terrarium.argonauts.api.teams.party.PartyApi;
 import earth.terrarium.argonauts.api.teams.settings.Setting;
 import earth.terrarium.argonauts.api.teams.settings.TeamSettingsApi;
 import earth.terrarium.argonauts.common.commands.TeamExceptions;
+import earth.terrarium.argonauts.common.settings.Settings;
 import earth.terrarium.argonauts.common.utils.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -42,6 +43,7 @@ public final class PartySettingsCommand {
         Party party = PartyApi.API.getPlayerParty(player).orElse(null);
         if (party == null) throw TeamExceptions.NOT_IN_PARTY.create();
         if (!party.canManageSettings(player.getUUID())) throw TeamExceptions.NO_PERMISSION_MANAGE_SETTINGS.create();
+        if (settingId.equals(Settings.DISPLAY_NAME.id()) && setting.toStringCommand().length() > Settings.MAX_NAME_LENGTH) throw TeamExceptions.NAME_TOO_LONG.create();
 
         Setting<?> oldSettingValue = TeamSettingsApi.API.getSetting(party, settingId);
         PartyApi.API.modifySetting(source.getLevel(), party, setting, settingId);

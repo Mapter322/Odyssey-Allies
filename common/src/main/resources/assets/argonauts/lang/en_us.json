@@ -138,6 +138,7 @@
     "command.argonauts.exception.no_permission_create_guild": "You don't have permission to create a guild.",
     "command.argonauts.exception.no_permission_create_party": "You don't have permission to create a party.",
     "command.argonauts.exception.passive_teleport_disabled": "Passive teleport is disabled.",
+    "command.argonauts.exception.name_too_long": "The name must be at most 32 characters long.",
 
     "gamerule.maxGuildMembers": "Max Guild Members",
     "gamerule.maxPartyMembers": "Max Party Members",

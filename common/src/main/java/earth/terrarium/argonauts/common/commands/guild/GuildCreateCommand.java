@@ -6,7 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import earth.terrarium.argonauts.api.teams.guild.Guild;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.common.commands.TeamExceptions;
-
+import earth.terrarium.argonauts.common.settings.Settings;
 import earth.terrarium.argonauts.common.utils.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -34,6 +34,7 @@ public final class GuildCreateCommand {
     private static void create(CommandSourceStack source, String name) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         if (GuildApi.API.getPlayerGuild(player).isPresent()) throw TeamExceptions.ALREADY_IN_GUILD.create();
+        if (name.length() > Settings.MAX_NAME_LENGTH) throw TeamExceptions.NAME_TOO_LONG.create();
         Guild guild = new Guild(player.getUUID(), name);
         GuildApi.API.create(source.getLevel(), guild);
 

@@ -13,6 +13,9 @@ import java.util.Optional;
 
 public class Settings {
 
+    public static final int MAX_NAME_LENGTH = 32;
+    public static final int MAX_MOTD_LENGTH = 64;
+
     public static final StringSetting DISPLAY_NAME = register(new StringSetting("displayName", ""));
     public static final ColorSettings COLOR = register(new ColorSettings("color", MinecraftColors.WHITE));
 
@@ -34,6 +37,7 @@ public class Settings {
     public static void init() {
         TeamSettingsApi.API.add(DISPLAY_NAME);
         TeamSettingsApi.API.add(COLOR);
+        TeamSettingsApi.API.addGuildSetting(MOTD);
         TeamSettingsApi.API.add(PUBLIC);
         TeamSettingsApi.API.add(FRIENDLY_FIRE);
         TeamSettingsApi.API.add(ANNOUNCE_JOIN);
@@ -43,7 +47,5 @@ public class Settings {
             TeamSettingsApi.API.add(PASSIVE_TELEPORT);
             TeamSettingsApi.API.addGuildSetting(HEADQUARTERS);
         }
-
-        TeamSettingsApi.API.addGuildSetting(MOTD);
     }
 }

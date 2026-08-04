@@ -14,6 +14,7 @@ import earth.terrarium.argonauts.api.teams.settings.types.StringSetting;
 import earth.terrarium.argonauts.client.screens.BaseScreen;
 import earth.terrarium.argonauts.client.widget.LabelledEntry;
 import earth.terrarium.argonauts.common.constants.ConstantComponents;
+import earth.terrarium.argonauts.common.settings.Settings;
 import earth.terrarium.olympus.client.components.Widgets;
 import earth.terrarium.olympus.client.components.base.ListWidget;
 import earth.terrarium.olympus.client.components.base.renderer.WidgetRenderer;
@@ -70,6 +71,8 @@ public class SettingsScreen extends BaseScreen {
 
     @Override
     protected void init() {
+        this.imageWidth = Math.min(240, this.width - 12);
+        this.imageHeight = Math.min(280, this.height - 12);
         super.init();
 
         boolean canEdit = team.canManageSettings(this.selfId);
@@ -104,7 +107,13 @@ public class SettingsScreen extends BaseScreen {
         ImageButton closeButton = new ImageButton(
             0, 0, 11, 11,
             UIConstants.MODAL_CLOSE,
-            button -> this.onClose()
+            button -> {
+                if (this.canGoBack()) {
+                    this.goBack();
+                } else {
+                    this.onClose();
+                }
+            }
         );
         closeButton.setPosition(
             this.leftPos + this.imageWidth - 11 - HEADER_PAD,
@@ -140,6 +149,7 @@ public class SettingsScreen extends BaseScreen {
             }
             row.setLockedWidth();
             row.setWidth(listWidth);
+            row.setDrawDivider(true);
             list.add(row);
         });
 
@@ -179,7 +189,9 @@ public class SettingsScreen extends BaseScreen {
                 layout.withChild(picker);
             });
         });
-        return new LabelledEntry(this.font, title, carousel);
+        return new LabelledEntry(this.font, title, carousel)
+            .setEntryYOffset(-2)
+            ;
     }
 
     @SuppressWarnings("unchecked")
@@ -207,27 +219,41 @@ public class SettingsScreen extends BaseScreen {
     @SuppressWarnings("unchecked")
     private LabelledEntry stringRow(String id, Component title, boolean canEdit) {
         State<String> state = (State<String>) this.states.get(id);
+        int maxLength = getMaxLength(id);
         var carousel = Widgets.carousel(row -> {
             row.withSize(TEXT_INPUT_W + 4, WIDGET_H);
             row.withContents(layout -> layout.withChild(Widgets.textInput(state, textBox -> {
                 textBox.withSize(TEXT_INPUT_W, WIDGET_H);
+                textBox.withMaxLength(maxLength);
                 if (!canEdit) textBox.asDisabled();
             })));
         });
-        return new LabelledEntry(this.font, title, carousel);
+        return new LabelledEntry(this.font, title, carousel)
+            .setEntryYOffset(-2)
+            ;
     }
 
     @SuppressWarnings("unchecked")
     private LabelledEntry fallbackRow(String id, Component title, boolean canEdit) {
         State<String> state = (State<String>) this.states.get(id);
+        int maxLength = getMaxLength(id);
         var carousel = Widgets.carousel(row -> {
             row.withSize(TEXT_INPUT_W + 4, WIDGET_H);
             row.withContents(layout -> layout.withChild(Widgets.textInput(state, textBox -> {
                 textBox.withSize(TEXT_INPUT_W, WIDGET_H);
+                textBox.withMaxLength(maxLength);
                 if (!canEdit) textBox.asDisabled();
             })));
         });
-        return new LabelledEntry(this.font, title, carousel);
+        return new LabelledEntry(this.font, title, carousel)
+            .setEntryYOffset(-2)
+            ;
+    }
+
+    private int getMaxLength(String settingId) {
+        if (Settings.DISPLAY_NAME.id().equals(settingId)) return Settings.MAX_NAME_LENGTH;
+        if (Settings.MOTD.id().equals(settingId)) return Settings.MAX_MOTD_LENGTH;
+        return Short.MAX_VALUE;
     }
 
     private void saveAll() {

@@ -6,7 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import earth.terrarium.argonauts.api.teams.party.Party;
 import earth.terrarium.argonauts.api.teams.party.PartyApi;
 import earth.terrarium.argonauts.common.commands.TeamExceptions;
-
+import earth.terrarium.argonauts.common.settings.Settings;
 import earth.terrarium.argonauts.common.utils.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -35,6 +35,7 @@ public final class PartyCreateCommand {
     private static void create(CommandSourceStack source, String name) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         if (PartyApi.API.getPlayerParty(player).isPresent()) throw TeamExceptions.ALREADY_IN_PARTY.create();
+        if (name.length() > Settings.MAX_NAME_LENGTH) throw TeamExceptions.NAME_TOO_LONG.create();
         Party party = new Party(player.getUUID(), name);
         PartyApi.API.create(source.getLevel(), party);
 

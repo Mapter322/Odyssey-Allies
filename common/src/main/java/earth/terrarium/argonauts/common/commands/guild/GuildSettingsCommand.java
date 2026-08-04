@@ -7,6 +7,7 @@ import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.api.teams.settings.Setting;
 import earth.terrarium.argonauts.api.teams.settings.TeamSettingsApi;
 import earth.terrarium.argonauts.common.commands.TeamExceptions;
+import earth.terrarium.argonauts.common.settings.Settings;
 import earth.terrarium.argonauts.common.utils.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -42,6 +43,7 @@ public final class GuildSettingsCommand {
         Guild guild = GuildApi.API.getPlayerGuild(player).orElse(null);
         if (guild == null) throw TeamExceptions.NOT_IN_GUILD.create();
         if (!guild.canManageSettings(player.getUUID())) throw TeamExceptions.NO_PERMISSION_MANAGE_SETTINGS.create();
+        if (settingId.equals(Settings.DISPLAY_NAME.id()) && setting.toStringCommand().length() > Settings.MAX_NAME_LENGTH) throw TeamExceptions.NAME_TOO_LONG.create();
 
         Setting<?> oldSettingValue = TeamSettingsApi.API.getSetting(guild, settingId);
         GuildApi.API.modifySetting(source.getLevel(), guild, setting, settingId);

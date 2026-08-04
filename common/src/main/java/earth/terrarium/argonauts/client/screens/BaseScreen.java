@@ -17,8 +17,8 @@ public abstract class BaseScreen extends BaseCursorScreen implements ScreenHisto
     protected static final int CLOSE_Y = 6;
     protected static final int CLOSE_SIZE = 10;
 
-    protected final int imageWidth;
-    protected final int imageHeight;
+    protected int imageWidth;
+    protected int imageHeight;
     protected int leftPos;
     protected int topPos;
     protected int titleLabelX;

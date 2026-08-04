@@ -40,6 +40,7 @@ public class TeamExceptions {
     public static final SimpleCommandExceptionType NO_PERMISSION_CREATE_GUILD = create("command.argonauts.exception.no_permission_create_guild");
     public static final SimpleCommandExceptionType NO_PERMISSION_CREATE_PARTY = create("command.argonauts.exception.no_permission_create_party");
     public static final SimpleCommandExceptionType PASSIVE_TELEPORT_DISABLED = create("command.argonauts.exception.passive_teleport_disabled");
+    public static final SimpleCommandExceptionType NAME_TOO_LONG = create("command.argonauts.exception.name_too_long");
 
     private static SimpleCommandExceptionType create(String translationKey) {
         return new SimpleCommandExceptionType(CommonUtils.serverTranslatable(translationKey));
