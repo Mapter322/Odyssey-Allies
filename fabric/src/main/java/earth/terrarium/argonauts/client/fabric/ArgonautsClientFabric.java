@@ -5,6 +5,7 @@ import earth.terrarium.argonauts.api.teams.party.PartyApi;
 import earth.terrarium.argonauts.client.ArgonautsClient;
 import earth.terrarium.argonauts.client.screens.chat.ChatScreen;
 import earth.terrarium.argonauts.client.screens.info.TeamInfoScreen;
+import earth.terrarium.argonauts.client.screens.menu.guild.GuildMainMenuScreen;
 import earth.terrarium.argonauts.client.screens.members.MembersScreen;
 import earth.terrarium.argonauts.client.screens.settings.SettingsScreen;
 import earth.terrarium.argonauts.common.commands.TeamExceptions;
@@ -79,7 +80,7 @@ public class ArgonautsClientFabric implements ClientModInitializer {
             dispatcher.register(ClientCommandManager.literal("guildc").executes(context -> {
                 GuildApi.API.getPlayerGuild(context.getSource().getPlayer()).ifPresent(guild ->
                     Minecraft.getInstance().tell(() ->
-                        Minecraft.getInstance().setScreen(new TeamInfoScreen("guild", guild))
+                        Minecraft.getInstance().setScreen(new GuildMainMenuScreen(guild))
                     )
                 );
                 return 0;

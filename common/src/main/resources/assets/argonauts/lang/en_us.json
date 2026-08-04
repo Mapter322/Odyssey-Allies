@@ -155,6 +155,18 @@
     "gui.argonauts.info.chat_button": "Chat",
     "gui.argonauts.info.settings_button": "Settings",
 
+    "gui.argonauts.menu.section.general": "General",
+    "gui.argonauts.menu.section.motd": "Message of the Day",
+    "gui.argonauts.menu.section.headquarters": "Headquarters",
+    "gui.argonauts.menu.no_motd": "No MOTD set",
+    "gui.argonauts.menu.yes": "Yes",
+    "gui.argonauts.menu.no": "No",
+    "gui.argonauts.info.public": "Public:",
+    "gui.argonauts.info.friendly_fire": "Friendly Fire:",
+    "gui.argonauts.close": "Close",
+    "gui.argonauts.leave_guild": "Leave Guild",
+    "gui.argonauts.disband_guild": "Disband Guild",
+
     "gui.argonauts.party_chat.title": "Party Chat",
     "gui.argonauts.party_members.title": "Party Members",
     "gui.argonauts.party_settings.title": "Party Settings",

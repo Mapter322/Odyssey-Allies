@@ -102,7 +102,7 @@ public class LabelledEntry extends BaseParentWidget {
         guiGraphics.drawString(this.font, this.label, this.getX() + leftPadding, this.getTextY(), this.color);
         entry.render(guiGraphics, mouseX, mouseY, partialTicks);
         if (this.drawDivider) {
-            int y = this.getY() + this.getHeight() - 1;
+            int y = this.getY() + this.getHeight();
             int startX = this.getX();
             int endX = this.getX() + this.getWidth();
             guiGraphics.fill(startX, y, endX, y + 1, this.dividerColor);

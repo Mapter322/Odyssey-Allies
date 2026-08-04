@@ -30,6 +30,13 @@ public class ConstantComponents {
     public static final Component GUILD_MEMBERS_TITLE = Component.translatable("gui.argonauts.guild_members.title");
     public static final Component GUILD_SETTINGS_TITLE = Component.translatable("gui.argonauts.guild_settings.title");
 
+    public static final Component GUILD_MENU_TITLE = Component.translatable("gui.argonauts.guild_info.title");
+    public static final Component PARTY_MENU_TITLE = Component.translatable("gui.argonauts.party_info.title");
+
+    public static final Component CLOSE = Component.translatable("gui.argonauts.close");
+    public static final Component LEAVE_GUILD = Component.translatable("gui.argonauts.leave_guild");
+    public static final Component DISBAND_GUILD = Component.translatable("gui.argonauts.disband_guild");
+
     public static final Component MEMBER_STATUS = Component.translatable("gui.argonauts.member_status");
     public static final Component MEMBER_PERMISSIONS = Component.translatable("gui.argonauts.member_permissions");
     public static final Component MEMBER_ACTIONS = Component.translatable("gui.argonauts.member_actions");
