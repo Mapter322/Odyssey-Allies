@@ -1,22 +1,31 @@
 package earth.terrarium.argonauts.client.screens.members;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.teamresourceful.resourcefullib.client.utils.ScreenUtils;
-import earth.terrarium.argonauts.Argonauts;
 import earth.terrarium.argonauts.api.teams.Member;
 import earth.terrarium.argonauts.api.teams.Team;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.api.teams.party.PartyApi;
 import earth.terrarium.argonauts.api.teams.permissions.MemberPermissionsApi;
 import earth.terrarium.argonauts.client.screens.BaseScreen;
-import earth.terrarium.argonauts.client.screens.entries.BooleanEntry;
-import earth.terrarium.argonauts.client.screens.entries.CommandEntry;
-import earth.terrarium.argonauts.client.screens.entries.DividerEntry;
-import earth.terrarium.argonauts.client.screens.entries.TextEntry;
-import earth.terrarium.argonauts.client.screens.settings.SettingList;
+import earth.terrarium.argonauts.client.widget.LabelledEntry;
 import earth.terrarium.argonauts.common.constants.ConstantComponents;
+import earth.terrarium.olympus.client.components.Widgets;
+import earth.terrarium.olympus.client.components.base.ListWidget;
+import earth.terrarium.olympus.client.components.buttons.Button;
+import earth.terrarium.olympus.client.components.renderers.WidgetRenderers;
+import earth.terrarium.olympus.client.components.string.TextWidget;
+import earth.terrarium.olympus.client.constants.MinecraftColors;
+import earth.terrarium.olympus.client.ui.UIConstants;
+import earth.terrarium.olympus.client.ui.context.DividerWidget;
+import earth.terrarium.olympus.client.utils.State;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.PlayerFaceRenderer;
+import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -26,11 +35,27 @@ import java.util.*;
 
 public class MembersScreen extends BaseScreen {
 
-    private static final ResourceLocation CONTAINER_BACKGROUND = Argonauts.id("textures/gui/members.png");
+    private static final int BASE_WIDTH = 300;
+    private static final int BASE_HEIGHT = 210;
+
+    private static final int BANNER_HEIGHT = 16;
+    private static final int SIDE_PADDING = 8;
+    private static final int HEADER_PAD = 4;
+    private static final int PANEL_GAP = 4;
+    private static final int INSET_PADDING = 4;
+
+    private static final int LIST_WIDTH = 90;
+    private static final int ROW_HEIGHT = 20;
+    private static final int ROW_GAP = 2;
+    private static final int ENTRY_GAP = 3;
+
+    private static final int TOGGLE_W = 26;
+    private static final int TOGGLE_H = 14;
+    private static final int BUTTON_HEIGHT = 20;
 
     private final Team team;
     private final Set<String> permissions;
-    private final List<MembersList.EntryData> members = new ArrayList<>();
+    private final List<MemberEntry> members = new ArrayList<>();
 
     private final UUID selfId;
 
@@ -40,7 +65,7 @@ public class MembersScreen extends BaseScreen {
     private Member selectedMember;
 
     public MembersScreen(Component displayName, Team team, Set<String> permissions) {
-        super(displayName, 276, 223);
+        super(displayName, BASE_WIDTH, BASE_HEIGHT);
         this.team = team;
         this.permissions = permissions;
         this.selfId = Minecraft.getInstance().getGameProfile().getId();
@@ -53,74 +78,256 @@ public class MembersScreen extends BaseScreen {
 
             PlayerInfo info = conn != null ? conn.getPlayerInfo(uuid) : null;
             if (info != null) {
-                this.members.add(new MembersList.EntryData(info.getProfile(), info.getSkin().texture(), info));
+                this.members.add(new MemberEntry(info.getProfile(), info.getSkin().texture(), true));
             } else {
                 String name = !member.name().isEmpty() ? member.name() : uuid.toString().substring(0, 8);
                 GameProfile profile = new GameProfile(uuid, name);
-                this.members.add(new MembersList.EntryData(profile, skinManager.getInsecureSkin(profile).texture(), null));
+                this.members.add(new MemberEntry(profile, skinManager.getInsecureSkin(profile).texture(), false));
             }
         });
     }
+
+    private record MemberEntry(GameProfile profile, ResourceLocation skin, boolean online) {}
 
     @Override
     protected void init() {
+        this.imageWidth = Math.min(BASE_WIDTH, this.width - 12);
+        this.imageHeight = Math.min(BASE_HEIGHT, this.height - 12);
         super.init();
 
-        addRenderableWidget(new MembersList(this.leftPos + 8, this.topPos + 29, 70, 180, 20, this.members, entry -> {
-            if (entry != null) {
-                this.selectedProfile = entry.profile();
-                this.selectedMember = this.team.members().get(this.selectedProfile.getId());
-                rebuildWidgets();
+        StringWidget titleLabel = new StringWidget(this.title, this.font);
+        titleLabel.setColor(0xFFFFFF);
+        titleLabel.setPosition(
+            this.leftPos + HEADER_PAD,
+            this.topPos + (BANNER_HEIGHT - this.font.lineHeight) / 2
+        );
+        this.addRenderableWidget(titleLabel);
+
+        Component onlineText = onlineCountText();
+        StringWidget onlineLabel = new StringWidget(onlineText, this.font);
+        onlineLabel.setColor(0xFFAAAAAA);
+        onlineLabel.setPosition(
+            this.leftPos + this.imageWidth - 14 - HEADER_PAD - this.font.width(onlineText),
+            this.topPos + (BANNER_HEIGHT - this.font.lineHeight) / 2
+        );
+        this.addRenderableWidget(onlineLabel);
+
+        ImageButton closeButton = new ImageButton(
+            0, 0, 11, 11,
+            UIConstants.MODAL_CLOSE,
+            button -> {
+                if (this.canGoBack()) {
+                    this.goBack();
+                } else {
+                    this.onClose();
+                }
             }
-        }));
+        );
+        closeButton.setPosition(
+            this.leftPos + this.imageWidth - 11 - HEADER_PAD,
+            this.topPos + (BANNER_HEIGHT - 11) / 2
+        );
+        closeButton.setTooltip(Tooltip.create(ConstantComponents.CLOSE));
+        this.addRenderableWidget(closeButton);
+
+        int contentTop = this.topPos + BANNER_HEIGHT + 4;
+        int contentBottom = this.topPos + this.imageHeight - 6;
+        int contentHeight = contentBottom - contentTop;
+        int contentWidth = this.imageWidth - SIDE_PADDING * 2;
+        int detailsWidth = contentWidth - LIST_WIDTH - PANEL_GAP;
+
+        ListWidget memberList = new ListWidget(LIST_WIDTH - 2, contentHeight);
+        memberList.withGap(ROW_GAP);
+        memberList.setPosition(this.leftPos + SIDE_PADDING + 1, contentTop + 1);
+        this.members.forEach(entry -> memberList.add(memberRow(entry, LIST_WIDTH - 2)));
+        this.addRenderableWidget(memberList);
+        memberList.visitWidgets(this::addWidget);
+
+        int detailsX = this.leftPos + SIDE_PADDING + LIST_WIDTH + PANEL_GAP + INSET_PADDING;
+        int detailsY = contentTop + INSET_PADDING;
 
         if (this.selectedProfile != null && this.selectedMember != null) {
-            SettingList list = addRenderableWidget(new SettingList(this.leftPos + 84, this.topPos + 29, 184, 180));
-            addSettingsContent(list, this.selectedProfile, this.selectedMember);
+            ListWidget detailsList = new ListWidget(detailsWidth - INSET_PADDING * 2, contentHeight - INSET_PADDING * 2);
+            detailsList.withGap(ENTRY_GAP);
+            detailsList.setPosition(detailsX, detailsY);
+            buildDetails(detailsList, this.selectedProfile, this.selectedMember, detailsWidth - INSET_PADDING * 2);
+            this.addRenderableWidget(detailsList);
+            detailsList.visitWidgets(this::addWidget);
+        } else {
+            TextWidget placeholder = Widgets.text(ConstantComponents.SELECT_MEMBER)
+                .withColor(MinecraftColors.GRAY)
+                .withLeftAlignment();
+            placeholder.setPosition(detailsX, detailsY);
+            this.addRenderableWidget(placeholder);
         }
     }
 
-    private void addSettingsContent(SettingList list, GameProfile profile, Member member) {
-        list.addEntry(new TextEntry(ConstantComponents.MEMBER_STATUS, member.status().getDisplayName()));
-        list.addEntry(new DividerEntry(ConstantComponents.MEMBER_PERMISSIONS));
+    private Button memberRow(MemberEntry entry, int width) {
+        return Widgets.button(button -> {
+            button.withSize(width, ROW_HEIGHT);
+            button.withTexture(UIConstants.LIST_ENTRY);
+            button.withTooltip(Component.literal(entry.profile().getName()));
+            button.withRenderer((graphics, context, partialTick) -> {
+                int left = context.getX();
+                int top = context.getY();
 
-        this.permissions.forEach(permission -> {
-            Component title = Component.translatable("permission.argonauts." + permission);
-            Component description = Component.translatable("permission.argonauts." + permission + ".description");
+                if (!entry.online()) {
+                    graphics.fill(left, top, left + context.getWidth(), top + context.getHeight(), 0x80000000);
+                }
 
-            list.addEntry(new BooleanEntry(
-                    title,
-                    description,
-                    member.hasPermission(permission),
-                    member.status().isMember() && team.canManagePermissions(this.selfId) && !team.isOwner(profile.getId()),
-                    newValue -> ScreenUtils.sendCommand("argonauts %s permissions set %s %s %s".formatted(team.type(), permission, profile.getName(), newValue))
-                )
-            );
+                PlayerFaceRenderer.draw(graphics, entry.skin(), left + 2, top + 2, 16);
+                graphics.drawString(
+                    Minecraft.getInstance().font,
+                    entry.profile().getName(),
+                    left + 21,
+                    top + (context.getHeight() - Minecraft.getInstance().font.lineHeight) / 2,
+                    entry.online() ? 0xFFFFFF : 0xAAAAAA,
+                    false
+                );
+            });
+            button.withCallback(() -> {
+                this.selectedProfile = entry.profile();
+                this.selectedMember = this.team.members().get(entry.profile().getId());
+                rebuildWidgets();
+            });
+        });
+    }
+
+    private void buildDetails(ListWidget list, GameProfile profile, Member member, int width) {
+        list.add(statusRow(member));
+
+        list.add(new DividerWidget());
+        list.add(section(ConstantComponents.MEMBER_PERMISSIONS));
+
+        boolean canEditPermissions = member.status().isMember() && team.canManagePermissions(this.selfId) && !team.isOwner(profile.getId());
+        this.permissions.forEach(permission ->
+            list.add(permissionRow(permission, profile, member, canEditPermissions))
+        );
+
+        list.add(new DividerWidget());
+        list.add(section(ConstantComponents.MEMBER_ACTIONS));
+        list.add(removeButton(profile, width));
+    }
+
+    private LabelledEntry statusRow(Member member) {
+        TextWidget value = Widgets.text(member.status().getDisplayName())
+            .withColor(MinecraftColors.WHITE)
+            .withRightAlignment();
+        LabelledEntry entry = new LabelledEntry(this.font, ConstantComponents.MEMBER_STATUS, value);
+        return entry;
+    }
+
+    private LabelledEntry permissionRow(String permission, GameProfile profile, Member member, boolean canEdit) {
+        Component title = Component.translatable("permission.argonauts." + permission);
+        Component description = Component.translatable("permission.argonauts." + permission + ".description");
+
+        State<Boolean> state = new State<>() {
+            private boolean value = member.hasPermission(permission);
+
+            @Override
+            public void set(Boolean newValue) {
+                this.value = newValue;
+                ScreenUtils.sendCommand("argonauts %s permissions set %s %s %s".formatted(team.type(), permission, profile.getName(), newValue));
+            }
+
+            @Override
+            public Boolean get() {
+                return this.value;
+            }
+        };
+
+        Button toggle = Widgets.toggle(state, button -> {
+            button.withSize(TOGGLE_W, TOGGLE_H);
+            button.withTooltip(description);
+            if (!canEdit) button.asDisabled();
         });
 
-        list.addEntry(new DividerEntry(ConstantComponents.MEMBER_ACTIONS));
-        list.addEntry(new CommandEntry(
-            ConstantComponents.REMOVE_MEMBER,
-            ConstantComponents.REMOVE,
-            "argonauts %s kick %s".formatted(team.type(), profile.getName()),
-            team.canManageMembers(this.selfId) && !team.isOwner(profile.getId())
-        ));
+        return new LabelledEntry(this.font, title, toggle)
+            .setLockedWidth()
+            .setEntryYOffset(-2);
+    }
+
+    private Button removeButton(GameProfile profile, int width) {
+        boolean canManage = team.canManageMembers(this.selfId) && !team.isOwner(profile.getId());
+        return Widgets.button(button -> {
+            button.withSize(width, BUTTON_HEIGHT);
+            button.withRenderer(WidgetRenderers.text(ConstantComponents.REMOVE_MEMBER).withColor(MinecraftColors.WHITE));
+            button.withTexture(UIConstants.DANGER_BUTTON);
+            if (!canManage) button.asDisabled();
+            button.withCallback(() -> {
+                ScreenUtils.sendCommand("argonauts %s kick %s".formatted(team.type(), profile.getName()));
+                this.selectedProfile = null;
+                this.selectedMember = null;
+                rebuildWidgets();
+            });
+        });
+    }
+
+    private TextWidget section(Component title) {
+        return Widgets.text(title)
+            .withColor(MinecraftColors.GOLD)
+            .withLeftAlignment();
+    }
+
+    private Component onlineCountText() {
+        int online = team.onlineMembers(Objects.requireNonNull(Minecraft.getInstance().level)).size();
+        int total = team.realMembersCount();
+        return Component.translatable("gui.argonauts.online_members", online, total);
     }
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(font, title, this.titleLabelX, this.titleLabelY, 0x404040, false);
-        int online = team.onlineMembers(Objects.requireNonNull(Minecraft.getInstance().level)).size();
-        int total = team.realMembersCount();
-        Component onlineText = Component.translatable("gui.argonauts.online_members", online, total);
-        graphics.drawString(font, onlineText, this.imageWidth - 8 - font.width(onlineText), this.titleLabelY, 0x404040, false);
+    }
+
+    @Override
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        graphics.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
+        this.renderBg(graphics, partialTick, mouseX, mouseY);
     }
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         int x = (this.width - this.imageWidth) / 2;
         int y = (this.height - this.imageHeight) / 2;
-        graphics.blit(CONTAINER_BACKGROUND, x, y, 0, 0, this.imageWidth, this.imageHeight, 512, 512);
+        RenderSystem.disableDepthTest();
+        graphics.blitSprite(UIConstants.MODAL, x, y, this.imageWidth, this.imageHeight);
+        graphics.blitSprite(UIConstants.MODAL_HEADER, x, y, this.imageWidth, BANNER_HEIGHT);
+
+        int contentTop = y + BANNER_HEIGHT + 4;
+        int contentHeight = y + this.imageHeight - 6 - contentTop;
+        int contentWidth = this.imageWidth - SIDE_PADDING * 2;
+
+        // Left panel background (members list)
+        int memberListX = x + SIDE_PADDING;
+        graphics.blitSprite(UIConstants.MODAL_INSET, memberListX, contentTop, LIST_WIDTH, contentHeight);
+
+        // Right panel background (details)
+        int detailsX = x + SIDE_PADDING + LIST_WIDTH + PANEL_GAP;
+        int detailsWidth = contentWidth - LIST_WIDTH - PANEL_GAP;
+        graphics.blitSprite(UIConstants.MODAL_INSET, detailsX, contentTop, detailsWidth, contentHeight);
+
+        RenderSystem.enableDepthTest();
+    }
+
+    @Override
+    public boolean mouseClicked(double mx, double my, int button) {
+        for (var listener : this.children()) {
+            if (listener.mouseClicked(mx, my, button)) {
+                this.setFocused(listener);
+                if (button == 0) this.setDragging(true);
+                return true;
+            }
+        }
+        this.setFocused(null);
+        return false;
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (Minecraft.getInstance().options.keyInventory.matches(keyCode, scanCode)) {
+            return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     public static void openGuild() {

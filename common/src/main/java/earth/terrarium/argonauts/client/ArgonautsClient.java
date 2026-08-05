@@ -6,7 +6,7 @@ import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.api.teams.party.PartyApi;
 import earth.terrarium.argonauts.client.screens.chat.ChatScreen;
 import earth.terrarium.argonauts.client.screens.menu.guild.GuildMainMenuScreen;
-import earth.terrarium.argonauts.client.screens.info.TeamInfoScreen;
+import earth.terrarium.argonauts.client.screens.menu.party.PartyMainMenuScreen;
 import earth.terrarium.argonauts.client.screens.widgets.IconButton;
 import earth.terrarium.argonauts.common.chat.ChatHandler;
 import earth.terrarium.argonauts.common.constants.ConstantComponents;
@@ -98,7 +98,7 @@ public class ArgonautsClient {
     private static void openPartyMenu() {
         PartyApi.API.getPlayerParty(Minecraft.getInstance().player).ifPresent(party ->
             Minecraft.getInstance().tell(() ->
-                Minecraft.getInstance().setScreen(new TeamInfoScreen("party", party))
+                Minecraft.getInstance().setScreen(new PartyMainMenuScreen(party))
             )
         );
     }

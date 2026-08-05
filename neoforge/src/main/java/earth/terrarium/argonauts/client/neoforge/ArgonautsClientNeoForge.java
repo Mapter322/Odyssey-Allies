@@ -5,7 +5,7 @@ import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.api.teams.party.PartyApi;
 import earth.terrarium.argonauts.client.ArgonautsClient;
 import earth.terrarium.argonauts.client.screens.chat.ChatScreen;
-import earth.terrarium.argonauts.client.screens.info.TeamInfoScreen;
+import earth.terrarium.argonauts.client.screens.menu.party.PartyMainMenuScreen;
 import earth.terrarium.argonauts.client.screens.menu.guild.GuildMainMenuScreen;
 import earth.terrarium.argonauts.client.screens.members.MembersScreen;
 import earth.terrarium.argonauts.client.screens.settings.SettingsScreen;
@@ -157,7 +157,7 @@ public class ArgonautsClientNeoForge {
                 .executes(context -> {
                     PartyApi.API.getPlayerParty(Minecraft.getInstance().player).ifPresent(party ->
                         Minecraft.getInstance().tell(() ->
-                            Minecraft.getInstance().setScreen(new TeamInfoScreen("party", party))
+                            Minecraft.getInstance().setScreen(new PartyMainMenuScreen(party))
                         )
                     );
                     return 0;

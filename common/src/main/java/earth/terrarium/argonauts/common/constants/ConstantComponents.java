@@ -36,6 +36,8 @@ public class ConstantComponents {
     public static final Component CLOSE = Component.translatable("gui.argonauts.close");
     public static final Component LEAVE_GUILD = Component.translatable("gui.argonauts.leave_guild");
     public static final Component DISBAND_GUILD = Component.translatable("gui.argonauts.disband_guild");
+    public static final Component LEAVE_PARTY = Component.translatable("gui.argonauts.leave_party");
+    public static final Component DISBAND_PARTY = Component.translatable("gui.argonauts.disband_party");
 
     public static final Component MEMBER_STATUS = Component.translatable("gui.argonauts.member_status");
     public static final Component MEMBER_PERMISSIONS = Component.translatable("gui.argonauts.member_permissions");
@@ -45,6 +47,7 @@ public class ConstantComponents {
 
     public static final Component REMOVE_MEMBER = Component.translatable("gui.argonauts.remove_member");
     public static final Component REMOVE = Component.translatable("gui.argonauts.remove");
+    public static final Component SELECT_MEMBER = Component.translatable("gui.argonauts.select_member");
 
     public static final Component MAX_GUILD_MEMBERS = Component.translatable("gui.argonauts.max_guild_members");
     public static final Component MAX_PARTY_MEMBERS = Component.translatable("gui.argonauts.max_party_members");
