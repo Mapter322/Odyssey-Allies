@@ -40,6 +40,14 @@ public final class PartyHudRenderer {
     private static final ResourceLocation ARROW_TEXTURE = Argonauts.id("textures/gui/arrow.png");
     private static final int ARROW_SIZE = 7;
 
+    private static final int OFFLINE_COLOR = 0xFF666A73;
+    private static final int UNKNOWN_DIMENSION_COLOR = 0xFFFF6EC7;
+    private static final Map<String, Integer> DIMENSION_COLORS = Map.of(
+        "minecraft:overworld", 0xFF4CAF50,
+        "minecraft:the_nether", 0xFFB02E3E,
+        "minecraft:the_end", 0xFF9B59D0
+    );
+
     private PartyHudRenderer() {
     }
 
@@ -80,8 +88,12 @@ public final class PartyHudRenderer {
         int foodY = heartsY + heartRows * 10;
         int entryHeight = foodY - y + ICON_SIZE + 3;
 
+        String dimension = tracked
+            ? player.level().dimension().location().toString()
+            : data != null ? data.dimension() : "";
+
         graphics.fill(x, y, x + PANEL_WIDTH, y + entryHeight, 0xA010141B);
-        graphics.fill(x, y, x + 2, y + entryHeight, online ? 0xFF4CAF50 : 0xFF666A73);
+        graphics.fill(x, y, x + 2, y + entryHeight, statusColor(dimension, online));
 
         String name = member.name().isBlank() ? playerId.toString().substring(0, 8) : member.name();
         ResourceLocation skinTexture = playerInfo != null
@@ -132,6 +144,13 @@ public final class PartyHudRenderer {
         renderHearts(graphics, x + 27, heartsY, heartSlots, health);
         renderFood(graphics, x + 27, foodY, hunger);
         return entryHeight;
+    }
+
+    private static int statusColor(String dimension, boolean online) {
+        if (!online) {
+            return OFFLINE_COLOR;
+        }
+        return DIMENSION_COLORS.getOrDefault(dimension, UNKNOWN_DIMENSION_COLOR);
     }
 
     private static void renderDirectionArrow(GuiGraphics graphics, int centerX, int centerY, LocalPlayer localPlayer, double dx, double dz) {
