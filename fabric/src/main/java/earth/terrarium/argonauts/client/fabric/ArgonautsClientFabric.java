@@ -14,6 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
@@ -24,6 +25,7 @@ public class ArgonautsClientFabric implements ClientModInitializer {
     public void onInitializeClient() {
         ArgonautsClient.init();
         ClientTickEvents.START_CLIENT_TICK.register(client -> ArgonautsClient.clientTick());
+        HudRenderCallback.EVENT.register((graphics, tickDelta) -> ArgonautsClient.renderHud(graphics));
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> ArgonautsClient.onPlayerLoggedOut());
         KeyBindingHelper.registerKeyBinding(ArgonautsClient.KEY_OPEN_PARTY_CHAT);
         KeyBindingHelper.registerKeyBinding(ArgonautsClient.KEY_OPEN_GUILD_CHAT);

@@ -8,6 +8,7 @@ import earth.terrarium.argonauts.client.screens.chat.ChatScreen;
 import earth.terrarium.argonauts.client.screens.menu.guild.GuildMainMenuScreen;
 import earth.terrarium.argonauts.client.screens.menu.party.PartyMainMenuScreen;
 import earth.terrarium.argonauts.client.screens.widgets.IconButton;
+import earth.terrarium.argonauts.client.hud.PartyHudRenderer;
 import earth.terrarium.argonauts.common.chat.ChatHandler;
 import earth.terrarium.argonauts.common.constants.ConstantComponents;
 import earth.terrarium.argonauts.mixins.client.ScreenWidgetInvoker;
@@ -106,6 +107,10 @@ public class ArgonautsClient {
     public static void clientTick() {
         if (KEY_OPEN_PARTY_CHAT.consumeClick()) ChatScreen.openParty();
         if (KEY_OPEN_GUILD_CHAT.consumeClick()) ChatScreen.openGuild();
+    }
+
+    public static void renderHud(net.minecraft.client.gui.GuiGraphics graphics) {
+        PartyHudRenderer.render(graphics);
     }
 
     @NotNull

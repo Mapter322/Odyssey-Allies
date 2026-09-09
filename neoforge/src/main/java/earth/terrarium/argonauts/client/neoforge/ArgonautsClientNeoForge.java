@@ -18,6 +18,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -30,6 +31,7 @@ public class ArgonautsClientNeoForge {
         NeoForge.EVENT_BUS.addListener(ArgonautsClientNeoForge::onPlayerLoggedOut);
         NeoForge.EVENT_BUS.addListener(ArgonautsClientNeoForge::onRegisterClientCommands);
         NeoForge.EVENT_BUS.addListener(ArgonautsClientNeoForge::onScreenInit);
+        NeoForge.EVENT_BUS.addListener(ArgonautsClientNeoForge::onRenderGui);
         NeoForge.EVENT_BUS.addListener(ArgonautsClientNeoForge::onMouseClickPre);
         ArgonautsClient.init();
     }
@@ -40,6 +42,10 @@ public class ArgonautsClientNeoForge {
 
     public static void onScreenInit(ScreenEvent.Init.Post event) {
         ArgonautsClient.setupInventoryButtons(event.getScreen());
+    }
+
+    public static void onRenderGui(RenderGuiEvent.Pre event) {
+        ArgonautsClient.renderHud(event.getGuiGraphics());
     }
 
     public static void onMouseClickPre(ScreenEvent.MouseButtonPressed.Pre event) {
