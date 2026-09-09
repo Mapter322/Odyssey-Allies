@@ -1,6 +1,7 @@
 package earth.terrarium.argonauts.client.hud;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.math.Axis;
 import earth.terrarium.argonauts.Argonauts;
 import earth.terrarium.argonauts.api.teams.Member;
@@ -48,6 +49,10 @@ public final class PartyHudRenderer {
         "minecraft:the_end", 0xFF9B59D0
     );
 
+    private static final float SMALL_SCREEN_SCALE = 0.5F;
+    private static final int SMALL_SCREEN_WIDTH = 480;
+    private static final int SMALL_SCREEN_HEIGHT = 270;
+
     private PartyHudRenderer() {
     }
 
@@ -63,6 +68,25 @@ public final class PartyHudRenderer {
             return;
         }
 
+        float scale = hudScale(minecraft);
+        if (scale == 1.0F) {
+            renderParty(graphics, minecraft, localPlayer, party);
+            return;
+        }
+        graphics.pose().pushPose();
+        graphics.pose().scale(scale, scale, 1.0F);
+        renderParty(graphics, minecraft, localPlayer, party);
+        graphics.pose().popPose();
+    }
+
+    private static float hudScale(Minecraft minecraft) {
+        Window window = minecraft.getWindow();
+        return window.getGuiScaledWidth() < SMALL_SCREEN_WIDTH || window.getGuiScaledHeight() < SMALL_SCREEN_HEIGHT
+            ? SMALL_SCREEN_SCALE
+            : 1.0F;
+    }
+
+    private static void renderParty(GuiGraphics graphics, Minecraft minecraft, LocalPlayer localPlayer, Party party) {
         int y = PANEL_Y;
         for (Map.Entry<UUID, Member> entry : party.members().entrySet()) {
             if (entry.getKey().equals(localPlayer.getUUID()) || !entry.getValue().status().isMember()) {
