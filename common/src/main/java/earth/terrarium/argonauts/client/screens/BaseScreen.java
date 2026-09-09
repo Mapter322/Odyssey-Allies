@@ -7,7 +7,9 @@ import com.teamresourceful.resourcefullib.client.screens.ScreenHistory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -66,6 +68,7 @@ public abstract class BaseScreen extends BaseCursorScreen implements ScreenHisto
         double relMy = my - this.topPos;
         if (relMx >= CLOSE_X && relMx < CLOSE_X + CLOSE_SIZE
             && relMy >= CLOSE_Y && relMy < CLOSE_Y + CLOSE_SIZE) {
+            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             if (this.canGoBack()) {
                 this.goBack();
             } else {
