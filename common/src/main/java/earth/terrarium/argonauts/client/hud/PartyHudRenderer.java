@@ -2,9 +2,11 @@ package earth.terrarium.argonauts.client.hud;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.math.Axis;
+import earth.terrarium.argonauts.Argonauts;
 import earth.terrarium.argonauts.api.teams.Member;
 import earth.terrarium.argonauts.api.teams.party.Party;
 import earth.terrarium.argonauts.api.teams.party.PartyApi;
+import earth.terrarium.argonauts.common.network.packets.ClientboundSyncPartyStatusPacket.MemberData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
@@ -14,6 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -21,7 +24,7 @@ public final class PartyHudRenderer {
 
     private static final int PANEL_X = 6;
     private static final int PANEL_Y = 6;
-    private static final int PANEL_WIDTH = 154;
+    private static final int PANEL_WIDTH = 122;
     private static final int ENTRY_GAP = 2;
     private static final int FACE_SIZE = 16;
     private static final int ICON_SIZE = 9;
@@ -34,6 +37,8 @@ public final class PartyHudRenderer {
     private static final ResourceLocation FOOD_EMPTY = ResourceLocation.withDefaultNamespace("hud/food_empty");
     private static final ResourceLocation FOOD_FULL = ResourceLocation.withDefaultNamespace("hud/food_full");
     private static final ResourceLocation FOOD_HALF = ResourceLocation.withDefaultNamespace("hud/food_half");
+    private static final ResourceLocation ARROW_TEXTURE = Argonauts.id("textures/gui/arrow.png");
+    private static final int ARROW_SIZE = 7;
 
     private PartyHudRenderer() {
     }
@@ -60,12 +65,15 @@ public final class PartyHudRenderer {
     }
 
     private static int renderMember(GuiGraphics graphics, Minecraft minecraft, UUID playerId, Member member, int x, int y) {
+        LocalPlayer localPlayer = minecraft.player;
         Player player = minecraft.level.getPlayerByUUID(playerId);
         PlayerInfo playerInfo = minecraft.getConnection() == null ? null : minecraft.getConnection().getPlayerInfo(playerId);
-        boolean online = player != null && playerInfo != null;
-        float health = online ? Math.max(0.0F, player.getHealth()) : 0.0F;
-        float maxHealth = online ? Math.max(1.0F, player.getMaxHealth()) : 20.0F;
-        int hunger = online ? player.getFoodData().getFoodLevel() : 0;
+        boolean tracked = player != null && playerInfo != null;
+        MemberData data = tracked ? null : PartyHudData.get(playerId);
+        boolean online = tracked || (data != null && data.online());
+        float health = tracked ? Math.max(0.0F, player.getHealth()) : online ? Math.max(0.0F, data.health()) : 0.0F;
+        float maxHealth = tracked ? Math.max(1.0F, player.getMaxHealth()) : online ? Math.max(1.0F, data.maxHealth()) : 20.0F;
+        int hunger = tracked ? player.getFoodData().getFoodLevel() : online ? data.hunger() : 0;
         int heartSlots = online ? Math.max(1, (int) Math.ceil(maxHealth / 2.0F)) : ICONS_PER_ROW;
         int heartRows = Math.max(1, (heartSlots + ICONS_PER_ROW - 1) / ICONS_PER_ROW);
         int heartsY = y + 14;
@@ -89,17 +97,36 @@ public final class PartyHudRenderer {
             graphics.fill(x + 6, y + 5, x + 6 + FACE_SIZE, y + 5 + FACE_SIZE, 0xFF30343B);
         }
 
-        String distanceText = online ? Math.round(minecraft.player.distanceTo(player)) + "m" : "";
-        int nameWidth = PANEL_WIDTH - 31;
-        if (!distanceText.isEmpty()) {
-            nameWidth -= minecraft.font.width(" " + distanceText) + 14;
+        double dx = 0.0;
+        double dy = 0.0;
+        double dz = 0.0;
+        boolean navigate = false;
+        if (tracked) {
+            dx = player.getX() - localPlayer.getX();
+            dy = player.getY() - localPlayer.getY();
+            dz = player.getZ() - localPlayer.getZ();
+            navigate = true;
+        } else if (online && data.dimension().equals(localPlayer.level().dimension().location().toString())) {
+            dx = data.x() - localPlayer.getX();
+            dy = data.y() - localPlayer.getY();
+            dz = data.z() - localPlayer.getZ();
+            navigate = true;
         }
-        String displayName = trimName(minecraft, name, nameWidth);
+
+        String distanceText = navigate ? formatDistance((float) Math.sqrt(dx * dx + dy * dy + dz * dz)) : "";
+        int arrowCenterX = 0;
+        int distanceRight = 0;
+        int nameRight = x + PANEL_WIDTH - 5;
+        if (!distanceText.isEmpty()) {
+            arrowCenterX = x + PANEL_WIDTH - 10;
+            distanceRight = arrowCenterX - 8;
+            nameRight = distanceRight - 3 - minecraft.font.width(distanceText);
+        }
+        String displayName = trimName(minecraft, name, nameRight - (x + 27));
         graphics.drawString(minecraft.font, displayName, x + 27, y + 4, online ? 0xFFFFFFFF : 0xFFAAAAAA, false);
         if (!distanceText.isEmpty()) {
-            int distanceRight = x + PANEL_WIDTH - 18;
             graphics.drawString(minecraft.font, distanceText, distanceRight - minecraft.font.width(distanceText), y + 4, 0xFFB7C0C8, false);
-            renderDirectionArrow(graphics, x + PANEL_WIDTH - 10, y + 9, minecraft.player, player);
+            renderDirectionArrow(graphics, arrowCenterX, y + 7, localPlayer, dx, dz);
         }
 
         renderHearts(graphics, x + 27, heartsY, heartSlots, health);
@@ -107,9 +134,7 @@ public final class PartyHudRenderer {
         return entryHeight;
     }
 
-    private static void renderDirectionArrow(GuiGraphics graphics, int centerX, int centerY, LocalPlayer localPlayer, Player target) {
-        double dx = target.getX() - localPlayer.getX();
-        double dz = target.getZ() - localPlayer.getZ();
+    private static void renderDirectionArrow(GuiGraphics graphics, int centerX, int centerY, LocalPlayer localPlayer, double dx, double dz) {
         if (dx == 0.0 && dz == 0.0) {
             return;
         }
@@ -118,11 +143,10 @@ public final class PartyHudRenderer {
         float angle = Mth.wrapDegrees(targetYaw - localPlayer.getYRot());
 
         graphics.pose().pushPose();
-        graphics.pose().translate(centerX, centerY, 0.0F);
+        graphics.pose().translate(centerX + 0.5F, centerY + 0.5F, 0.0F);
         graphics.pose().mulPose(Axis.ZP.rotationDegrees(angle));
-        graphics.fill(-1, -5, 1, 4, 0xFFD9E2E8);
-        graphics.fill(-3, -3, 3, 0, 0xFFD9E2E8);
-        graphics.fill(-4, -1, 4, 1, 0xFFD9E2E8);
+        graphics.pose().translate(-0.5F, -0.5F, 0.0F);
+        graphics.blit(ARROW_TEXTURE, -ARROW_SIZE / 2, -ARROW_SIZE / 2, 0, 0, ARROW_SIZE, ARROW_SIZE, ARROW_SIZE, ARROW_SIZE);
         graphics.pose().popPose();
     }
 
@@ -159,6 +183,17 @@ public final class PartyHudRenderer {
                 graphics.blitSprite(FOOD_HALF, iconX, y, ICON_SIZE, ICON_SIZE);
             }
         }
+    }
+
+    private static String formatDistance(float distance) {
+        int meters = Math.round(distance);
+        if (meters < 1000) {
+            return meters + "m";
+        }
+        if (meters < 10000) {
+            return String.format(Locale.ROOT, "%.1fkm", meters / 1000.0F);
+        }
+        return Math.round(meters / 1000.0F) + "km";
     }
 
     private static String trimName(Minecraft minecraft, String name, int maxWidth) {

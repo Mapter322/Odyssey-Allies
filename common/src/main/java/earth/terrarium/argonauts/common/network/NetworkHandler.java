@@ -27,6 +27,7 @@ public class NetworkHandler {
         CHANNEL.register(ClientboundModifyPartyPermissionPacket.TYPE);
         CHANNEL.register(ClientboundLeavePartyPacket.TYPE);
         CHANNEL.register(ClientboundModifyPartySettingPacket.TYPE);
+        CHANNEL.register(ClientboundSyncPartyStatusPacket.TYPE);
 
         CHANNEL.register(ClientboundSendMessagePacket.TYPE);
     }
