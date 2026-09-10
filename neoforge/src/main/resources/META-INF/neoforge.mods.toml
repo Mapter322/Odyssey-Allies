@@ -18,6 +18,9 @@ displayTest="IGNORE_ALL_VERSION"
 [[mixins]]
 config = "argonauts-common.mixins.json"
 
+[[mixins]]
+config = "argonauts-compat.mixins.json"
+
 [[dependencies.argonauts]]
 modId = "neoforge"
 type="required"

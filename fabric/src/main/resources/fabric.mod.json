@@ -31,7 +31,8 @@
         ]
     },
     "mixins": [
-        "argonauts-common.mixins.json"
+        "argonauts-common.mixins.json",
+        "argonauts-compat.mixins.json"
     ],
     "depends": {
         "fabric-api": "*",

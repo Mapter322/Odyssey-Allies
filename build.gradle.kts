@@ -41,6 +41,7 @@ subprojects {
         maven(url = "https://maven.teamresourceful.com/repository/maven-public/")
         maven(url = "https://maven.neoforged.net/releases/")
         maven(url = "https://api.modrinth.com/maven/")
+        maven(url = "https://chocolateminecraft.com/maven/")
         mavenLocal()
     }
 
