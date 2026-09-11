@@ -8,7 +8,7 @@ import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.api.teams.permissions.MemberPermissionsApi;
 import earth.terrarium.argonauts.common.commands.TeamExceptions;
 import earth.terrarium.argonauts.common.commands.TeamSuggestionProviders;
-import earth.terrarium.argonauts.common.utils.ModUtils;
+import earth.terrarium.argonauts.api.util.ModUtils;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;

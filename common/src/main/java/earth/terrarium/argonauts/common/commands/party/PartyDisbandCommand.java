@@ -5,7 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import earth.terrarium.argonauts.api.teams.party.Party;
 import earth.terrarium.argonauts.api.teams.party.PartyApi;
 import earth.terrarium.argonauts.common.commands.TeamExceptions;
-import earth.terrarium.argonauts.common.utils.ModUtils;
+import earth.terrarium.argonauts.api.util.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;

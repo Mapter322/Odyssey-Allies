@@ -9,7 +9,7 @@ import earth.terrarium.argonauts.common.commands.TeamExceptions;
 import earth.terrarium.argonauts.common.guild.GuildSaveData;
 import earth.terrarium.argonauts.common.permissions.Permissions;
 import earth.terrarium.argonauts.common.settings.Settings;
-import earth.terrarium.argonauts.common.utils.ModUtils;
+import earth.terrarium.argonauts.api.util.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;

@@ -6,7 +6,7 @@ import earth.terrarium.argonauts.api.teams.guild.Guild;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.common.commands.TeamExceptions;
 import earth.terrarium.argonauts.common.settings.Settings;
-import earth.terrarium.argonauts.common.utils.ModUtils;
+import earth.terrarium.argonauts.api.util.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;

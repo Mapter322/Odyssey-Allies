@@ -7,8 +7,8 @@ import com.mojang.datafixers.util.Pair;
 import earth.terrarium.argonauts.api.teams.MemberStatus;
 import earth.terrarium.argonauts.api.teams.guild.Guild;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
+import earth.terrarium.argonauts.api.util.ModUtils;
 import earth.terrarium.argonauts.common.commands.TeamExceptions;
-import earth.terrarium.argonauts.common.utils.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -18,10 +18,12 @@ import net.minecraft.server.players.GameProfileCache;
 
 import java.util.UUID;
 
+import static earth.terrarium.argonauts.common.utils.ModUtils.getFakePlayers;
+
 public final class GuildFakePlayerCommands {
 
     private static final SuggestionProvider<CommandSourceStack> FAKE_PLAYER_SUGGESTION_PROVIDER = (context, builder) ->
-        SharedSuggestionProvider.suggest(ModUtils.getFakePlayers(), builder, pair -> pair.getFirst().toString(), Pair::getSecond);
+        SharedSuggestionProvider.suggest(getFakePlayers(), builder, pair -> pair.getFirst().toString(), Pair::getSecond);
 
     private static final SuggestionProvider<CommandSourceStack> CURRENT_FAKE_PLAYERS_SUGGESTION_PROVIDER = (context, builder) -> {
         ServerPlayer player = context.getSource().getPlayerOrException();

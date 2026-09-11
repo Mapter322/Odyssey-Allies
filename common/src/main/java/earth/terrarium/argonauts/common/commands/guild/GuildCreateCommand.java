@@ -5,12 +5,14 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import earth.terrarium.argonauts.api.teams.guild.Guild;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
+import earth.terrarium.argonauts.api.util.ModUtils;
 import earth.terrarium.argonauts.common.commands.TeamExceptions;
 import earth.terrarium.argonauts.common.settings.Settings;
-import earth.terrarium.argonauts.common.utils.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
+
+import static earth.terrarium.argonauts.common.utils.ModUtils.formatTextColors;
 
 public final class GuildCreateCommand {
 
@@ -20,7 +22,7 @@ public final class GuildCreateCommand {
                 .then(Commands.literal("create")
                     .then(Commands.argument("name", StringArgumentType.greedyString())
                         .executes(context -> {
-                            create(context.getSource(), ModUtils.formatTextColors(StringArgumentType.getString(context, "name")));
+                            create(context.getSource(), formatTextColors(StringArgumentType.getString(context, "name")));
                             return 1;
                         }))
                     .executes(context -> {
