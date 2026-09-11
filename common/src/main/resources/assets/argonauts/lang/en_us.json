@@ -192,6 +192,9 @@
     "gui.argonauts.settings": "Settings",
     "gui.argonauts.save": "Save",
 
+    "gui.argonauts.invite_member": "Invite",
+    "gui.argonauts.invite_member.description": "Enter the name of the player you want to invite.",
+    "gui.argonauts.invite_member.placeholder": "Player name",
     "gui.argonauts.remove_member": "Remove Member",
     "gui.argonauts.remove": "Remove",
 

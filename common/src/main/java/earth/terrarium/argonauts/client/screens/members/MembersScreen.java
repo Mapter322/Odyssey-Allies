@@ -3,6 +3,7 @@ package earth.terrarium.argonauts.client.screens.members;
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.teamresourceful.resourcefullib.client.utils.ScreenUtils;
+import earth.terrarium.argonauts.client.Modals;
 import earth.terrarium.argonauts.api.teams.Member;
 import earth.terrarium.argonauts.api.teams.Team;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
@@ -136,12 +137,36 @@ public class MembersScreen extends BaseScreen {
         int contentWidth = this.imageWidth - SIDE_PADDING * 2;
         int detailsWidth = contentWidth - LIST_WIDTH - PANEL_GAP;
 
-        ListWidget memberList = new ListWidget(LIST_WIDTH - 2, contentHeight);
+        int listHeight = contentHeight - BUTTON_HEIGHT - ROW_GAP;
+
+        ListWidget memberList = new ListWidget(LIST_WIDTH - 2, listHeight);
         memberList.withGap(ROW_GAP);
         memberList.setPosition(this.leftPos + SIDE_PADDING + 1, contentTop + 1);
         this.members.forEach(entry -> memberList.add(memberRow(entry, LIST_WIDTH - 2)));
         this.addRenderableWidget(memberList);
         memberList.visitWidgets(this::addWidget);
+
+        int inviteY = contentTop + 1 + listHeight + ROW_GAP - 2;
+        Button inviteButton = Widgets.button(button -> {
+            button.withSize(LIST_WIDTH - 2, BUTTON_HEIGHT);
+            button.withTexture(UIConstants.PRIMARY_BUTTON);
+            button.withRenderer(WidgetRenderers.text(ConstantComponents.INVITE_MEMBER).withColor(MinecraftColors.WHITE));
+            boolean canManage = team.canManageMembers(this.selfId);
+            if (!canManage) button.asDisabled();
+            button.withCallback(() -> {
+                Modals.input(
+                    ConstantComponents.INVITE_MEMBER,
+                    ConstantComponents.INVITE_MEMBER_DESCRIPTION,
+                    ConstantComponents.INVITE_MEMBER_PLACEHOLDER,
+                    16,
+                    ConstantComponents.INVITE_MEMBER,
+                    name -> !name.isBlank(),
+                    name -> ScreenUtils.sendCommand("argonauts %s invite %s".formatted(team.type(), name))
+                );
+            });
+        });
+        inviteButton.setPosition(this.leftPos + SIDE_PADDING + 1, inviteY);
+        this.addRenderableWidget(inviteButton);
 
         int detailsX = this.leftPos + SIDE_PADDING + LIST_WIDTH + PANEL_GAP + INSET_PADDING;
         int detailsY = contentTop + INSET_PADDING;

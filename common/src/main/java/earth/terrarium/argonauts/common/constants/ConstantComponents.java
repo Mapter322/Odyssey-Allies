@@ -55,6 +55,9 @@ public class ConstantComponents {
     public static final Component REMOVE_MEMBER = Component.translatable("gui.argonauts.remove_member");
     public static final Component REMOVE = Component.translatable("gui.argonauts.remove");
     public static final Component SELECT_MEMBER = Component.translatable("gui.argonauts.select_member");
+    public static final Component INVITE_MEMBER = Component.translatable("gui.argonauts.invite_member");
+    public static final Component INVITE_MEMBER_DESCRIPTION = Component.translatable("gui.argonauts.invite_member.description");
+    public static final Component INVITE_MEMBER_PLACEHOLDER = Component.translatable("gui.argonauts.invite_member.placeholder");
 
     public static final Component MAX_GUILD_MEMBERS = Component.translatable("gui.argonauts.max_guild_members");
     public static final Component MAX_PARTY_MEMBERS = Component.translatable("gui.argonauts.max_party_members");
