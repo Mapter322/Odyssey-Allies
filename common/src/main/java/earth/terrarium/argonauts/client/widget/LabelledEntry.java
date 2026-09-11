@@ -17,6 +17,7 @@ public class LabelledEntry extends BaseParentWidget {
     private boolean lockedWidth = false;
     private int entryYOffset = 0;
     private boolean drawDivider = false;
+    private int dividerYOffset = 0;
     private int dividerColor = 0x20FFFFFF;
 
     public LabelledEntry(Font font, Component label, AbstractWidget entry) {
@@ -62,6 +63,11 @@ public class LabelledEntry extends BaseParentWidget {
         return this;
     }
 
+    public LabelledEntry setDividerYOffset(int offset) {
+        this.dividerYOffset = offset;
+        return this;
+    }
+
     public LabelledEntry setDrawDivider(boolean drawDivider) {
         this.drawDivider = drawDivider;
         return this;
@@ -102,7 +108,7 @@ public class LabelledEntry extends BaseParentWidget {
         guiGraphics.drawString(this.font, this.label, this.getX() + leftPadding, this.getTextY(), this.color);
         entry.render(guiGraphics, mouseX, mouseY, partialTicks);
         if (this.drawDivider) {
-            int y = this.getY() + this.getHeight();
+            int y = this.getY() + this.getHeight() + this.dividerYOffset;
             int startX = this.getX();
             int endX = this.getX() + this.getWidth();
             guiGraphics.fill(startX, y, endX, y + 1, this.dividerColor);

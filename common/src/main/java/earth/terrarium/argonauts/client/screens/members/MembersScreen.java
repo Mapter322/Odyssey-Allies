@@ -19,11 +19,11 @@ import earth.terrarium.olympus.client.components.Widgets;
 import earth.terrarium.olympus.client.components.base.ListWidget;
 import earth.terrarium.olympus.client.components.buttons.Button;
 import earth.terrarium.olympus.client.components.compound.radio.RadioState;
+import earth.terrarium.olympus.client.components.renderers.TristateRenderers;
 import earth.terrarium.olympus.client.components.renderers.WidgetRenderers;
 import earth.terrarium.olympus.client.components.string.TextWidget;
 import earth.terrarium.olympus.client.constants.MinecraftColors;
 import earth.terrarium.olympus.client.ui.UIConstants;
-import earth.terrarium.olympus.client.ui.context.DividerWidget;
 import earth.terrarium.olympus.client.utils.State;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -52,12 +52,15 @@ public class MembersScreen extends BaseScreen {
 
     private static final int LIST_WIDTH = 90;
     private static final int ROW_HEIGHT = 20;
-    private static final int ROW_GAP = 2;
+    private static final int ROW_GAP = 0;
     private static final int ENTRY_GAP = 3;
 
     private static final int TOGGLE_W = 26;
     private static final int TOGGLE_H = 14;
+    private static final int TRISTATE_W = 36;
+    private static final int TRISTATE_H = 14;
     private static final int BUTTON_HEIGHT = 20;
+    private static final int INVITE_LIFT = 2;
 
     private final Team team;
     private final Set<String> permissions;
@@ -71,6 +74,10 @@ public class MembersScreen extends BaseScreen {
     private GameProfile selectedProfile;
     @Nullable
     private Member selectedMember;
+    @Nullable
+    private DetailsListWidget detailsList;
+    @Nullable
+    private Integer pendingDetailsScroll;
 
     public MembersScreen(Component displayName, Team team, Set<String> permissions) {
         super(displayName, BASE_WIDTH, BASE_HEIGHT);
@@ -144,7 +151,7 @@ public class MembersScreen extends BaseScreen {
         int contentWidth = this.imageWidth - SIDE_PADDING * 2;
         int detailsWidth = contentWidth - LIST_WIDTH - PANEL_GAP;
 
-        int listHeight = contentHeight - BUTTON_HEIGHT - ROW_GAP;
+        int listHeight = contentHeight - BUTTON_HEIGHT - ROW_GAP - INVITE_LIFT;
 
         ListWidget memberList = new ListWidget(LIST_WIDTH - 2, listHeight);
         memberList.withGap(ROW_GAP);
@@ -153,7 +160,7 @@ public class MembersScreen extends BaseScreen {
         this.addRenderableWidget(memberList);
         memberList.visitWidgets(this::addWidget);
 
-        int inviteY = contentTop + 1 + listHeight + ROW_GAP - 2;
+        int inviteY = contentTop + 1 + listHeight + ROW_GAP;
         Button inviteButton = Widgets.button(button -> {
             button.withSize(LIST_WIDTH - 2, BUTTON_HEIGHT);
             button.withTexture(UIConstants.PRIMARY_BUTTON);
@@ -179,13 +186,18 @@ public class MembersScreen extends BaseScreen {
         int detailsY = contentTop + INSET_PADDING;
 
         if (this.selectedProfile != null && this.selectedMember != null) {
-            ListWidget detailsList = new ListWidget(detailsWidth - INSET_PADDING * 2, contentHeight - INSET_PADDING * 2);
-            detailsList.withGap(ENTRY_GAP);
-            detailsList.setPosition(detailsX, detailsY);
-            buildDetails(detailsList, this.selectedProfile, this.selectedMember, detailsWidth - INSET_PADDING * 2);
-            this.addRenderableWidget(detailsList);
-            detailsList.visitWidgets(this::addWidget);
+            this.detailsList = new DetailsListWidget(detailsWidth - INSET_PADDING * 2, contentHeight - INSET_PADDING * 2);
+            this.detailsList.withGap(ENTRY_GAP);
+            this.detailsList.setPosition(detailsX, detailsY);
+            buildDetails(this.detailsList, this.selectedProfile, this.selectedMember, detailsWidth - INSET_PADDING * 2);
+            if (this.pendingDetailsScroll != null) {
+                this.detailsList.restoreScroll(this.pendingDetailsScroll);
+                this.pendingDetailsScroll = null;
+            }
+            this.addRenderableWidget(this.detailsList);
+            this.detailsList.visitWidgets(this::addWidget);
         } else {
+            this.detailsList = null;
             TextWidget placeholder = Widgets.text(ConstantComponents.SELECT_MEMBER)
                 .withColor(MinecraftColors.GRAY)
                 .withLeftAlignment();
@@ -202,6 +214,13 @@ public class MembersScreen extends BaseScreen {
             button.withRenderer((graphics, context, partialTick) -> {
                 int left = context.getX();
                 int top = context.getY();
+                boolean selected = this.selectedProfile != null
+                    && this.selectedProfile.getId().equals(entry.profile().getId());
+
+                if (selected) {
+                    graphics.fill(left, top, left + context.getWidth(), top + context.getHeight(), 0xFF55FFFF);
+                    graphics.fill(left + 1, top + 1, left + context.getWidth() - 1, top + context.getHeight() - 1, 0xC0102028);
+                }
 
                 if (!entry.online()) {
                     graphics.fill(left, top, left + context.getWidth(), top + context.getHeight(), 0x80000000);
@@ -229,9 +248,8 @@ public class MembersScreen extends BaseScreen {
     private void buildDetails(ListWidget list, GameProfile profile, Member member, int width) {
         this.memberSettingStates.clear();
         this.sentMemberSettingStates.clear();
-        list.add(statusRow(member));
+        list.add(roleRow(member));
 
-        list.add(new DividerWidget());
         list.add(section(ConstantComponents.MEMBER_PERMISSIONS));
 
         boolean canEditPermissions = member.status().isMember() && team.canManagePermissions(this.selfId) && !team.isOwner(profile.getId());
@@ -242,22 +260,22 @@ public class MembersScreen extends BaseScreen {
         if (this.team.type().equals("guild")) {
             List<MemberSetting> settings = MemberSettingsApi.API.getSettings(this.team);
             if (!settings.isEmpty()) {
-                list.add(new DividerWidget());
                 list.add(section(Component.translatable("gui.argonauts.member_claim_permissions")));
                 settings.forEach(setting -> list.add(memberSettingRow(setting, profile, canEditPermissions)));
             }
         }
 
-        list.add(new DividerWidget());
         list.add(section(ConstantComponents.MEMBER_ACTIONS));
         list.add(removeButton(profile, width));
     }
 
-    private LabelledEntry statusRow(Member member) {
+    private LabelledEntry roleRow(Member member) {
         TextWidget value = Widgets.text(member.status().getDisplayName())
             .withColor(MinecraftColors.WHITE)
             .withRightAlignment();
-        LabelledEntry entry = new LabelledEntry(this.font, ConstantComponents.MEMBER_STATUS, value);
+        LabelledEntry entry = new LabelledEntry(this.font, ConstantComponents.ROLE, value);
+        entry.setDrawDivider(true);
+        entry.setDividerYOffset(-1);
         return entry;
     }
 
@@ -288,7 +306,9 @@ public class MembersScreen extends BaseScreen {
 
         return new LabelledEntry(this.font, title, toggle)
             .setLockedWidth()
-            .setEntryYOffset(-2);
+            .setEntryYOffset(-2)
+            .setDrawDivider(true)
+            .setDividerYOffset(-1);
     }
 
     private LabelledEntry memberSettingRow(MemberSetting setting, GameProfile profile, boolean canEdit) {
@@ -305,12 +325,22 @@ public class MembersScreen extends BaseScreen {
         });
         this.memberSettingStates.put(setting.id(), state);
         this.sentMemberSettingStates.put(setting.id(), current);
-        var toggle = Widgets.tristate(state);
+        var toggle = Widgets.tristate(state, builder -> builder
+            .withRenderer((option, active) -> WidgetRenderers.layered(
+                WidgetRenderers.sprite(active ? TristateRenderers.getButtonSprites(option) : UIConstants.BUTTON),
+                WidgetRenderers.icon(TristateRenderers.getIcon(option))
+                    .withColor(active ? MinecraftColors.WHITE : TristateRenderers.getColor(option))
+                    .withPaddingBottom(1)
+                    .withCentered(10, 10)
+            ))
+            .withSize(TRISTATE_W, TRISTATE_H), layout -> {});
         toggle.withTooltip(setting.description());
         toggle.active = canEdit;
         return new LabelledEntry(this.font, setting.name(), toggle)
             .setLockedWidth()
-            .setEntryYOffset(-2);
+            .setEntryYOffset(-2)
+            .setDrawDivider(true)
+            .setDividerYOffset(-1);
     }
 
     @Override
@@ -331,6 +361,7 @@ public class MembersScreen extends BaseScreen {
     }
 
     public void refreshMemberSettings() {
+        if (this.detailsList != null) this.pendingDetailsScroll = this.detailsList.getScroll();
         this.clearWidgets();
         this.init();
     }
@@ -355,6 +386,16 @@ public class MembersScreen extends BaseScreen {
         return Widgets.text(title)
             .withColor(MinecraftColors.GOLD)
             .withLeftAlignment();
+    }
+
+    private static class DetailsListWidget extends ListWidget {
+        DetailsListWidget(int width, int height) {
+            super(width, height);
+        }
+
+        void restoreScroll(int scroll) {
+            this.scroll = Math.max(0, Math.min(scroll, Math.max(0, this.getContentHeight() - this.getHeight())));
+        }
     }
 
     private Component onlineCountText() {

@@ -187,7 +187,7 @@
     "gui.argonauts.guild_settings.title": "Guild Settings",
 
     "gui.argonauts.online_members": "%s/%s Online",
-    "gui.argonauts.member_status": "Member Status",
+    "gui.argonauts.role": "Role",
     "gui.argonauts.member_permissions": "Permissions",
     "gui.argonauts.member_actions": "Actions",
     "gui.argonauts.settings": "Settings",

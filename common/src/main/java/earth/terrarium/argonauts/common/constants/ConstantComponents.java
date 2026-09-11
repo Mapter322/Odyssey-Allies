@@ -46,7 +46,7 @@ public class ConstantComponents {
     public static final Component DISBAND_PARTY = Component.translatable("gui.argonauts.disband_party");
     public static final Component DISBAND_PARTY_DESCRIPTION = Component.translatable("gui.argonauts.disband_party.description");
 
-    public static final Component MEMBER_STATUS = Component.translatable("gui.argonauts.member_status");
+    public static final Component ROLE = Component.translatable("gui.argonauts.role");
     public static final Component MEMBER_PERMISSIONS = Component.translatable("gui.argonauts.member_permissions");
     public static final Component MEMBER_ACTIONS = Component.translatable("gui.argonauts.member_actions");
     public static final Component SETTINGS = Component.translatable("gui.argonauts.settings");
