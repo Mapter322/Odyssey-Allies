@@ -4,6 +4,7 @@ import earth.terrarium.argonauts.Argonauts;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.api.teams.party.PartyApi;
 import earth.terrarium.argonauts.client.ArgonautsClient;
+import earth.terrarium.argonauts.client.NotificationManager;
 import earth.terrarium.argonauts.client.screens.chat.ChatScreen;
 import earth.terrarium.argonauts.client.screens.menu.party.PartyMainMenuScreen;
 import earth.terrarium.argonauts.client.screens.menu.guild.GuildMainMenuScreen;
@@ -32,6 +33,7 @@ public class ArgonautsClientNeoForge {
         NeoForge.EVENT_BUS.addListener(ArgonautsClientNeoForge::onRegisterClientCommands);
         NeoForge.EVENT_BUS.addListener(ArgonautsClientNeoForge::onScreenInit);
         NeoForge.EVENT_BUS.addListener(ArgonautsClientNeoForge::onRenderGui);
+        NeoForge.EVENT_BUS.addListener(ArgonautsClientNeoForge::onRenderScreen);
         NeoForge.EVENT_BUS.addListener(ArgonautsClientNeoForge::onMouseClickPre);
         ArgonautsClient.init();
     }
@@ -46,6 +48,10 @@ public class ArgonautsClientNeoForge {
 
     public static void onRenderGui(RenderGuiEvent.Pre event) {
         ArgonautsClient.renderHud(event.getGuiGraphics());
+    }
+
+    public static void onRenderScreen(ScreenEvent.Render.Post event) {
+        NotificationManager.render(event.getGuiGraphics());
     }
 
     public static void onMouseClickPre(ScreenEvent.MouseButtonPressed.Pre event) {

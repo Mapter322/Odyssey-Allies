@@ -101,6 +101,7 @@ public class ArgonautsClient {
 
     public static void renderHud(net.minecraft.client.gui.GuiGraphics graphics) {
         PartyHudRenderer.render(graphics);
+        NotificationManager.render(graphics);
     }
 
     @NotNull
@@ -110,5 +111,6 @@ public class ArgonautsClient {
 
     public static void onPlayerLoggedOut() {
         ChatHandler.clearChannels();
+        NotificationManager.clear();
     }
 }

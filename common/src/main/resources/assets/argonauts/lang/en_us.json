@@ -117,6 +117,7 @@
     "command.argonauts.exception.fake_player_already_in_guild": "This fake player is already in your guild.",
     "command.argonauts.exception.fake_player_not_in_guild": "This fake player is not in your guild.",
     "command.argonauts.exception.guild_does_not_exist": "This guild does not exist.",
+    "command.argonauts.exception.guild_not_empty": "You can't leave a guild that still has members.",
 
     "command.argonauts.exception.already_in_party": "You are already in a party.",
     "command.argonauts.exception.not_in_party": "You are not in a party.",

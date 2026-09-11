@@ -3,6 +3,7 @@ package earth.terrarium.argonauts.client.fabric;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.api.teams.party.PartyApi;
 import earth.terrarium.argonauts.client.ArgonautsClient;
+import earth.terrarium.argonauts.client.NotificationManager;
 import earth.terrarium.argonauts.client.screens.chat.ChatScreen;
 import earth.terrarium.argonauts.client.screens.menu.party.PartyMainMenuScreen;
 import earth.terrarium.argonauts.client.screens.menu.guild.GuildMainMenuScreen;
@@ -31,9 +32,12 @@ public class ArgonautsClientFabric implements ClientModInitializer {
         KeyBindingHelper.registerKeyBinding(ArgonautsClient.KEY_OPEN_GUILD_CHAT);
         registerClientCommands();
 
-        ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) ->
-            ArgonautsClient.setupInventoryButtons(screen)
-        );
+        ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
+            ArgonautsClient.setupInventoryButtons(screen);
+            ScreenEvents.afterRender(screen).register((ignored, graphics, mouseX, mouseY, tickDelta) ->
+                NotificationManager.render(graphics)
+            );
+        });
     }
 
     // Fabric is really dumb and doesn't merge commands, so the head node needs to have a different name than the server so the `c` was added.
