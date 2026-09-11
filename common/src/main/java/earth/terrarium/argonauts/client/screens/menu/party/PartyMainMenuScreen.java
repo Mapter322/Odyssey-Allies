@@ -5,6 +5,7 @@ import com.teamresourceful.resourcefullib.client.utils.ScreenUtils;
 import com.teamresourceful.resourcefullib.common.color.Color;
 import earth.terrarium.argonauts.api.teams.Team;
 import earth.terrarium.argonauts.api.teams.party.PartyApi;
+import earth.terrarium.argonauts.client.Modals;
 import earth.terrarium.argonauts.client.screens.BaseScreen;
 import earth.terrarium.argonauts.client.screens.chat.ChatScreen;
 import earth.terrarium.argonauts.client.screens.members.MembersScreen;
@@ -120,10 +121,19 @@ public class PartyMainMenuScreen extends BaseScreen {
         list.add(new DividerWidget());
 
         if (this.isOwner) {
-            list.add(dangerButton(width, ConstantComponents.DISBAND_PARTY, () -> sendCommand("argonauts party disband")));
+            list.add(dangerButton(width, ConstantComponents.DISBAND_PARTY, this::confirmDisbandParty));
         } else {
             list.add(dangerButton(width, ConstantComponents.LEAVE_PARTY, () -> sendCommand("argonauts party leave")));
         }
+    }
+
+    private void confirmDisbandParty() {
+        Modals.confirm(
+            ConstantComponents.DISBAND_PARTY,
+            ConstantComponents.DISBAND_PARTY_DESCRIPTION,
+            ConstantComponents.DISBAND_PARTY,
+            () -> sendCommand("argonauts party disband")
+        );
     }
 
     private TextWidget nameHeader() {
@@ -232,10 +242,18 @@ public class PartyMainMenuScreen extends BaseScreen {
     }
 
     public static void open() {
-        PartyApi.API.getPlayerParty(Minecraft.getInstance().player).ifPresent(party ->
+        var party = PartyApi.API.getPlayerParty(Minecraft.getInstance().player);
+        if (party.isPresent()) {
             Minecraft.getInstance().tell(() ->
-                Minecraft.getInstance().setScreen(new PartyMainMenuScreen(party))
-            )
-        );
+                Minecraft.getInstance().setScreen(new PartyMainMenuScreen(party.get()))
+            );
+        } else {
+            Modals.confirm(
+                ConstantComponents.CREATE_PARTY,
+                ConstantComponents.CREATE_PARTY_DESCRIPTION,
+                ConstantComponents.CREATE_PARTY,
+                () -> ScreenUtils.sendCommand("argonauts party create")
+            );
+        }
     }
 }

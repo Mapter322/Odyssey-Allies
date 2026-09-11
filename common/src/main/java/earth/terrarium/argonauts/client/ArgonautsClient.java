@@ -2,8 +2,6 @@ package earth.terrarium.argonauts.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import earth.terrarium.argonauts.Argonauts;
-import earth.terrarium.argonauts.api.teams.guild.GuildApi;
-import earth.terrarium.argonauts.api.teams.party.PartyApi;
 import earth.terrarium.argonauts.client.screens.chat.ChatScreen;
 import earth.terrarium.argonauts.client.screens.menu.guild.GuildMainMenuScreen;
 import earth.terrarium.argonauts.client.screens.menu.party.PartyMainMenuScreen;
@@ -89,19 +87,11 @@ public class ArgonautsClient {
     }
 
     private static void openGuildMenu() {
-        GuildApi.API.getPlayerGuild(Minecraft.getInstance().player).ifPresent(guild ->
-            Minecraft.getInstance().tell(() ->
-                Minecraft.getInstance().setScreen(new GuildMainMenuScreen(guild))
-            )
-        );
+        GuildMainMenuScreen.open();
     }
 
     private static void openPartyMenu() {
-        PartyApi.API.getPlayerParty(Minecraft.getInstance().player).ifPresent(party ->
-            Minecraft.getInstance().tell(() ->
-                Minecraft.getInstance().setScreen(new PartyMainMenuScreen(party))
-            )
-        );
+        PartyMainMenuScreen.open();
     }
 
     public static void clientTick() {

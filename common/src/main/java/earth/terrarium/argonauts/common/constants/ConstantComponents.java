@@ -34,10 +34,17 @@ public class ConstantComponents {
     public static final Component PARTY_MENU_TITLE = Component.translatable("gui.argonauts.party_info.title");
 
     public static final Component CLOSE = Component.translatable("gui.argonauts.close");
+    public static final Component CREATE_GUILD = Component.translatable("gui.argonauts.create_guild");
+    public static final Component CREATE_GUILD_DESCRIPTION = Component.translatable("gui.argonauts.create_guild.description");
+    public static final Component CREATE_GUILD_PLACEHOLDER = Component.translatable("gui.argonauts.create_guild.placeholder");
+    public static final Component CREATE_PARTY = Component.translatable("gui.argonauts.create_party");
+    public static final Component CREATE_PARTY_DESCRIPTION = Component.translatable("gui.argonauts.create_party.description");
     public static final Component LEAVE_GUILD = Component.translatable("gui.argonauts.leave_guild");
     public static final Component DISBAND_GUILD = Component.translatable("gui.argonauts.disband_guild");
+    public static final Component DISBAND_GUILD_DESCRIPTION = Component.translatable("gui.argonauts.disband_guild.description");
     public static final Component LEAVE_PARTY = Component.translatable("gui.argonauts.leave_party");
     public static final Component DISBAND_PARTY = Component.translatable("gui.argonauts.disband_party");
+    public static final Component DISBAND_PARTY_DESCRIPTION = Component.translatable("gui.argonauts.disband_party.description");
 
     public static final Component MEMBER_STATUS = Component.translatable("gui.argonauts.member_status");
     public static final Component MEMBER_PERMISSIONS = Component.translatable("gui.argonauts.member_permissions");

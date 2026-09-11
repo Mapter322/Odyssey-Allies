@@ -5,6 +5,7 @@ import com.teamresourceful.resourcefullib.client.utils.ScreenUtils;
 import com.teamresourceful.resourcefullib.common.color.Color;
 import earth.terrarium.argonauts.api.teams.Team;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
+import earth.terrarium.argonauts.client.Modals;
 import earth.terrarium.argonauts.client.screens.BaseScreen;
 import earth.terrarium.argonauts.client.screens.chat.ChatScreen;
 import earth.terrarium.argonauts.client.screens.members.MembersScreen;
@@ -127,10 +128,19 @@ public class GuildMainMenuScreen extends BaseScreen {
         list.add(new DividerWidget());
 
         if (this.isOwner) {
-            list.add(dangerButton(width, ConstantComponents.DISBAND_GUILD, () -> sendCommand("argonauts guild disband")));
+            list.add(dangerButton(width, ConstantComponents.DISBAND_GUILD, this::confirmDisbandGuild));
         } else {
             list.add(dangerButton(width, ConstantComponents.LEAVE_GUILD, () -> sendCommand("argonauts guild leave")));
         }
+    }
+
+    private void confirmDisbandGuild() {
+        Modals.confirm(
+            ConstantComponents.DISBAND_GUILD,
+            ConstantComponents.DISBAND_GUILD_DESCRIPTION,
+            ConstantComponents.DISBAND_GUILD,
+            () -> sendCommand("argonauts guild disband")
+        );
     }
 
     private Button navButton(int width, Component text, Runnable action) {
@@ -297,10 +307,21 @@ public class GuildMainMenuScreen extends BaseScreen {
     }
 
     public static void open() {
-        GuildApi.API.getPlayerGuild(Minecraft.getInstance().player).ifPresent(guild ->
+        var guild = GuildApi.API.getPlayerGuild(Minecraft.getInstance().player);
+        if (guild.isPresent()) {
             Minecraft.getInstance().tell(() ->
-                Minecraft.getInstance().setScreen(new GuildMainMenuScreen(guild))
-            )
-        );
+                Minecraft.getInstance().setScreen(new GuildMainMenuScreen(guild.get()))
+            );
+        } else {
+            Modals.input(
+                ConstantComponents.CREATE_GUILD,
+                ConstantComponents.CREATE_GUILD_DESCRIPTION,
+                ConstantComponents.CREATE_GUILD_PLACEHOLDER,
+                Settings.MAX_NAME_LENGTH,
+                ConstantComponents.CREATE_GUILD,
+                name -> !name.isBlank() && name.length() <= Settings.MAX_NAME_LENGTH,
+                name -> ScreenUtils.sendCommand("argonauts guild create " + name)
+            );
+        }
     }
 }

@@ -149,11 +149,7 @@ public class ArgonautsClientNeoForge {
         event.getDispatcher().register(Commands.literal("argonauts")
             .then(Commands.literal("guild")
                 .executes(context -> {
-                    GuildApi.API.getPlayerGuild(Minecraft.getInstance().player).ifPresent(guild ->
-                        Minecraft.getInstance().tell(() ->
-                            Minecraft.getInstance().setScreen(new GuildMainMenuScreen(guild))
-                        )
-                    );
+                    GuildMainMenuScreen.open();
                     return 0;
                 })
             )
@@ -161,11 +157,7 @@ public class ArgonautsClientNeoForge {
         event.getDispatcher().register(Commands.literal("argonauts")
             .then(Commands.literal("party")
                 .executes(context -> {
-                    PartyApi.API.getPlayerParty(Minecraft.getInstance().player).ifPresent(party ->
-                        Minecraft.getInstance().tell(() ->
-                            Minecraft.getInstance().setScreen(new PartyMainMenuScreen(party))
-                        )
-                    );
+                    PartyMainMenuScreen.open();
                     return 0;
                 })
             )

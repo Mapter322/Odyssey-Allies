@@ -9,8 +9,8 @@ import earth.terrarium.argonauts.client.screens.menu.guild.GuildMainMenuScreen;
 import earth.terrarium.argonauts.client.screens.members.MembersScreen;
 import earth.terrarium.argonauts.client.screens.settings.SettingsScreen;
 import earth.terrarium.argonauts.common.commands.TeamExceptions;
+
 import net.fabricmc.api.ClientModInitializer;
-import net.minecraft.client.Minecraft;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -122,11 +122,7 @@ public class ArgonautsClientFabric implements ClientModInitializer {
             dispatcher.register(ClientCommandManager.literal("argonauts")
                 .then(ClientCommandManager.literal("guildc")
                     .executes(context -> {
-                        GuildApi.API.getPlayerGuild(context.getSource().getPlayer()).ifPresent(guild ->
-                            Minecraft.getInstance().tell(() ->
-                                Minecraft.getInstance().setScreen(new GuildMainMenuScreen(guild))
-                            )
-                        );
+                        GuildMainMenuScreen.open();
                         return 0;
                     })
                 )
@@ -134,11 +130,7 @@ public class ArgonautsClientFabric implements ClientModInitializer {
             dispatcher.register(ClientCommandManager.literal("argonauts")
                 .then(ClientCommandManager.literal("partyc")
                     .executes(context -> {
-                        PartyApi.API.getPlayerParty(context.getSource().getPlayer()).ifPresent(party ->
-                            Minecraft.getInstance().tell(() ->
-                                Minecraft.getInstance().setScreen(new PartyMainMenuScreen(party))
-                            )
-                        );
+                        PartyMainMenuScreen.open();
                         return 0;
                     })
                 )
