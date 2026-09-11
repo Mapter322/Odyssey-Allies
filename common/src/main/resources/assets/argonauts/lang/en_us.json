@@ -22,6 +22,7 @@
     "permission.argonauts.managePermissions.description": "Allows the member to modify member permissions",
     "permission.argonauts.teleport.description": "Allows the member to use teleport commands",
     "permission.argonauts.teleportMembers.description": "Allows the member to teleport other members",
+    "gui.argonauts.member_claim_permissions": "Claim Permissions",
 
     "setting.argonauts.displayName": "Display Name",
     "setting.argonauts.color": "Color",

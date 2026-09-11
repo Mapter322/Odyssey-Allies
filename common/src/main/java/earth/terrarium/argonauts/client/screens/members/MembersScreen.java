@@ -9,12 +9,16 @@ import earth.terrarium.argonauts.api.teams.Team;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.api.teams.party.PartyApi;
 import earth.terrarium.argonauts.api.teams.permissions.MemberPermissionsApi;
+import earth.terrarium.argonauts.api.teams.settings.MemberSetting;
+import earth.terrarium.argonauts.api.teams.settings.MemberSettingState;
+import earth.terrarium.argonauts.api.teams.settings.MemberSettingsApi;
 import earth.terrarium.argonauts.client.screens.BaseScreen;
 import earth.terrarium.argonauts.client.widget.LabelledEntry;
 import earth.terrarium.argonauts.common.constants.ConstantComponents;
 import earth.terrarium.olympus.client.components.Widgets;
 import earth.terrarium.olympus.client.components.base.ListWidget;
 import earth.terrarium.olympus.client.components.buttons.Button;
+import earth.terrarium.olympus.client.components.compound.radio.RadioState;
 import earth.terrarium.olympus.client.components.renderers.WidgetRenderers;
 import earth.terrarium.olympus.client.components.string.TextWidget;
 import earth.terrarium.olympus.client.constants.MinecraftColors;
@@ -33,6 +37,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import com.teamresourceful.resourcefullib.common.utils.TriState;
 
 public class MembersScreen extends BaseScreen {
 
@@ -57,6 +62,8 @@ public class MembersScreen extends BaseScreen {
     private final Team team;
     private final Set<String> permissions;
     private final List<MemberEntry> members = new ArrayList<>();
+    private final Map<String, RadioState<TriState>> memberSettingStates = new HashMap<>();
+    private final Map<String, MemberSettingState> sentMemberSettingStates = new HashMap<>();
 
     private final UUID selfId;
 
@@ -213,12 +220,15 @@ public class MembersScreen extends BaseScreen {
             button.withCallback(() -> {
                 this.selectedProfile = entry.profile();
                 this.selectedMember = this.team.members().get(entry.profile().getId());
+                if (this.team.type().equals("guild")) MemberSettingsApi.API.request(this.team, entry.profile().getId());
                 rebuildWidgets();
             });
         });
     }
 
     private void buildDetails(ListWidget list, GameProfile profile, Member member, int width) {
+        this.memberSettingStates.clear();
+        this.sentMemberSettingStates.clear();
         list.add(statusRow(member));
 
         list.add(new DividerWidget());
@@ -228,6 +238,15 @@ public class MembersScreen extends BaseScreen {
         this.permissions.forEach(permission ->
             list.add(permissionRow(permission, profile, member, canEditPermissions))
         );
+
+        if (this.team.type().equals("guild")) {
+            List<MemberSetting> settings = MemberSettingsApi.API.getSettings(this.team);
+            if (!settings.isEmpty()) {
+                list.add(new DividerWidget());
+                list.add(section(Component.translatable("gui.argonauts.member_claim_permissions")));
+                settings.forEach(setting -> list.add(memberSettingRow(setting, profile, canEditPermissions)));
+            }
+        }
 
         list.add(new DividerWidget());
         list.add(section(ConstantComponents.MEMBER_ACTIONS));
@@ -270,6 +289,50 @@ public class MembersScreen extends BaseScreen {
         return new LabelledEntry(this.font, title, toggle)
             .setLockedWidth()
             .setEntryYOffset(-2);
+    }
+
+    private LabelledEntry memberSettingRow(MemberSetting setting, GameProfile profile, boolean canEdit) {
+        MemberSettingState current = MemberSettingsApi.API.getState(this.team, profile.getId(), setting.id());
+        TriState value = switch (current) {
+            case ALLOW -> TriState.TRUE;
+            case DENY -> TriState.FALSE;
+            case INHERIT -> TriState.UNDEFINED;
+        };
+        RadioState<TriState> state = RadioState.of(value, switch (value) {
+            case TRUE -> 0;
+            case UNDEFINED -> 1;
+            case FALSE -> 2;
+        });
+        this.memberSettingStates.put(setting.id(), state);
+        this.sentMemberSettingStates.put(setting.id(), current);
+        var toggle = Widgets.tristate(state);
+        toggle.withTooltip(setting.description());
+        toggle.active = canEdit;
+        return new LabelledEntry(this.font, setting.name(), toggle)
+            .setLockedWidth()
+            .setEntryYOffset(-2);
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (this.selectedProfile == null || !this.team.type().equals("guild")) return;
+        this.memberSettingStates.forEach((id, state) -> {
+            MemberSettingState value = switch (state.get()) {
+                case TRUE -> MemberSettingState.ALLOW;
+                case FALSE -> MemberSettingState.DENY;
+                case UNDEFINED -> MemberSettingState.INHERIT;
+            };
+            if (value != this.sentMemberSettingStates.get(id)) {
+                MemberSettingsApi.API.setState(this.team, this.selectedProfile.getId(), id, value);
+                this.sentMemberSettingStates.put(id, value);
+            }
+        });
+    }
+
+    public void refreshMemberSettings() {
+        this.clearWidgets();
+        this.init();
     }
 
     private Button removeButton(GameProfile profile, int width) {
