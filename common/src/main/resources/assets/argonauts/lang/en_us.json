@@ -155,6 +155,7 @@
     "gui.argonauts.info.members_button": "Members",
     "gui.argonauts.info.chat_button": "Chat",
     "gui.argonauts.info.settings_button": "Settings",
+    "gui.argonauts.info.claim_map_button": "Claim Map",
 
     "gui.argonauts.menu.section.general": "General",
     "gui.argonauts.menu.section.motd": "Message of the Day",

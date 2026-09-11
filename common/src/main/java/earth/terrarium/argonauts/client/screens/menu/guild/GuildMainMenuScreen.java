@@ -14,6 +14,7 @@ import earth.terrarium.argonauts.client.widget.LabelledEntry;
 import earth.terrarium.argonauts.common.constants.ConstantComponents;
 import earth.terrarium.argonauts.common.settings.Settings;
 import earth.terrarium.argonauts.common.utils.Config;
+import earth.terrarium.cadmus.client.CadmusClient;
 import earth.terrarium.olympus.client.components.Widgets;
 import earth.terrarium.olympus.client.components.base.ListWidget;
 import earth.terrarium.olympus.client.components.buttons.Button;
@@ -124,6 +125,7 @@ public class GuildMainMenuScreen extends BaseScreen {
         list.add(navButton(width, Component.translatable("gui.argonauts.info.members_button"), MembersScreen::openGuild));
         list.add(navButton(width, Component.translatable("gui.argonauts.info.chat_button"), ChatScreen::openGuild));
         list.add(navButton(width, Component.translatable("gui.argonauts.info.settings_button"), SettingsScreen::openGuild));
+        list.add(navButton(width, Component.translatable("gui.argonauts.info.claim_map_button"), () -> CadmusClient.openClaimMap(this)));
 
         list.add(new DividerWidget());
 
