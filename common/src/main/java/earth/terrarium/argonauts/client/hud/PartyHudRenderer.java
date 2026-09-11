@@ -23,8 +23,18 @@ import java.util.UUID;
 
 public final class PartyHudRenderer {
 
-    private static final int PANEL_X = 6;
-    private static final int PANEL_Y = 6;
+    private static final boolean XAERO_MINIMAP;
+    static {
+        boolean found = false;
+        try {
+            Class.forName("xaero.common.HudMod");
+            found = true;
+        } catch (ClassNotFoundException ignored) {
+        }
+        XAERO_MINIMAP = found;
+    }
+
+    private static final int PANEL_MARGIN = 6;
     private static final int PANEL_WIDTH = 122;
     private static final int ENTRY_GAP = 2;
     private static final int FACE_SIZE = 16;
@@ -70,12 +80,12 @@ public final class PartyHudRenderer {
 
         float scale = hudScale(minecraft);
         if (scale == 1.0F) {
-            renderParty(graphics, minecraft, localPlayer, party);
+            renderParty(graphics, minecraft, localPlayer, party, 1.0F);
             return;
         }
         graphics.pose().pushPose();
         graphics.pose().scale(scale, scale, 1.0F);
-        renderParty(graphics, minecraft, localPlayer, party);
+        renderParty(graphics, minecraft, localPlayer, party, scale);
         graphics.pose().popPose();
     }
 
@@ -86,13 +96,19 @@ public final class PartyHudRenderer {
             : 1.0F;
     }
 
-    private static void renderParty(GuiGraphics graphics, Minecraft minecraft, LocalPlayer localPlayer, Party party) {
-        int y = PANEL_Y;
+    private static void renderParty(GuiGraphics graphics, Minecraft minecraft, LocalPlayer localPlayer, Party party, float scale) {
+        Window window = minecraft.getWindow();
+        int screenWidth = scale == 1.0F
+            ? window.getGuiScaledWidth()
+            : (int) (window.getGuiScaledWidth() * window.getGuiScale());
+        int x = XAERO_MINIMAP ? screenWidth - PANEL_WIDTH - PANEL_MARGIN : PANEL_MARGIN;
+        int y = PANEL_MARGIN;
+
         for (Map.Entry<UUID, Member> entry : party.members().entrySet()) {
             if (entry.getKey().equals(localPlayer.getUUID()) || !entry.getValue().status().isMember()) {
                 continue;
             }
-            y += renderMember(graphics, minecraft, entry.getKey(), entry.getValue(), PANEL_X, y) + ENTRY_GAP;
+            y += renderMember(graphics, minecraft, entry.getKey(), entry.getValue(), x, y) + ENTRY_GAP;
         }
     }
 
