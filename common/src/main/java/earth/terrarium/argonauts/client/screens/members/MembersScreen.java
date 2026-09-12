@@ -6,7 +6,9 @@ import com.teamresourceful.resourcefullib.client.utils.ScreenUtils;
 import earth.terrarium.argonauts.client.Modals;
 import earth.terrarium.argonauts.api.teams.Member;
 import earth.terrarium.argonauts.api.teams.Team;
+import earth.terrarium.argonauts.api.teams.guild.Guild;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
+import earth.terrarium.argonauts.api.teams.guild.Role;
 import earth.terrarium.argonauts.api.teams.party.PartyApi;
 import earth.terrarium.argonauts.api.teams.permissions.MemberPermissionsApi;
 import earth.terrarium.argonauts.api.teams.settings.MemberSetting;
@@ -15,10 +17,12 @@ import earth.terrarium.argonauts.api.teams.settings.MemberSettingsApi;
 import earth.terrarium.argonauts.client.screens.BaseScreen;
 import earth.terrarium.argonauts.client.widget.LabelledEntry;
 import earth.terrarium.argonauts.common.constants.ConstantComponents;
+import earth.terrarium.argonauts.common.guild.GuildRoleDefaults;
 import earth.terrarium.olympus.client.components.Widgets;
 import earth.terrarium.olympus.client.components.base.ListWidget;
 import earth.terrarium.olympus.client.components.buttons.Button;
 import earth.terrarium.olympus.client.components.compound.radio.RadioState;
+import earth.terrarium.olympus.client.components.dropdown.DropdownState;
 import earth.terrarium.olympus.client.components.renderers.TristateRenderers;
 import earth.terrarium.olympus.client.components.renderers.WidgetRenderers;
 import earth.terrarium.olympus.client.components.string.TextWidget;
@@ -61,8 +65,11 @@ public class MembersScreen extends BaseScreen {
     private static final int TRISTATE_H = 14;
     private static final int BUTTON_HEIGHT = 20;
     private static final int INVITE_LIFT = 2;
+    private static final int ROLE_DROPDOWN_W = 90;
+    private static final int ROLE_DROPDOWN_H = 14;
 
     private final Team team;
+    private final Guild guild;
     private final Set<String> permissions;
     private final List<MemberEntry> members = new ArrayList<>();
     private final Map<String, RadioState<TriState>> memberSettingStates = new HashMap<>();
@@ -82,6 +89,7 @@ public class MembersScreen extends BaseScreen {
     public MembersScreen(Component displayName, Team team, Set<String> permissions) {
         super(displayName, BASE_WIDTH, BASE_HEIGHT);
         this.team = team;
+        this.guild = team instanceof Guild instance ? instance : null;
         this.permissions = permissions;
         this.selfId = Minecraft.getInstance().getGameProfile().getId();
 
@@ -248,7 +256,7 @@ public class MembersScreen extends BaseScreen {
     private void buildDetails(ListWidget list, GameProfile profile, Member member, int width) {
         this.memberSettingStates.clear();
         this.sentMemberSettingStates.clear();
-        list.add(roleRow(member));
+        list.add(roleRow(profile, member));
 
         list.add(section(ConstantComponents.MEMBER_PERMISSIONS));
 
@@ -269,14 +277,47 @@ public class MembersScreen extends BaseScreen {
         list.add(removeButton(profile, width));
     }
 
-    private LabelledEntry roleRow(Member member) {
-        TextWidget value = Widgets.text(member.status().getDisplayName())
-            .withColor(MinecraftColors.WHITE)
-            .withRightAlignment();
-        LabelledEntry entry = new LabelledEntry(this.font, ConstantComponents.ROLE, value);
-        entry.setDrawDivider(true);
-        entry.setDividerYOffset(-1);
-        return entry;
+    private LabelledEntry roleRow(GameProfile profile, Member member) {
+        if (this.guild == null || !member.status().isMember() || member.isOwner()) {
+            TextWidget value = Widgets.text(member.status().getDisplayName())
+                .withColor(MinecraftColors.WHITE)
+                .withRightAlignment();
+            LabelledEntry entry = new LabelledEntry(this.font, ConstantComponents.ROLE, value);
+            entry.setDrawDivider(true);
+            entry.setDividerYOffset(-1);
+            return entry;
+        }
+
+        List<String> options = new ArrayList<>();
+        options.add(Role.MEMBER);
+        this.guild.roles().keySet().stream()
+            .filter(id -> !GuildRoleDefaults.isDefaultRole(id))
+            .sorted()
+            .forEach(options::add);
+
+        DropdownState<String> state = DropdownState.of(this.guild.getRoleId(profile.getId()));
+        Button dropdown = Widgets.dropdown(
+            state,
+            options,
+            this::roleName,
+            button -> {
+                button.withSize(ROLE_DROPDOWN_W, ROLE_DROPDOWN_H);
+                if (!this.team.canManagePermissions(this.selfId)) button.asDisabled();
+            },
+            builder -> builder
+                .withSize(ROLE_DROPDOWN_W, 150)
+                .withCallback(role -> ScreenUtils.sendCommand("argonauts guild role assign " + profile.getName() + " " + role))
+        );
+
+        return new LabelledEntry(this.font, ConstantComponents.ROLE, dropdown)
+            .setLockedWidth()
+            .setEntryYOffset(-2)
+            .setDrawDivider(true)
+            .setDividerYOffset(-1);
+    }
+
+    private Component roleName(String roleId) {
+        return Component.translatableWithFallback("gui.argonauts.role." + roleId, roleId);
     }
 
     private LabelledEntry permissionRow(String permission, GameProfile profile, Member member, boolean canEdit) {

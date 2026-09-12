@@ -50,6 +50,7 @@ public class TeamExceptions {
     public static final SimpleCommandExceptionType INVALID_ROLE_NAME = create("command.argonauts.exception.invalid_role_name");
     public static final SimpleCommandExceptionType CANNOT_DELETE_DEFAULT_ROLE = create("command.argonauts.exception.cannot_delete_default_role");
     public static final SimpleCommandExceptionType CANNOT_ASSIGN_ROLE = create("command.argonauts.exception.cannot_assign_role");
+    public static final SimpleCommandExceptionType CANNOT_CHANGE_OWNER_ROLE = create("command.argonauts.exception.cannot_change_owner_role");
     public static final SimpleCommandExceptionType ROLE_CYCLE = create("command.argonauts.exception.role_cycle");
     public static final SimpleCommandExceptionType ROLE_CANNOT_HAVE_PARENT = create("command.argonauts.exception.role_cannot_have_parent");
 

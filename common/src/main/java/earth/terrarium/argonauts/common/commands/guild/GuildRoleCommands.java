@@ -198,6 +198,7 @@ public final class GuildRoleCommands {
         Guild guild = requireGuildAndPermission(source, player);
 
         if (!guild.isMember(target.getUUID())) throw TeamExceptions.PLAYER_NOT_IN_GUILD.create();
+        if (guild.isOwner(target.getUUID())) throw TeamExceptions.CANNOT_CHANGE_OWNER_ROLE.create();
         if (!guild.roles().containsKey(roleId)) throw TeamExceptions.ROLE_NOT_FOUND.create();
         if (roleId.equals(Role.ALL) || roleId.equals(Role.ALLY)) throw TeamExceptions.CANNOT_ASSIGN_ROLE.create();
 

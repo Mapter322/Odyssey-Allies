@@ -174,6 +174,7 @@
     "command.argonauts.exception.invalid_role_name": "Invalid role name, use up to 24 characters: a-z, 0-9, _ and -.",
     "command.argonauts.exception.cannot_delete_default_role": "Default roles cannot be deleted.",
     "command.argonauts.exception.cannot_assign_role": "This role cannot be assigned to members.",
+    "command.argonauts.exception.cannot_change_owner_role": "The owner's role cannot be changed.",
     "command.argonauts.exception.role_cycle": "This parent would create a role cycle.",
     "command.argonauts.exception.role_cannot_have_parent": "This role cannot have a parent.",
 

@@ -10,6 +10,8 @@ import earth.terrarium.argonauts.Argonauts;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.api.teams.guild.GuildRoleApi;
 import earth.terrarium.argonauts.client.ArgonautsClient;
+import earth.terrarium.argonauts.client.screens.members.MembersScreen;
+import net.minecraft.client.Minecraft;
 
 import java.util.UUID;
 
@@ -43,8 +45,11 @@ public record ClientboundModifyGuildMemberRolePacket(
 
         @Override
         public Runnable handle(ClientboundModifyGuildMemberRolePacket packet) {
-            return () -> GuildApi.API.get(ArgonautsClient.level(), packet.id()).ifPresent(guild ->
-                GuildRoleApi.API.modifyMemberRole(ArgonautsClient.level(), guild, packet.playerId(), packet.roleId()));
+            return () -> {
+                GuildApi.API.get(ArgonautsClient.level(), packet.id()).ifPresent(guild ->
+                    GuildRoleApi.API.modifyMemberRole(ArgonautsClient.level(), guild, packet.playerId(), packet.roleId()));
+                if (Minecraft.getInstance().screen instanceof MembersScreen screen) screen.refreshMemberSettings();
+            };
         }
     }
 }
