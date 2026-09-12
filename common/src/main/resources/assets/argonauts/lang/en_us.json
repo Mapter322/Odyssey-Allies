@@ -112,6 +112,19 @@
     "command.argonauts.role.permission": "§7Set role §b%s§7 permission §b%s§7 to §b%s",
     "command.argonauts.role.setting": "§7Set role §b%s§7 setting §b%s§7 to §b%s",
 
+    "command.argonauts.role.info.name": "§7Role: §b%s",
+    "command.argonauts.role.info.parent": "§7Parent: §b%s",
+    "command.argonauts.role.info.members": "§7Members (§b%s§7): §b%s",
+    "command.argonauts.role.info.guild_permissions": "§6Guild Permissions",
+    "command.argonauts.role.info.claim_permissions": "§6Claim Permissions",
+    "command.argonauts.role.info.entry": "§b%s§7: §6%s",
+    "command.argonauts.role.info.none": "§7None",
+
+    "command.argonauts.member.info.name": "§b%s §6[%s]",
+    "command.argonauts.member.info.guild_permissions": "§6Guild Permissions",
+    "command.argonauts.member.info.claim_permissions": "§6Claim Permissions",
+    "command.argonauts.member.info.entry": "§b%s§7: §6%s",
+
     "command.argonauts.setting.set": "§7Set setting§b %s§7 from §6%s§7 to §6%s",
     "command.argonauts.setting.get": "§b%s§7 is set to §b%s",
 

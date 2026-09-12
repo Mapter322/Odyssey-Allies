@@ -22,12 +22,16 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.GameProfileCache;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public final class GuildRoleCommands {
@@ -100,6 +104,15 @@ public final class GuildRoleCommands {
                                     return 1;
                                 })
                             )
+                        )
+                    )
+                    .then(Commands.literal("info")
+                        .then(Commands.argument("role", StringArgumentType.word())
+                            .suggests(ROLE_SUGGESTION_PROVIDER)
+                            .executes(context -> {
+                                info(context.getSource(), roleId(context));
+                                return 1;
+                            })
                         )
                     )
                     .then(Commands.literal("permission")
@@ -227,6 +240,77 @@ public final class GuildRoleCommands {
             setting.name(),
             TeamArguments.triStateName(value)
         ), false);
+    }
+
+    private static void info(CommandSourceStack source, String roleId) throws CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
+        Guild guild = requireGuildAndPermission(source, player);
+
+        Role role = guild.roles().get(roleId);
+        if (role == null) throw TeamExceptions.ROLE_NOT_FOUND.create();
+
+        source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.role.info.name",
+            Component.translatableWithFallback("gui.argonauts.role." + roleId, roleId)), false);
+        source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.role.info.parent",
+            parentChain(guild, role)), false);
+
+        GameProfileCache cache = source.getServer().getProfileCache();
+        List<String> members = new ArrayList<>();
+        guild.members().forEach((uuid, member) -> {
+            if (!guild.getRoleId(uuid).equals(roleId)) return;
+            if (cache != null) {
+                cache.get(uuid).ifPresent(profile -> members.add(profile.getName()));
+            } else {
+                members.add(uuid.toString().substring(0, 8));
+            }
+        });
+        members.sort(String::compareTo);
+        String memberList = members.isEmpty() ? "none" : String.join(", ", members);
+        source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.role.info.members", members.size(), memberList), false);
+
+        source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.role.info.guild_permissions"), false);
+        List<String> permissions = new ArrayList<>(MemberPermissionsApi.API.getGuildPermissions().keySet());
+        permissions.sort(String::compareTo);
+        boolean anyPermission = false;
+        for (String permission : permissions) {
+            TriState state = role.override(permission);
+            if (state == TriState.UNDEFINED) continue;
+            anyPermission = true;
+            source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.role.info.entry",
+                MemberPermissionsApi.API.getPermissionName(permission), TeamArguments.triStateName(state)), false);
+        }
+        if (!anyPermission) {
+            source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.role.info.none"), false);
+        }
+
+        List<MemberSetting> settings = new ArrayList<>(MemberSettingsApi.API.getSettings(guild));
+        if (!settings.isEmpty()) {
+            settings.sort(java.util.Comparator.comparing(MemberSetting::id));
+            source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.role.info.claim_permissions"), false);
+            boolean anySetting = false;
+            for (MemberSetting setting : settings) {
+                TriState state = role.override(setting.id());
+                if (state == TriState.UNDEFINED) continue;
+                anySetting = true;
+                source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.role.info.entry",
+                    setting.name(), TeamArguments.triStateName(state)), false);
+            }
+            if (!anySetting) {
+                source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.role.info.none"), false);
+            }
+        }
+    }
+
+    private static String parentChain(Guild guild, Role role) {
+        List<String> chain = new ArrayList<>();
+        Set<String> visited = new HashSet<>();
+        String current = role.parent();
+        while (current != null && !current.isEmpty() && visited.add(current)) {
+            chain.add(current);
+            Role parent = guild.roles().get(current);
+            current = parent == null ? "" : parent.parent();
+        }
+        return chain.isEmpty() ? "none" : String.join(" -> ", chain);
     }
 
     private static Guild requireGuildAndPermission(CommandSourceStack source, ServerPlayer player) throws CommandSyntaxException {
