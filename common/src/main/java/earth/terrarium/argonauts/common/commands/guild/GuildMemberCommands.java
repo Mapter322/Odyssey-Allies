@@ -93,7 +93,7 @@ public final class GuildMemberCommands {
             settings.sort(Comparator.comparing(MemberSetting::id));
             source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.member.info.claim_permissions"), false);
             for (MemberSetting setting : settings) {
-                TriState state = guild.getRoleValue(target.getUUID(), setting.id());
+                TriState state = guild.getPermission(target.getUUID(), setting.id());
                 String value = switch (state) {
                     case TRUE -> "allow";
                     case FALSE -> "deny";

@@ -189,6 +189,23 @@ public record Guild(
     }
 
     /**
+     * Resolves the value of a permission for the player, applying personal overrides before the
+     * role chain.
+     *
+     * @param player     the player
+     * @param permission the permission or setting id
+     * @return the resolved value
+     */
+    public TriState getPermission(UUID player, String permission) {
+        Member member = this.members().get(player);
+        if (member != null) {
+            TriState personal = member.permissionOverride(permission);
+            if (personal != TriState.UNDEFINED) return personal;
+        }
+        return this.getRoleValue(player, permission);
+    }
+
+    /**
      * Checks if setting the parent of a role would create a cycle.
      *
      * @param roleId   the role id

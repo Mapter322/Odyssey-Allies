@@ -12,7 +12,6 @@ import earth.terrarium.argonauts.api.teams.guild.Role;
 import earth.terrarium.argonauts.api.teams.party.PartyApi;
 import earth.terrarium.argonauts.api.teams.permissions.MemberPermissionsApi;
 import earth.terrarium.argonauts.api.teams.settings.MemberSetting;
-import earth.terrarium.argonauts.api.teams.settings.MemberSettingState;
 import earth.terrarium.argonauts.api.teams.settings.MemberSettingsApi;
 import earth.terrarium.argonauts.client.screens.BaseScreen;
 import earth.terrarium.argonauts.client.widget.LabelledEntry;
@@ -70,8 +69,6 @@ public class MembersScreen extends BaseScreen {
     private final Guild guild;
     private final Set<String> permissions;
     private final List<MemberEntry> members = new ArrayList<>();
-    private final Map<String, RadioState<TriState>> memberSettingStates = new HashMap<>();
-    private final Map<String, MemberSettingState> sentMemberSettingStates = new HashMap<>();
 
     private final UUID selfId;
 
@@ -245,29 +242,29 @@ public class MembersScreen extends BaseScreen {
             button.withCallback(() -> {
                 this.selectedProfile = entry.profile();
                 this.selectedMember = this.team.members().get(entry.profile().getId());
-                if (this.team.type().equals("guild")) MemberSettingsApi.API.request(this.team, entry.profile().getId());
                 rebuildWidgets();
             });
         });
     }
 
     private void buildDetails(ListWidget list, GameProfile profile, Member member, int width) {
-        this.memberSettingStates.clear();
-        this.sentMemberSettingStates.clear();
         list.add(roleRow(profile, member));
 
         list.add(section(ConstantComponents.MEMBER_PERMISSIONS));
 
         boolean canEditPermissions = member.status().isMember() && team.canManagePermissions(this.selfId) && !team.isOwner(profile.getId());
         this.permissions.forEach(permission ->
-            list.add(permissionRow(permission, profile, member, canEditPermissions))
+            list.add(permissionRow(permission,
+                Component.translatable("permission.argonauts." + permission),
+                Component.translatable("permission.argonauts." + permission + ".description"),
+                profile, member, canEditPermissions))
         );
 
         if (this.team.type().equals("guild")) {
             List<MemberSetting> settings = MemberSettingsApi.API.getSettings(this.team);
             if (!settings.isEmpty()) {
                 list.add(section(Component.translatable("gui.argonauts.member_claim_permissions")));
-                settings.forEach(setting -> list.add(memberSettingRow(setting, profile, canEditPermissions)));
+                settings.forEach(setting -> list.add(permissionRow(setting.id(), setting.name(), setting.description(), profile, member, canEditPermissions)));
             }
         }
 
@@ -318,11 +315,8 @@ public class MembersScreen extends BaseScreen {
         return Component.translatableWithFallback("gui.argonauts.role." + roleId, roleId);
     }
 
-    private LabelledEntry permissionRow(String permission, GameProfile profile, Member member, boolean canEdit) {
-        Component title = Component.translatable("permission.argonauts." + permission);
-        Component description = Component.translatable("permission.argonauts." + permission + ".description");
-
-        TriState value = member.permissionOverride(permission);
+    private LabelledEntry permissionRow(String key, Component title, Component description, GameProfile profile, Member member, boolean canEdit) {
+        TriState value = member.permissionOverride(key);
         RadioState<TriState> state = RadioState.of(value, switch (value) {
             case TRUE -> 0;
             case UNDEFINED -> 1;
@@ -338,7 +332,7 @@ public class MembersScreen extends BaseScreen {
             ))
             .withSize(TRISTATE_W, TRISTATE_H)
             .withCallback(selected -> ScreenUtils.sendCommand("argonauts %s permissions set %s %s %s".formatted(
-                team.type(), permission, profile.getName(), TeamArguments.triStateName(selected)))), layout -> {});
+                team.type(), key, profile.getName(), TeamArguments.triStateName(selected)))), layout -> {});
         toggle.withTooltip(description);
         toggle.active = canEdit;
         return new LabelledEntry(this.font, title, toggle)
@@ -346,55 +340,6 @@ public class MembersScreen extends BaseScreen {
             .setEntryYOffset(-2)
             .setDrawDivider(true)
             .setDividerYOffset(-1);
-    }
-
-    private LabelledEntry memberSettingRow(MemberSetting setting, GameProfile profile, boolean canEdit) {
-        MemberSettingState current = MemberSettingsApi.API.getState(this.team, profile.getId(), setting.id());
-        TriState value = switch (current) {
-            case ALLOW -> TriState.TRUE;
-            case DENY -> TriState.FALSE;
-            case INHERIT -> TriState.UNDEFINED;
-        };
-        RadioState<TriState> state = RadioState.of(value, switch (value) {
-            case TRUE -> 0;
-            case UNDEFINED -> 1;
-            case FALSE -> 2;
-        });
-        this.memberSettingStates.put(setting.id(), state);
-        this.sentMemberSettingStates.put(setting.id(), current);
-        var toggle = Widgets.tristate(state, builder -> builder
-            .withRenderer((option, active) -> WidgetRenderers.layered(
-                WidgetRenderers.sprite(active ? TristateRenderers.getButtonSprites(option) : UIConstants.BUTTON),
-                WidgetRenderers.icon(TristateRenderers.getIcon(option))
-                    .withColor(active ? MinecraftColors.WHITE : TristateRenderers.getColor(option))
-                    .withPaddingBottom(1)
-                    .withCentered(10, 10)
-            ))
-            .withSize(TRISTATE_W, TRISTATE_H), layout -> {});
-        toggle.withTooltip(setting.description());
-        toggle.active = canEdit;
-        return new LabelledEntry(this.font, setting.name(), toggle)
-            .setLockedWidth()
-            .setEntryYOffset(-2)
-            .setDrawDivider(true)
-            .setDividerYOffset(-1);
-    }
-
-    @Override
-    public void tick() {
-        super.tick();
-        if (this.selectedProfile == null || !this.team.type().equals("guild")) return;
-        this.memberSettingStates.forEach((id, state) -> {
-            MemberSettingState value = switch (state.get()) {
-                case TRUE -> MemberSettingState.ALLOW;
-                case FALSE -> MemberSettingState.DENY;
-                case UNDEFINED -> MemberSettingState.INHERIT;
-            };
-            if (value != this.sentMemberSettingStates.get(id)) {
-                MemberSettingsApi.API.setState(this.team, this.selectedProfile.getId(), id, value);
-                this.sentMemberSettingStates.put(id, value);
-            }
-        });
     }
 
     public void refreshMemberSettings() {
