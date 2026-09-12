@@ -28,6 +28,7 @@ public class ConstantComponents {
 
     public static final Component GUILD_CHAT_TITLE = Component.translatable("gui.argonauts.guild_chat.title");
     public static final Component GUILD_MEMBERS_TITLE = Component.translatable("gui.argonauts.guild_members.title");
+    public static final Component GUILD_ROLES_TITLE = Component.translatable("gui.argonauts.guild_roles.title");
     public static final Component GUILD_SETTINGS_TITLE = Component.translatable("gui.argonauts.guild_settings.title");
 
     public static final Component GUILD_MENU_TITLE = Component.translatable("gui.argonauts.guild_info.title");
@@ -47,6 +48,14 @@ public class ConstantComponents {
     public static final Component DISBAND_PARTY_DESCRIPTION = Component.translatable("gui.argonauts.disband_party.description");
 
     public static final Component ROLE = Component.translatable("gui.argonauts.role");
+    public static final Component PARENT = Component.translatable("gui.argonauts.parent");
+    public static final Component ACTIONS = Component.translatable("gui.argonauts.actions");
+    public static final Component SELECT_ROLE = Component.translatable("gui.argonauts.select_role");
+    public static final Component CREATE_ROLE = Component.translatable("gui.argonauts.create_role");
+    public static final Component CREATE_ROLE_DESCRIPTION = Component.translatable("gui.argonauts.create_role.description");
+    public static final Component CREATE_ROLE_PLACEHOLDER = Component.translatable("gui.argonauts.create_role.placeholder");
+    public static final Component DELETE_ROLE = Component.translatable("gui.argonauts.delete_role");
+    public static final Component DELETE_ROLE_DESCRIPTION = Component.translatable("gui.argonauts.delete_role.description");
     public static final Component MEMBER_PERMISSIONS = Component.translatable("gui.argonauts.member_permissions");
     public static final Component MEMBER_ACTIONS = Component.translatable("gui.argonauts.member_actions");
     public static final Component SETTINGS = Component.translatable("gui.argonauts.settings");

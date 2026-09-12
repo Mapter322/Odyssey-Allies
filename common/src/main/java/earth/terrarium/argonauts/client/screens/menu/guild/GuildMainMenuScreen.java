@@ -9,6 +9,7 @@ import earth.terrarium.argonauts.client.Modals;
 import earth.terrarium.argonauts.client.screens.BaseScreen;
 import earth.terrarium.argonauts.client.screens.chat.ChatScreen;
 import earth.terrarium.argonauts.client.screens.members.MembersScreen;
+import earth.terrarium.argonauts.client.screens.roles.RolesScreen;
 import earth.terrarium.argonauts.client.screens.settings.SettingsScreen;
 import earth.terrarium.argonauts.client.widget.LabelledEntry;
 import earth.terrarium.argonauts.common.constants.ConstantComponents;
@@ -123,6 +124,7 @@ public class GuildMainMenuScreen extends BaseScreen {
 
     private void buildButtons(ListWidget list, int width) {
         list.add(navButton(width, Component.translatable("gui.argonauts.info.members_button"), MembersScreen::openGuild));
+        list.add(navButton(width, Component.translatable("gui.argonauts.info.roles_button"), RolesScreen::openGuild));
         list.add(navButton(width, Component.translatable("gui.argonauts.info.chat_button"), ChatScreen::openGuild));
         list.add(navButton(width, Component.translatable("gui.argonauts.info.settings_button"), SettingsScreen::openGuild));
         list.add(navButton(width, Component.translatable("gui.argonauts.info.claim_map_button"), () -> CadmusClient.openClaimMap(this)));
