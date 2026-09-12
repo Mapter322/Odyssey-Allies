@@ -69,6 +69,8 @@ public class GuildSaveData extends SaveHandler {
             Guild guild = new Guild(UUID.fromString(id), members, settings, roles);
             if (guild.roles().isEmpty()) {
                 guild.roles().putAll(GuildRoleDefaults.create(guild));
+            } else if (GuildRoleDefaults.applyMissingDefaults(guild, guild.roles())) {
+                setDirty();
             }
             this.guilds.put(guild.id(), guild);
             members.forEach((memberId, member) -> {
