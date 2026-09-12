@@ -1,15 +1,17 @@
 package earth.terrarium.argonauts.common.commands.guild;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.teamresourceful.resourcefullib.common.utils.TriState;
+import earth.terrarium.argonauts.api.teams.Member;
 import earth.terrarium.argonauts.api.teams.guild.Guild;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.api.teams.permissions.MemberPermissionsApi;
+import earth.terrarium.argonauts.common.commands.TeamArguments;
 import earth.terrarium.argonauts.common.commands.TeamExceptions;
 import earth.terrarium.argonauts.common.commands.TeamSuggestionProviders;
 import earth.terrarium.argonauts.api.util.ModUtils;
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -26,9 +28,11 @@ public final class GuildPermissionCommands {
                             .then(Commands.literal(permission)
                                 .then(Commands.argument("player", EntityArgument.player())
                                     .suggests(TeamSuggestionProviders.CURRENT_GUILD_MEMBERS_SUGGESTION_PROVIDER)
-                                    .then(Commands.argument("value", BoolArgumentType.bool())
+                                    .then(Commands.argument("value", StringArgumentType.word())
+                                        .suggests(TeamArguments.TRI_STATE_SUGGESTION_PROVIDER)
                                         .executes(context -> {
-                                            boolean value = BoolArgumentType.getBool(context, "value");
+                                            TriState value = TeamArguments.parseTriState(StringArgumentType.getString(context, "value"));
+                                            if (value == null) throw TeamExceptions.INVALID_PERMISSION_VALUE.create();
                                             set(context.getSource(), EntityArgument.getPlayer(context, "player"), permission, value);
                                             return 1;
                                         })
@@ -61,7 +65,7 @@ public final class GuildPermissionCommands {
         ));
     }
 
-    private static void set(CommandSourceStack source, ServerPlayer target, String permission, boolean value) throws CommandSyntaxException {
+    private static void set(CommandSourceStack source, ServerPlayer target, String permission, TriState value) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         Guild guild = GuildApi.API.getPlayerGuild(player).orElse(null);
         if (guild == null) throw TeamExceptions.NOT_IN_GUILD.create();
@@ -71,7 +75,7 @@ public final class GuildPermissionCommands {
 
         source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.permissions.set",
             MemberPermissionsApi.API.getPermissionName(permission),
-            value,
+            TeamArguments.triStateName(value),
             target.getName()
         ), false);
     }
@@ -95,12 +99,12 @@ public final class GuildPermissionCommands {
         Guild guild = GuildApi.API.getPlayerGuild(player).orElse(null);
         if (guild == null) throw TeamExceptions.NOT_IN_GUILD.create();
 
-        Object2BooleanMap<String> permissions = guild.getOrCreateMember(target.getUUID()).permissions();
+        Member member = guild.getOrCreateMember(target.getUUID());
 
-        permissions.forEach((permission, value) -> source.sendSuccess(() ->
+        member.permissionOverrides().forEach((permission, value) -> source.sendSuccess(() ->
             ModUtils.translatableWithStyle("command.argonauts.permissions.list",
                 MemberPermissionsApi.API.getPermissionName(permission),
-                value
+                TeamArguments.triStateName(value)
             ), false));
     }
 }

@@ -7,6 +7,7 @@ import earth.terrarium.argonauts.api.teams.MemberStatus;
 import earth.terrarium.argonauts.api.teams.guild.Guild;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.api.teams.settings.Setting;
+import com.teamresourceful.resourcefullib.common.utils.TriState;
 
 import earth.terrarium.argonauts.common.network.NetworkHandler;
 import earth.terrarium.argonauts.common.network.packets.*;
@@ -106,10 +107,12 @@ public class GuildApiImpl implements GuildApi {
     }
 
     @Override
-    public void modifyPermission(Level level, Guild guild, UUID playerId, String permission, boolean value) {
+    public void modifyPermission(Level level, Guild guild, UUID playerId, String permission, TriState value) {
         var data = GuildSaveData.read(level);
-        guild.getOrCreateMember(playerId).setPermission(permission, value);
-        if (guild.members().get(playerId).status().isMember()) {
+        Member member = guild.getOrCreateMember(playerId);
+        member.setPermissionOverride(permission, value);
+        member.permissions().put(permission, value == TriState.TRUE);
+        if (member.status().isMember()) {
             data.guildsByPlayer().put(playerId, guild);
         }
         if (level instanceof ServerLevel serverLevel) {
@@ -117,7 +120,7 @@ public class GuildApiImpl implements GuildApi {
             data.setDirty();
             NetworkHandler.sendToAllClientPlayers(new ClientboundModifyGuildPermissionPacket(guild.id(), playerId, permission, value), serverLevel.getServer());
         }
-        ArgonautsEvents.ModifyGuildMemberEvent.fire(level, guild, playerId, guild.getOrCreateMember(playerId).status());
+        ArgonautsEvents.ModifyGuildMemberEvent.fire(level, guild, playerId, member.status());
     }
 
     @Override

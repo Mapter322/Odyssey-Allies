@@ -6,6 +6,7 @@ import com.teamresourceful.resourcefullib.common.network.Packet;
 import com.teamresourceful.resourcefullib.common.network.base.ClientboundPacketType;
 import com.teamresourceful.resourcefullib.common.network.base.PacketType;
 import com.teamresourceful.resourcefullib.common.network.defaults.CodecPacketType;
+import com.teamresourceful.resourcefullib.common.utils.TriState;
 import earth.terrarium.argonauts.Argonauts;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.client.ArgonautsClient;
@@ -16,7 +17,7 @@ public record ClientboundModifyGuildPermissionPacket(
     UUID id,
     UUID playerId,
     String permission,
-    boolean value
+    TriState value
 ) implements Packet<ClientboundModifyGuildPermissionPacket> {
 
     public static final ClientboundPacketType<ClientboundModifyGuildPermissionPacket> TYPE = new Type();
@@ -36,7 +37,7 @@ public record ClientboundModifyGuildPermissionPacket(
                     ByteCodec.UUID.fieldOf(ClientboundModifyGuildPermissionPacket::id),
                     ByteCodec.UUID.fieldOf(ClientboundModifyGuildPermissionPacket::playerId),
                     ByteCodec.STRING.fieldOf(ClientboundModifyGuildPermissionPacket::permission),
-                    ByteCodec.BOOLEAN.fieldOf(ClientboundModifyGuildPermissionPacket::value),
+                    ByteCodec.ofEnum(TriState.class).fieldOf(ClientboundModifyGuildPermissionPacket::value),
                     ClientboundModifyGuildPermissionPacket::new
                 )
             );

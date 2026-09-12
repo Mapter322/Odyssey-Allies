@@ -3,6 +3,7 @@ package earth.terrarium.argonauts.api.teams.guild;
 import earth.terrarium.argonauts.api.ApiHelper;
 import earth.terrarium.argonauts.api.teams.MemberStatus;
 import earth.terrarium.argonauts.api.teams.settings.Setting;
+import com.teamresourceful.resourcefullib.common.utils.TriState;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
@@ -68,7 +69,7 @@ public interface GuildApi {
      * @param permission the permission
      * @param value      the value
      */
-    void modifyPermission(Level level, Guild guild, UUID playerId, String permission, boolean value);
+    void modifyPermission(Level level, Guild guild, UUID playerId, String permission, TriState value);
 
     /**
      * Modifies the setting of the guild.
