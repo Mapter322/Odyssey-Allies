@@ -7,11 +7,13 @@ import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.api.teams.guild.Role;
 import earth.terrarium.argonauts.client.Modals;
 import earth.terrarium.argonauts.client.screens.BaseScreen;
+import earth.terrarium.argonauts.client.widget.LabelledEntry;
 import earth.terrarium.argonauts.common.constants.ConstantComponents;
 import earth.terrarium.argonauts.common.guild.GuildRoleDefaults;
 import earth.terrarium.olympus.client.components.Widgets;
 import earth.terrarium.olympus.client.components.base.ListWidget;
 import earth.terrarium.olympus.client.components.buttons.Button;
+import earth.terrarium.olympus.client.components.dropdown.DropdownState;
 import earth.terrarium.olympus.client.components.renderers.WidgetRenderers;
 import earth.terrarium.olympus.client.components.string.TextWidget;
 import earth.terrarium.olympus.client.constants.MinecraftColors;
@@ -50,6 +52,8 @@ public class RolesScreen extends BaseScreen {
     private static final int ENTRY_GAP = 3;
     private static final int BUTTON_HEIGHT = 20;
     private static final int CREATE_LIFT = 2;
+    private static final int DROPDOWN_W = 90;
+    private static final int DROPDOWN_H = 14;
 
     private static final Comparator<String> ROLE_ORDER = Comparator
         .comparingInt((String id) -> switch (id) {
@@ -202,8 +206,45 @@ public class RolesScreen extends BaseScreen {
     }
 
     private void buildDetails(ListWidget list, Role role, int width) {
+        list.add(parentRow(role, width));
         list.add(section(ConstantComponents.ACTIONS));
         list.add(deleteButton(role, width));
+    }
+
+    private LabelledEntry parentRow(Role role, int width) {
+        boolean canEdit = this.guild.canManagePermissions(this.selfId) && !role.id().equals(Role.ALL);
+        String current = role.hasParent() ? role.parent() : "none";
+
+        List<String> options = new ArrayList<>();
+        options.add("none");
+        this.guild.roles().keySet().stream()
+            .filter(id -> !id.equals(role.id()) && !this.guild.wouldCreateRoleCycle(role.id(), id))
+            .sorted(ROLE_ORDER)
+            .forEach(options::add);
+
+        DropdownState<String> state = DropdownState.of(current);
+        Button dropdown = Widgets.dropdown(
+            state,
+            options,
+            this::parentName,
+            button -> {
+                button.withSize(DROPDOWN_W, DROPDOWN_H);
+                if (!canEdit) button.asDisabled();
+            },
+            builder -> builder
+                .withSize(DROPDOWN_W, 150)
+                .withCallback(parent -> ScreenUtils.sendCommand("argonauts guild role parent " + role.id() + " " + parent))
+        );
+
+        return new LabelledEntry(this.font, ConstantComponents.PARENT, dropdown)
+            .setLockedWidth()
+            .setEntryYOffset(-2)
+            .setDrawDivider(true)
+            .setDividerYOffset(-1);
+    }
+
+    private Component parentName(String roleId) {
+        return roleId.equals("none") ? Component.translatable("gui.argonauts.none") : roleName(roleId);
     }
 
     private Button deleteButton(Role role, int width) {

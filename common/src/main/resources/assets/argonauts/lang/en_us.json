@@ -225,6 +225,7 @@
     "gui.argonauts.create_role.description": "Enter a name for the new role.",
     "gui.argonauts.create_role.placeholder": "Role name",
     "gui.argonauts.parent": "Parent",
+    "gui.argonauts.none": "None",
     "gui.argonauts.delete_role": "Delete Role",
     "gui.argonauts.delete_role.description": "Are you sure you want to delete this role? Members with this role will be moved to the member role.",
     "gui.argonauts.actions": "Actions",
