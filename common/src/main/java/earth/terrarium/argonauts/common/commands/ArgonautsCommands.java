@@ -21,6 +21,7 @@ public class ArgonautsCommands {
         GuildLeaveCommand.register(dispatcher);
         GuildMemberCommands.register(dispatcher);
         GuildPermissionCommands.register(dispatcher);
+        GuildRoleCommands.register(dispatcher);
         if (Config.teleportEnabled) {
             GuildTpCommand.register(dispatcher);
             GuildHeadquartersCommand.register(dispatcher);

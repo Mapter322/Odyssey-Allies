@@ -9,6 +9,10 @@
     "team.argonauts.member_status.allied": "§bAllied",
     "team.argonauts.member_status.fake_player": "§cFake Player",
 
+    "gui.argonauts.role.all": "All",
+    "gui.argonauts.role.member": "Member",
+    "gui.argonauts.role.ally": "Ally",
+
     "permission.argonauts.operator": "Operator",
     "permission.argonauts.manageMembers": "Manage Members",
     "permission.argonauts.manageSettings": "Manage Settings",
@@ -101,6 +105,13 @@
     "command.argonauts.permissions.get": "§7Permissions §b%s§7 is set to §b%s§7 for §6%s",
     "command.argonauts.permissions.list": "§b%s: §6%s",
 
+    "command.argonauts.role.create": "§7Created role §b%s",
+    "command.argonauts.role.delete": "§7Deleted role §b%s",
+    "command.argonauts.role.parent": "§7Role §b%s§7 now inherits from §b%s",
+    "command.argonauts.role.assign": "§7Assigned role §b%s§7 to §6%s",
+    "command.argonauts.role.permission": "§7Set role §b%s§7 permission §b%s§7 to §b%s",
+    "command.argonauts.role.setting": "§7Set role §b%s§7 setting §b%s§7 to §b%s",
+
     "command.argonauts.setting.set": "§7Set setting§b %s§7 from §6%s§7 to §6%s",
     "command.argonauts.setting.get": "§b%s§7 is set to §b%s",
 
@@ -141,6 +152,17 @@
     "command.argonauts.exception.no_permission_create_party": "You don't have permission to create a party.",
     "command.argonauts.exception.passive_teleport_disabled": "Passive teleport is disabled.",
     "command.argonauts.exception.name_too_long": "The name must be at most 32 characters long.",
+
+    "command.argonauts.exception.invalid_permission_value": "Invalid value, use allow, deny or inherit.",
+    "command.argonauts.exception.permission_not_found": "This permission does not exist.",
+    "command.argonauts.exception.setting_not_found": "This setting does not exist.",
+    "command.argonauts.exception.role_not_found": "This role does not exist.",
+    "command.argonauts.exception.role_already_exists": "A role with this name already exists.",
+    "command.argonauts.exception.invalid_role_name": "Invalid role name, use up to 24 characters: a-z, 0-9, _ and -.",
+    "command.argonauts.exception.cannot_delete_default_role": "Default roles cannot be deleted.",
+    "command.argonauts.exception.cannot_assign_role": "This role cannot be assigned to members.",
+    "command.argonauts.exception.role_cycle": "This parent would create a role cycle.",
+    "command.argonauts.exception.role_cannot_have_parent": "This role cannot have a parent.",
 
     "gamerule.maxGuildMembers": "Max Guild Members",
     "gamerule.maxPartyMembers": "Max Party Members",

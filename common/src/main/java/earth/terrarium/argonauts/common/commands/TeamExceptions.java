@@ -42,6 +42,17 @@ public class TeamExceptions {
     public static final SimpleCommandExceptionType PASSIVE_TELEPORT_DISABLED = create("command.argonauts.exception.passive_teleport_disabled");
     public static final SimpleCommandExceptionType NAME_TOO_LONG = create("command.argonauts.exception.name_too_long");
 
+    public static final SimpleCommandExceptionType INVALID_PERMISSION_VALUE = create("command.argonauts.exception.invalid_permission_value");
+    public static final SimpleCommandExceptionType PERMISSION_NOT_FOUND = create("command.argonauts.exception.permission_not_found");
+    public static final SimpleCommandExceptionType SETTING_NOT_FOUND = create("command.argonauts.exception.setting_not_found");
+    public static final SimpleCommandExceptionType ROLE_NOT_FOUND = create("command.argonauts.exception.role_not_found");
+    public static final SimpleCommandExceptionType ROLE_ALREADY_EXISTS = create("command.argonauts.exception.role_already_exists");
+    public static final SimpleCommandExceptionType INVALID_ROLE_NAME = create("command.argonauts.exception.invalid_role_name");
+    public static final SimpleCommandExceptionType CANNOT_DELETE_DEFAULT_ROLE = create("command.argonauts.exception.cannot_delete_default_role");
+    public static final SimpleCommandExceptionType CANNOT_ASSIGN_ROLE = create("command.argonauts.exception.cannot_assign_role");
+    public static final SimpleCommandExceptionType ROLE_CYCLE = create("command.argonauts.exception.role_cycle");
+    public static final SimpleCommandExceptionType ROLE_CANNOT_HAVE_PARENT = create("command.argonauts.exception.role_cannot_have_parent");
+
     private static SimpleCommandExceptionType create(String translationKey) {
         return new SimpleCommandExceptionType(CommonUtils.serverTranslatable(translationKey));
     }
