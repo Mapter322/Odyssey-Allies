@@ -12,6 +12,7 @@ import earth.terrarium.argonauts.api.teams.settings.Setting;
 import earth.terrarium.argonauts.api.teams.settings.types.ColorSettings;
 import earth.terrarium.argonauts.api.teams.settings.types.StringSetting;
 import earth.terrarium.argonauts.api.util.ModUtils;
+import earth.terrarium.argonauts.common.guild.GuildRoleDefaults;
 import earth.terrarium.argonauts.common.settings.Settings;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
@@ -26,25 +27,29 @@ import java.util.stream.Collectors;
  * @param id       The guild ID
  * @param members  A map of members to their corresponding permissions and member status
  * @param settings A map of setting IDs to their corresponding values
+ * @param roles    A map of role IDs to their corresponding roles
  */
 public record Guild(
     UUID id,
     Map<UUID, Member> members,
-    Map<String, Setting<?>> settings
+    Map<String, Setting<?>> settings,
+    Map<String, Role> roles
 ) implements Team {
 
     public static final ByteCodec<Guild> BYTE_CODEC = ObjectByteCodec.create(
         ByteCodec.UUID.fieldOf(Guild::id),
         new MapCodec<>(ByteCodec.UUID, Member.BYTE_CODEC).fieldOf(Guild::members),
         new MapCodec<>(ByteCodec.STRING, Setting.BYTE_CODEC).fieldOf(Guild::settings),
+        new MapCodec<>(ByteCodec.STRING, Role.BYTE_CODEC).fieldOf(Guild::roles),
         Guild::new
     );
 
     public Guild(UUID creator, String name) {
-        this(UUID.randomUUID(), new HashMap<>(), new HashMap<>());
+        this(UUID.randomUUID(), new HashMap<>(), new HashMap<>(), new HashMap<>());
         this.members.put(creator, new Member(MemberStatus.OWNER, MemberPermissionsApi.API.getGuildPermissions()));
         this.settings.put(Settings.DISPLAY_NAME.id(), new StringSetting(Settings.DISPLAY_NAME.id(), name));
         this.settings.put(Settings.COLOR.id(), new ColorSettings(Settings.COLOR.id(), ModUtils.uuidToColor(this.id)));
+        this.roles.putAll(GuildRoleDefaults.create(this));
     }
 
     @Override
