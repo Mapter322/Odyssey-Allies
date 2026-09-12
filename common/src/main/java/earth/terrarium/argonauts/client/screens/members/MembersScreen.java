@@ -16,6 +16,7 @@ import earth.terrarium.argonauts.api.teams.settings.MemberSettingState;
 import earth.terrarium.argonauts.api.teams.settings.MemberSettingsApi;
 import earth.terrarium.argonauts.client.screens.BaseScreen;
 import earth.terrarium.argonauts.client.widget.LabelledEntry;
+import earth.terrarium.argonauts.common.commands.TeamArguments;
 import earth.terrarium.argonauts.common.constants.ConstantComponents;
 import earth.terrarium.argonauts.common.guild.GuildRoleDefaults;
 import earth.terrarium.olympus.client.components.Widgets;
@@ -28,7 +29,6 @@ import earth.terrarium.olympus.client.components.renderers.WidgetRenderers;
 import earth.terrarium.olympus.client.components.string.TextWidget;
 import earth.terrarium.olympus.client.constants.MinecraftColors;
 import earth.terrarium.olympus.client.ui.UIConstants;
-import earth.terrarium.olympus.client.utils.State;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
@@ -59,8 +59,6 @@ public class MembersScreen extends BaseScreen {
     private static final int ROW_GAP = 0;
     private static final int ENTRY_GAP = 3;
 
-    private static final int TOGGLE_W = 26;
-    private static final int TOGGLE_H = 14;
     private static final int TRISTATE_W = 36;
     private static final int TRISTATE_H = 14;
     private static final int BUTTON_HEIGHT = 20;
@@ -324,27 +322,25 @@ public class MembersScreen extends BaseScreen {
         Component title = Component.translatable("permission.argonauts." + permission);
         Component description = Component.translatable("permission.argonauts." + permission + ".description");
 
-        State<Boolean> state = new State<>() {
-            private boolean value = member.hasPermission(permission);
-
-            @Override
-            public void set(Boolean newValue) {
-                this.value = newValue;
-                ScreenUtils.sendCommand("argonauts %s permissions set %s %s %s".formatted(team.type(), permission, profile.getName(), newValue));
-            }
-
-            @Override
-            public Boolean get() {
-                return this.value;
-            }
-        };
-
-        Button toggle = Widgets.toggle(state, button -> {
-            button.withSize(TOGGLE_W, TOGGLE_H);
-            button.withTooltip(description);
-            if (!canEdit) button.asDisabled();
+        TriState value = member.permissionOverride(permission);
+        RadioState<TriState> state = RadioState.of(value, switch (value) {
+            case TRUE -> 0;
+            case UNDEFINED -> 1;
+            case FALSE -> 2;
         });
-
+        var toggle = Widgets.tristate(state, builder -> builder
+            .withRenderer((option, active) -> WidgetRenderers.layered(
+                WidgetRenderers.sprite(active ? TristateRenderers.getButtonSprites(option) : UIConstants.BUTTON),
+                WidgetRenderers.icon(TristateRenderers.getIcon(option))
+                    .withColor(active ? MinecraftColors.WHITE : TristateRenderers.getColor(option))
+                    .withPaddingBottom(1)
+                    .withCentered(10, 10)
+            ))
+            .withSize(TRISTATE_W, TRISTATE_H)
+            .withCallback(selected -> ScreenUtils.sendCommand("argonauts %s permissions set %s %s %s".formatted(
+                team.type(), permission, profile.getName(), TeamArguments.triStateName(selected)))), layout -> {});
+        toggle.withTooltip(description);
+        toggle.active = canEdit;
         return new LabelledEntry(this.font, title, toggle)
             .setLockedWidth()
             .setEntryYOffset(-2)
