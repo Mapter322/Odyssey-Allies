@@ -4,6 +4,7 @@ import com.teamresourceful.bytecodecs.base.ByteCodec;
 import com.teamresourceful.bytecodecs.base.object.ObjectByteCodec;
 import com.teamresourceful.bytecodecs.defaults.MapCodec;
 import com.teamresourceful.resourcefullib.common.color.Color;
+import com.teamresourceful.resourcefullib.common.utils.TriState;
 import earth.terrarium.argonauts.api.teams.Member;
 import earth.terrarium.argonauts.api.teams.MemberStatus;
 import earth.terrarium.argonauts.api.teams.Team;
@@ -13,6 +14,7 @@ import earth.terrarium.argonauts.api.teams.settings.types.ColorSettings;
 import earth.terrarium.argonauts.api.teams.settings.types.StringSetting;
 import earth.terrarium.argonauts.api.util.ModUtils;
 import earth.terrarium.argonauts.common.guild.GuildRoleDefaults;
+import earth.terrarium.argonauts.common.permissions.Permissions;
 import earth.terrarium.argonauts.common.settings.Settings;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
@@ -124,5 +126,93 @@ public record Guild(
     public boolean isMemberOrFakePlayer(UUID player) {
         Member member = this.members().get(player);
         return member != null && (member.status().isMember() || member.status().isFakePlayer());
+    }
+
+    /**
+     * Gets the role that applies to the player. Members and fake players use their assigned role,
+     * allies always use the ally role and everyone else uses the all role.
+     *
+     * @param player the player
+     * @return the role id
+     */
+    public String getRoleId(UUID player) {
+        Member member = this.members().get(player);
+        if (member == null || member.status().isInvited()) return Role.ALL;
+        if (member.status().isAllied()) return Role.ALLY;
+        return member.role().isEmpty() ? Role.MEMBER : member.role();
+    }
+
+    /**
+     * Resolves the value of a permission for the player by walking their role chain, without
+     * applying personal overrides.
+     *
+     * @param player     the player
+     * @param permission the permission or setting id
+     * @return the resolved value, or {@link TriState#UNDEFINED} if no role sets it
+     */
+    public TriState getRoleValue(UUID player, String permission) {
+        return this.getRoleValue(this.getRoleId(player), permission);
+    }
+
+    /**
+     * Resolves the value of a permission by walking the role chain, starting at the given role.
+     *
+     * @param roleId     the role id
+     * @param permission the permission or setting id
+     * @return the resolved value, or {@link TriState#UNDEFINED} if no role sets it
+     */
+    public TriState getRoleValue(String roleId, String permission) {
+        Set<String> visited = new HashSet<>();
+        String current = roleId;
+        while (current != null && !current.isEmpty() && visited.add(current)) {
+            Role role = this.roles().get(current);
+            if (role == null) break;
+            TriState value = role.override(permission);
+            if (value != TriState.UNDEFINED) return value;
+            current = role.parent();
+        }
+        return TriState.UNDEFINED;
+    }
+
+    /**
+     * Resolves the value of a permission for a member, applying personal overrides before the
+     * role chain.
+     *
+     * @param member     the member
+     * @param permission the permission
+     * @return the resolved value
+     */
+    public TriState getPermission(Member member, String permission) {
+        TriState personal = member.permissionOverride(permission);
+        if (personal != TriState.UNDEFINED) return personal;
+        return this.getRoleValue(member.role().isEmpty() ? Role.MEMBER : member.role(), permission);
+    }
+
+    /**
+     * Checks if setting the parent of a role would create a cycle.
+     *
+     * @param roleId   the role id
+     * @param parentId the parent role id
+     * @return if the parent would create a cycle
+     */
+    public boolean wouldCreateRoleCycle(String roleId, String parentId) {
+        Set<String> visited = new HashSet<>();
+        String current = parentId;
+        while (current != null && !current.isEmpty() && visited.add(current)) {
+            if (current.equals(roleId)) return true;
+            Role role = this.roles().get(current);
+            if (role == null) return false;
+            current = role.parent();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean hasPermission(UUID player, String permission) {
+        Member member = this.members().get(player);
+        if (member == null || !member.status().isMember()) return false;
+        if (member.isOwner()) return true;
+        if (this.getPermission(member, Permissions.OPERATOR) == TriState.TRUE) return true;
+        return this.getPermission(member, permission) == TriState.TRUE;
     }
 }
