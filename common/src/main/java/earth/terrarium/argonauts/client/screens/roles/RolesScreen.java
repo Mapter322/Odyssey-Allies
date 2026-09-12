@@ -2,21 +2,30 @@ package earth.terrarium.argonauts.client.screens.roles;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.teamresourceful.resourcefullib.client.utils.ScreenUtils;
+import com.teamresourceful.resourcefullib.common.utils.TriState;
 import earth.terrarium.argonauts.api.teams.guild.Guild;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.api.teams.guild.Role;
+import earth.terrarium.argonauts.api.teams.permissions.MemberPermissionsApi;
+import earth.terrarium.argonauts.api.teams.settings.MemberSetting;
+import earth.terrarium.argonauts.api.teams.settings.MemberSettingsApi;
 import earth.terrarium.argonauts.client.Modals;
 import earth.terrarium.argonauts.client.screens.BaseScreen;
 import earth.terrarium.argonauts.client.widget.LabelledEntry;
+import earth.terrarium.argonauts.common.commands.TeamArguments;
 import earth.terrarium.argonauts.common.constants.ConstantComponents;
 import earth.terrarium.argonauts.common.guild.GuildRoleDefaults;
 import earth.terrarium.olympus.client.components.Widgets;
 import earth.terrarium.olympus.client.components.base.ListWidget;
 import earth.terrarium.olympus.client.components.buttons.Button;
+import earth.terrarium.olympus.client.components.compound.LayoutWidget;
+import earth.terrarium.olympus.client.components.compound.radio.RadioState;
 import earth.terrarium.olympus.client.components.dropdown.DropdownState;
+import earth.terrarium.olympus.client.components.renderers.TristateRenderers;
 import earth.terrarium.olympus.client.components.renderers.WidgetRenderers;
 import earth.terrarium.olympus.client.components.string.TextWidget;
 import earth.terrarium.olympus.client.constants.MinecraftColors;
+import earth.terrarium.olympus.client.layouts.LinearViewLayout;
 import earth.terrarium.olympus.client.ui.UIConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -54,6 +63,8 @@ public class RolesScreen extends BaseScreen {
     private static final int CREATE_LIFT = 2;
     private static final int DROPDOWN_W = 90;
     private static final int DROPDOWN_H = 14;
+    private static final int TRISTATE_W = 36;
+    private static final int TRISTATE_H = 14;
 
     private static final Comparator<String> ROLE_ORDER = Comparator
         .comparingInt((String id) -> switch (id) {
@@ -206,9 +217,78 @@ public class RolesScreen extends BaseScreen {
     }
 
     private void buildDetails(ListWidget list, Role role, int width) {
+        boolean canEdit = this.guild.canManagePermissions(this.selfId);
         list.add(parentRow(role, width));
+
+        if (!role.id().equals(Role.ALL) && !role.id().equals(Role.ALLY)) {
+            list.add(section(ConstantComponents.MEMBER_PERMISSIONS));
+            List<String> permissions = new ArrayList<>(MemberPermissionsApi.API.getGuildPermissions().keySet());
+            permissions.sort(String::compareTo);
+            permissions.forEach(permission -> list.add(rolePermissionRow(role, permission, canEdit)));
+        }
+
+        List<MemberSetting> settings = MemberSettingsApi.API.getSettings(this.guild);
+        if (!settings.isEmpty()) {
+            list.add(section(Component.translatable("gui.argonauts.member_claim_permissions")));
+            settings.forEach(setting -> list.add(roleSettingRow(role, setting, canEdit)));
+        }
+
         list.add(section(ConstantComponents.ACTIONS));
         list.add(deleteButton(role, width));
+    }
+
+    private LabelledEntry rolePermissionRow(Role role, String permission, boolean canEdit) {
+        LayoutWidget<LinearViewLayout> toggle = tristate(
+            displayState(role, permission),
+            canEdit,
+            "argonauts guild role permission " + role.id() + " " + permission
+        );
+        toggle.withTooltip(Component.translatable("permission.argonauts." + permission + ".description"));
+        return new LabelledEntry(this.font, Component.translatable("permission.argonauts." + permission), toggle)
+            .setLockedWidth()
+            .setEntryYOffset(-2)
+            .setDrawDivider(true)
+            .setDividerYOffset(-1);
+    }
+
+    private LabelledEntry roleSettingRow(Role role, MemberSetting setting, boolean canEdit) {
+        LayoutWidget<LinearViewLayout> toggle = tristate(
+            displayState(role, setting.id()),
+            canEdit,
+            "argonauts guild role setting " + role.id() + " " + setting.id()
+        );
+        toggle.withTooltip(setting.description());
+        return new LabelledEntry(this.font, setting.name(), toggle)
+            .setLockedWidth()
+            .setEntryYOffset(-2)
+            .setDrawDivider(true)
+            .setDividerYOffset(-1);
+    }
+
+    private TriState displayState(Role role, String key) {
+        TriState state = role.override(key);
+        return state == TriState.UNDEFINED && !role.hasParent() ? TriState.FALSE : state;
+    }
+
+    private LayoutWidget<LinearViewLayout> tristate(TriState current, boolean canEdit, String command) {
+        RadioState<TriState> state = RadioState.of(current, switch (current) {
+            case TRUE -> 0;
+            case UNDEFINED -> 1;
+            case FALSE -> 2;
+        });
+        LayoutWidget<LinearViewLayout> toggle = Widgets.tristate(state, builder -> builder
+            .withRenderer((option, active) -> WidgetRenderers.layered(
+                WidgetRenderers.sprite(active ? TristateRenderers.getButtonSprites(option) : UIConstants.BUTTON),
+                WidgetRenderers.icon(TristateRenderers.getIcon(option))
+                    .withColor(active ? MinecraftColors.WHITE : TristateRenderers.getColor(option))
+                    .withPaddingBottom(1)
+                    .withCentered(10, 10)
+            ))
+            .withSize(TRISTATE_W, TRISTATE_H)
+            .withCallback(value -> ScreenUtils.sendCommand(command + " " + TeamArguments.triStateName(value))),
+            layout -> {});
+        toggle.active = canEdit;
+        return toggle;
     }
 
     private LabelledEntry parentRow(Role role, int width) {
