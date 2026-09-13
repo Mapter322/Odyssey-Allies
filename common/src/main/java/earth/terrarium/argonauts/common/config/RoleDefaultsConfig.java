@@ -31,6 +31,20 @@ public final class RoleDefaultsConfig {
         Role.ALLY, "allysettingsdefault.json"
     );
     private static final List<String> ROLES = List.of(Role.ALL, Role.MEMBER, Role.ALLY);
+    private static final List<String> PRESET_TARGETS = List.of(
+        "block-break/minecraft:dirt",
+        "block-place/minecraft:dirt",
+        "block-interactions/#minecraft:doors",
+        "block-interactions/#minecraft:trapdoors",
+        "entity-interactions/minecraft:boat",
+        "entity-interactions/minecraft:chest_boat",
+        "entity-interactions/minecraft:horse",
+        "entity-damage/minecraft:horse",
+        "item-pickup/minecraft:dirt",
+        "use/#c:foods",
+        "use/minecraft:potion",
+        "use/minecraft:splash_potion"
+    );
 
     private static final Map<String, Map<String, TriState>> VALUES = new LinkedHashMap<>();
     private static boolean loaded;
@@ -129,6 +143,11 @@ public final class RoleDefaultsConfig {
         MemberPermissionsApi.API.getGuildPermissions().keySet().forEach(permission -> values.put(permission, value));
         for (MemberSetting setting : MemberSettingsApi.API.getSettings(null)) {
             values.put(settingKey(setting), value);
+        }
+        if (Argonauts.IS_CLAIMS_LOADED) {
+            for (String target : PRESET_TARGETS) {
+                values.putIfAbsent(target, value);
+            }
         }
         return values;
     }
