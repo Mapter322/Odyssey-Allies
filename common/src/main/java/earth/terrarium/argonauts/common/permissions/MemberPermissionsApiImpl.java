@@ -32,6 +32,11 @@ public class MemberPermissionsApiImpl implements MemberPermissionsApi, MemberSet
     }
 
     @Override
+    public void unregister(String id) {
+        memberSettings.removeIf(existing -> existing.id().equals(id));
+    }
+
+    @Override
     public void setHandler(MemberSettingsHandler handler) {
         this.memberSettingsHandler = handler;
     }

@@ -10,6 +10,8 @@ public interface MemberSettingsApi {
 
     void register(MemberSetting setting);
 
+    void unregister(String id);
+
     void setHandler(MemberSettingsHandler handler);
 
     List<MemberSetting> getSettings(Team team);
