@@ -8,6 +8,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 @Mod(Argonauts.MOD_ID)
@@ -17,8 +18,13 @@ public class ArgonautsNeoForge {
         Argonauts.init();
         NeoForge.EVENT_BUS.addListener(ArgonautsNeoForge::onPlayerLoggedIn);
         NeoForge.EVENT_BUS.addListener(ArgonautsNeoForge::onPlayerLoggedOut);
+        NeoForge.EVENT_BUS.addListener(ArgonautsNeoForge::onServerStarted);
         NeoForge.EVENT_BUS.addListener(ArgonautsNeoForge::onServerTick);
         NeoForge.EVENT_BUS.addListener(ArgonautsNeoForge::registerCommands);
+    }
+
+    private static void onServerStarted(ServerStartedEvent event) {
+        Argonauts.onServerStarted(event.getServer());
     }
 
     private static void onServerTick(ServerTickEvent.Post event) {

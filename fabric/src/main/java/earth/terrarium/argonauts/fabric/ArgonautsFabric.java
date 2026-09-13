@@ -6,6 +6,7 @@ import earth.terrarium.argonauts.common.compat.placeholdersapi.ArgonautsPlacehol
 import earth.terrarium.argonauts.common.hud.PartyHudSync;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -21,6 +22,7 @@ public class ArgonautsFabric implements ModInitializer {
         }
 
         CommandRegistrationCallback.EVENT.register((dispatcher, context, selection) -> ArgonautsCommands.register(dispatcher));
+        ServerLifecycleEvents.SERVER_STARTED.register(Argonauts::onServerStarted);
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> Argonauts.onPlayerJoin(handler.player));
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> Argonauts.onPlayerLeave(handler.player));
         ServerTickEvents.END_SERVER_TICK.register(PartyHudSync::tick);

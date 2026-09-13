@@ -1,12 +1,16 @@
 package earth.terrarium.argonauts;
 
 import com.teamresourceful.resourcefullib.common.utils.modinfo.ModInfoUtils;
+import earth.terrarium.argonauts.api.teams.guild.Guild;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.api.teams.party.PartyApi;
 import earth.terrarium.argonauts.common.compat.cadmus.CadmusCompat;
 import earth.terrarium.argonauts.common.compat.heracles.HeraclesCompat;
 
+import earth.terrarium.argonauts.common.config.RoleDefaultsConfig;
 import earth.terrarium.argonauts.common.constants.ConstantComponents;
+import earth.terrarium.argonauts.common.guild.GuildRoleDefaults;
+import earth.terrarium.argonauts.common.guild.GuildSaveData;
 import earth.terrarium.argonauts.common.network.NetworkHandler;
 import earth.terrarium.argonauts.common.network.packets.ClientboundSyncGuildsPacket;
 import earth.terrarium.argonauts.common.network.packets.ClientboundSyncPartiesPacket;
@@ -16,6 +20,7 @@ import earth.terrarium.argonauts.common.utils.Config;
 import earth.terrarium.argonauts.common.utils.ModUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 public class Argonauts {
@@ -44,6 +49,18 @@ public class Argonauts {
 
     public static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+    }
+
+    public static void onServerStarted(MinecraftServer server) {
+        RoleDefaultsConfig.ensureLoaded();
+        GuildSaveData data = GuildSaveData.read(server.overworld());
+        boolean changed = false;
+        for (Guild guild : data.guilds().values()) {
+            changed |= GuildRoleDefaults.applyMissingDefaults(guild, guild.roles());
+        }
+        if (changed) {
+            data.markDirty();
+        }
     }
 
     public static void onPlayerJoin(ServerPlayer player) {

@@ -162,6 +162,10 @@ public class GuildSaveData extends SaveHandler {
         return read(level, HandlerType.create(CLIENT_SIDE, GuildSaveData::new), "argonauts_guilds");
     }
 
+    public void markDirty() {
+        setDirty();
+    }
+
     public Map<UUID, Guild> guilds() {
         return this.guilds;
     }

@@ -13,7 +13,7 @@ public final class Config {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Argonauts.MOD_ID);
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final Path CONFIG_PATH = Path.of("config", Argonauts.MOD_ID + ".json");
+    private static final Path CONFIG_PATH = Path.of("config", Argonauts.MOD_ID, "argonauts-common.json");
 
     public static int maxGuildMembers = Argonauts.DEFAULT_MAX_GUILD_MEMBERS;
     public static int maxPartyMembers = Argonauts.DEFAULT_MAX_PARTY_MEMBERS;
