@@ -12,6 +12,7 @@ import earth.terrarium.argonauts.api.teams.settings.MemberSettingsApi;
 import earth.terrarium.argonauts.client.Modals;
 import earth.terrarium.argonauts.client.screens.BaseScreen;
 import earth.terrarium.argonauts.client.widget.LabelledEntry;
+import earth.terrarium.argonauts.client.widget.SettingCategoryEntry;
 import earth.terrarium.argonauts.common.commands.TeamArguments;
 import earth.terrarium.argonauts.common.constants.ConstantComponents;
 import earth.terrarium.argonauts.common.guild.GuildRoleDefaults;
@@ -37,8 +38,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -77,6 +82,7 @@ public class RolesScreen extends BaseScreen {
 
     private final Guild guild;
     private final UUID selfId;
+    private final Set<String> expandedCategories = new HashSet<>();
 
     @Nullable
     private String selectedRoleId;
@@ -230,7 +236,7 @@ public class RolesScreen extends BaseScreen {
         List<MemberSetting> settings = MemberSettingsApi.API.getSettings(this.guild);
         if (!settings.isEmpty()) {
             list.add(section(Component.translatable("gui.argonauts.member_claim_permissions")));
-            settings.forEach(setting -> list.add(roleSettingRow(role, setting, canEdit)));
+            buildSettingRows(list, settings, role, canEdit);
         }
 
         list.add(section(ConstantComponents.ACTIONS));
@@ -251,18 +257,62 @@ public class RolesScreen extends BaseScreen {
             .setDividerYOffset(-1);
     }
 
-    private LabelledEntry roleSettingRow(Role role, MemberSetting setting, boolean canEdit) {
+    private LabelledEntry roleSettingRow(Role role, MemberSetting setting, boolean canEdit, boolean indented) {
         LayoutWidget<LinearViewLayout> toggle = tristate(
             displayState(role, setting.id()),
             canEdit,
             "argonauts guild role setting " + role.id() + " \"" + setting.id() + "\""
         );
         toggle.withTooltip(setting.description());
-        return new LabelledEntry(this.font, setting.name(), toggle)
+        LabelledEntry entry = new LabelledEntry(this.font, setting.name(), toggle)
             .setLockedWidth()
             .setEntryYOffset(-2)
             .setDrawDivider(true)
             .setDividerYOffset(-1);
+        if (indented) entry.setLeftPadding(14);
+        return entry;
+    }
+
+    private void buildSettingRows(ListWidget list, List<MemberSetting> settings, Role role, boolean canEdit) {
+        Map<String, List<MemberSetting>> children = new LinkedHashMap<>();
+        List<MemberSetting> roots = new ArrayList<>();
+        for (MemberSetting setting : settings) {
+            if (setting.hasParent()) {
+                children.computeIfAbsent(setting.parent(), ignored -> new ArrayList<>()).add(setting);
+            } else {
+                roots.add(setting);
+            }
+        }
+        for (MemberSetting setting : roots) {
+            List<MemberSetting> group = children.get(setting.id());
+            if (group == null || group.isEmpty()) {
+                list.add(roleSettingRow(role, setting, canEdit, false));
+            }
+        }
+        for (MemberSetting setting : roots) {
+            List<MemberSetting> group = children.get(setting.id());
+            if (group == null || group.isEmpty()) continue;
+            list.add(categoryRow(role, setting, canEdit));
+            if (!this.expandedCategories.contains(setting.id())) continue;
+            group.forEach(child -> list.add(roleSettingRow(role, child, canEdit, true)));
+        }
+    }
+
+    private SettingCategoryEntry categoryRow(Role role, MemberSetting setting, boolean canEdit) {
+        SettingCategoryEntry entry = new SettingCategoryEntry(this.font, setting.name(),
+            () -> this.expandedCategories.contains(setting.id()),
+            () -> displayState(role, setting.id()),
+            () -> toggleCategory(setting.id()),
+            value -> ScreenUtils.sendCommand("argonauts guild role setting " + role.id() + " \"" + setting.id() + "\" " + TeamArguments.triStateName(value)),
+            canEdit);
+        entry.withTooltip(setting.description());
+        return entry;
+    }
+
+    private void toggleCategory(String key) {
+        if (!this.expandedCategories.remove(key)) this.expandedCategories.add(key);
+        if (this.detailsList != null) this.pendingDetailsScroll = this.detailsList.getScroll();
+        rebuildWidgets();
     }
 
     private TriState displayState(Role role, String key) {

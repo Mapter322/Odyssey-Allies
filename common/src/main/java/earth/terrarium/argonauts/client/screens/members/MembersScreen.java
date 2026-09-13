@@ -15,6 +15,7 @@ import earth.terrarium.argonauts.api.teams.settings.MemberSetting;
 import earth.terrarium.argonauts.api.teams.settings.MemberSettingsApi;
 import earth.terrarium.argonauts.client.screens.BaseScreen;
 import earth.terrarium.argonauts.client.widget.LabelledEntry;
+import earth.terrarium.argonauts.client.widget.SettingCategoryEntry;
 import earth.terrarium.argonauts.common.commands.TeamArguments;
 import earth.terrarium.argonauts.common.constants.ConstantComponents;
 import earth.terrarium.argonauts.common.guild.GuildRoleDefaults;
@@ -68,6 +69,7 @@ public class MembersScreen extends BaseScreen {
     private final Team team;
     private final Guild guild;
     private final Set<String> permissions;
+    private final Set<String> expandedCategories = new HashSet<>();
     private final List<MemberEntry> members = new ArrayList<>();
 
     private final UUID selfId;
@@ -257,14 +259,14 @@ public class MembersScreen extends BaseScreen {
             list.add(permissionRow(permission,
                 Component.translatable("permission.argonauts." + permission),
                 Component.translatable("permission.argonauts." + permission + ".description"),
-                profile, member, canEditPermissions))
+                profile, member, canEditPermissions, false))
         );
 
         if (this.team.type().equals("guild")) {
             List<MemberSetting> settings = MemberSettingsApi.API.getSettings(this.team);
             if (!settings.isEmpty()) {
                 list.add(section(Component.translatable("gui.argonauts.member_claim_permissions")));
-                settings.forEach(setting -> list.add(permissionRow(setting.id(), setting.name(), setting.description(), profile, member, canEditPermissions)));
+                buildSettingRows(list, settings, profile, member, canEditPermissions);
             }
         }
 
@@ -315,7 +317,7 @@ public class MembersScreen extends BaseScreen {
         return Component.translatableWithFallback("gui.argonauts.role." + roleId, roleId);
     }
 
-    private LabelledEntry permissionRow(String key, Component title, Component description, GameProfile profile, Member member, boolean canEdit) {
+    private LabelledEntry permissionRow(String key, Component title, Component description, GameProfile profile, Member member, boolean canEdit, boolean indented) {
         TriState value = member.permissionOverride(key);
         RadioState<TriState> state = RadioState.of(value, switch (value) {
             case TRUE -> 0;
@@ -335,11 +337,56 @@ public class MembersScreen extends BaseScreen {
                 team.type(), key, profile.getName(), TeamArguments.triStateName(selected)))), layout -> {});
         toggle.withTooltip(description);
         toggle.active = canEdit;
-        return new LabelledEntry(this.font, title, toggle)
+        LabelledEntry entry = new LabelledEntry(this.font, title, toggle)
             .setLockedWidth()
             .setEntryYOffset(-2)
             .setDrawDivider(true)
             .setDividerYOffset(-1);
+        if (indented) entry.setLeftPadding(14);
+        return entry;
+    }
+
+    private void buildSettingRows(ListWidget list, List<MemberSetting> settings, GameProfile profile, Member member, boolean canEdit) {
+        Map<String, List<MemberSetting>> children = new LinkedHashMap<>();
+        List<MemberSetting> roots = new ArrayList<>();
+        for (MemberSetting setting : settings) {
+            if (setting.hasParent()) {
+                children.computeIfAbsent(setting.parent(), ignored -> new ArrayList<>()).add(setting);
+            } else {
+                roots.add(setting);
+            }
+        }
+        for (MemberSetting setting : roots) {
+            List<MemberSetting> group = children.get(setting.id());
+            if (group == null || group.isEmpty()) {
+                list.add(permissionRow(setting.id(), setting.name(), setting.description(), profile, member, canEdit, false));
+            }
+        }
+        for (MemberSetting setting : roots) {
+            List<MemberSetting> group = children.get(setting.id());
+            if (group == null || group.isEmpty()) continue;
+            list.add(categoryRow(setting, profile, member, canEdit));
+            if (!this.expandedCategories.contains(setting.id())) continue;
+            group.forEach(child -> list.add(permissionRow(child.id(), child.name(), child.description(), profile, member, canEdit, true)));
+        }
+    }
+
+    private SettingCategoryEntry categoryRow(MemberSetting setting, GameProfile profile, Member member, boolean canEdit) {
+        SettingCategoryEntry entry = new SettingCategoryEntry(this.font, setting.name(),
+            () -> this.expandedCategories.contains(setting.id()),
+            () -> member.permissionOverride(setting.id()),
+            () -> toggleCategory(setting.id()),
+            value -> ScreenUtils.sendCommand("argonauts %s permissions set \"%s\" %s %s".formatted(
+                team.type(), setting.id(), profile.getName(), TeamArguments.triStateName(value))),
+            canEdit);
+        entry.withTooltip(setting.description());
+        return entry;
+    }
+
+    private void toggleCategory(String key) {
+        if (!this.expandedCategories.remove(key)) this.expandedCategories.add(key);
+        if (this.detailsList != null) this.pendingDetailsScroll = this.detailsList.getScroll();
+        rebuildWidgets();
     }
 
     public void refreshMemberSettings() {
