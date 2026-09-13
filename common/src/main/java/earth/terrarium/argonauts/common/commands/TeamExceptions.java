@@ -54,6 +54,11 @@ public class TeamExceptions {
     public static final SimpleCommandExceptionType ROLE_CYCLE = create("command.argonauts.exception.role_cycle");
     public static final SimpleCommandExceptionType ROLE_CANNOT_HAVE_PARENT = create("command.argonauts.exception.role_cannot_have_parent");
 
+    public static final SimpleCommandExceptionType INVALID_CONDITION = create("command.argonauts.exception.invalid_condition");
+    public static final SimpleCommandExceptionType CONDITION_ALREADY_EXISTS = create("command.argonauts.exception.condition_already_exists");
+    public static final SimpleCommandExceptionType CONDITION_NOT_FOUND = create("command.argonauts.exception.condition_not_found");
+    public static final SimpleCommandExceptionType CONDITION_LIMIT = create("command.argonauts.exception.condition_limit");
+
     private static SimpleCommandExceptionType create(String translationKey) {
         return new SimpleCommandExceptionType(CommonUtils.serverTranslatable(translationKey));
     }

@@ -13,6 +13,8 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import it.unimi.dsi.fastutil.objects.ObjectSet;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 
@@ -66,7 +68,15 @@ public class GuildSaveData extends SaveHandler {
                 roles.put(roleId, new Role(roleId, roleTag.getString("parent"), readOverrides(roleTag.getCompound("overrides"))));
             });
 
-            Guild guild = new Guild(UUID.fromString(id), members, settings, roles);
+            Object2ObjectMap<String, ObjectSet<String>> conditions = new Object2ObjectOpenHashMap<>();
+            CompoundTag conditionsTag = guildTag.getCompound("conditions");
+            conditionsTag.getAllKeys().forEach(roleId -> {
+                ObjectOpenHashSet<String> roleConditions = new ObjectOpenHashSet<>();
+                conditionsTag.getCompound(roleId).getAllKeys().forEach(roleConditions::add);
+                if (!roleConditions.isEmpty()) conditions.put(roleId, roleConditions);
+            });
+
+            Guild guild = new Guild(UUID.fromString(id), members, settings, roles, conditions);
             if (guild.roles().isEmpty()) {
                 guild.roles().putAll(GuildRoleDefaults.create(guild));
             } else if (GuildRoleDefaults.applyMissingDefaults(guild, guild.roles())) {
@@ -119,6 +129,14 @@ public class GuildSaveData extends SaveHandler {
                 rolesTag.put(roleId, roleTag);
             });
             guildTag.put("roles", rolesTag);
+
+            CompoundTag conditionsTag = new CompoundTag();
+            guild.conditions().forEach((roleId, conditions) -> {
+                CompoundTag roleTag = new CompoundTag();
+                conditions.forEach(condition -> roleTag.putBoolean(condition, true));
+                conditionsTag.put(roleId, roleTag);
+            });
+            guildTag.put("conditions", conditionsTag);
 
             guildsTag.put(id.toString(), guildTag);
         });

@@ -31,6 +31,15 @@ public final class RoleDefaultsConfig {
         Role.ALLY, "allysettingsdefault.json"
     );
     private static final List<String> ROLES = List.of(Role.ALL, Role.MEMBER, Role.ALLY);
+    public static final List<String> CONDITION_PARENTS = List.of(
+        "block-break",
+        "block-place",
+        "block-interactions",
+        "entity-interactions",
+        "entity-damage",
+        "item-pickup",
+        "use"
+    );
     private static final List<String> PRESET_TARGETS = List.of(
         "block-break/minecraft:dirt",
         "block-place/minecraft:dirt",

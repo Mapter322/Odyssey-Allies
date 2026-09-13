@@ -233,7 +233,11 @@ public class RolesScreen extends BaseScreen {
             permissions.forEach(permission -> list.add(rolePermissionRow(role, permission, canEdit)));
         }
 
-        List<MemberSetting> settings = MemberSettingsApi.API.getSettings(this.guild);
+        var guildConditions = this.guild.getConditions();
+        var roleConditions = this.guild.getConditions(role.id());
+        List<MemberSetting> settings = MemberSettingsApi.API.getSettings(this.guild).stream()
+            .filter(setting -> !guildConditions.contains(setting.id()) || roleConditions.contains(setting.id()))
+            .toList();
         if (!settings.isEmpty()) {
             list.add(section(Component.translatable("gui.argonauts.member_claim_permissions")));
             buildSettingRows(list, settings, role, canEdit);

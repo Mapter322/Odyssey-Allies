@@ -112,6 +112,11 @@
     "command.argonauts.role.permission": "§7Set role §b%s§7 permission §b%s§7 to §b%s",
     "command.argonauts.role.setting": "§7Set role §b%s§7 setting §b%s§7 to §b%s",
 
+    "command.argonauts.condition.add": "§7Added condition §b%s",
+    "command.argonauts.condition.remove": "§7Removed condition §b%s",
+    "command.argonauts.condition.list": "§b%s",
+    "command.argonauts.condition.list_empty": "§7This guild has no extra conditions.",
+
     "command.argonauts.role.info.name": "§7Role: §b%s",
     "command.argonauts.role.info.parent": "§7Parent: §b%s",
     "command.argonauts.role.info.members": "§7Members (§b%s§7): §b%s",
@@ -177,6 +182,11 @@
     "command.argonauts.exception.cannot_change_owner_role": "The owner's role cannot be changed.",
     "command.argonauts.exception.role_cycle": "This parent would create a role cycle.",
     "command.argonauts.exception.role_cannot_have_parent": "This role cannot have a parent.",
+
+    "command.argonauts.exception.invalid_condition": "Invalid condition, expected a parent, a slash and an id or tag, e.g. \"block-place/minecraft:dirt\".",
+    "command.argonauts.exception.condition_already_exists": "This condition is already present.",
+    "command.argonauts.exception.condition_not_found": "This guild has no such condition.",
+    "command.argonauts.exception.condition_limit": "This guild has reached the condition limit.",
 
     "gamerule.maxGuildMembers": "Max Guild Members",
     "gamerule.maxPartyMembers": "Max Party Members",

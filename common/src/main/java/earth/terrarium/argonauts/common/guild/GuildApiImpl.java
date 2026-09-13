@@ -6,8 +6,11 @@ import earth.terrarium.argonauts.api.teams.Member;
 import earth.terrarium.argonauts.api.teams.MemberStatus;
 import earth.terrarium.argonauts.api.teams.guild.Guild;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
+import earth.terrarium.argonauts.api.teams.guild.Role;
 import earth.terrarium.argonauts.api.teams.settings.Setting;
 import com.teamresourceful.resourcefullib.common.utils.TriState;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import it.unimi.dsi.fastutil.objects.ObjectSet;
 
 import earth.terrarium.argonauts.common.network.NetworkHandler;
 import earth.terrarium.argonauts.common.network.packets.*;
@@ -130,6 +133,39 @@ public class GuildApiImpl implements GuildApi {
         if (level instanceof ServerLevel serverLevel) {
             data.setDirty();
             NetworkHandler.sendToAllClientPlayers(new ClientboundModifyGuildSettingPacket(guild.id(), setting, settingId), serverLevel.getServer());
+        }
+        ArgonautsEvents.GuildChangedEvent.fire(level, guild);
+    }
+
+    @Override
+    public void addCondition(Level level, Guild guild, String role, String condition) {
+        var data = GuildSaveData.read(level);
+        ObjectSet<String> conditions = guild.conditions().computeIfAbsent(role, ignored -> new ObjectOpenHashSet<>());
+        if (!conditions.add(condition)) return;
+        if (level instanceof ServerLevel serverLevel) {
+            data.setDirty();
+            NetworkHandler.sendToAllClientPlayers(new ClientboundModifyGuildConditionPacket(guild.id(), role, condition, true), serverLevel.getServer());
+        }
+        ArgonautsEvents.GuildChangedEvent.fire(level, guild);
+    }
+
+    @Override
+    public void removeCondition(Level level, Guild guild, String role, String condition) {
+        var data = GuildSaveData.read(level);
+        ObjectSet<String> conditions = guild.conditions().get(role);
+        if (conditions == null || !conditions.remove(condition)) return;
+        if (conditions.isEmpty()) guild.conditions().remove(role);
+        Role guildRole = guild.roles().get(role);
+        if (guildRole != null) guildRole.setOverride(condition, TriState.UNDEFINED);
+        if (!guild.getConditions().contains(condition)) {
+            guild.members().values().forEach(member -> {
+                member.setPermissionOverride(condition, TriState.UNDEFINED);
+                member.permissions().remove(condition);
+            });
+        }
+        if (level instanceof ServerLevel serverLevel) {
+            data.setDirty();
+            NetworkHandler.sendToAllClientPlayers(new ClientboundModifyGuildConditionPacket(guild.id(), role, condition, false), serverLevel.getServer());
         }
         ArgonautsEvents.GuildChangedEvent.fire(level, guild);
     }

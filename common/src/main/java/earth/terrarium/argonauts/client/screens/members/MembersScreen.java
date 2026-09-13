@@ -263,7 +263,11 @@ public class MembersScreen extends BaseScreen {
         );
 
         if (this.team.type().equals("guild")) {
-            List<MemberSetting> settings = MemberSettingsApi.API.getSettings(this.team);
+            var guildConditions = this.guild.getConditions();
+            var memberConditions = this.guild.getEffectiveConditions(this.guild.getRoleId(profile.getId()));
+            List<MemberSetting> settings = MemberSettingsApi.API.getSettings(this.team).stream()
+                .filter(setting -> !guildConditions.contains(setting.id()) || memberConditions.contains(setting.id()))
+                .toList();
             if (!settings.isEmpty()) {
                 list.add(section(Component.translatable("gui.argonauts.member_claim_permissions")));
                 buildSettingRows(list, settings, profile, member, canEditPermissions);

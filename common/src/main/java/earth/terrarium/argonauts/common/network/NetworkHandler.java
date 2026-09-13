@@ -22,6 +22,7 @@ public class NetworkHandler {
         CHANNEL.register(ClientboundUpdateGuildRolePacket.TYPE);
         CHANNEL.register(ClientboundRemoveGuildRolePacket.TYPE);
         CHANNEL.register(ClientboundModifyGuildMemberRolePacket.TYPE);
+        CHANNEL.register(ClientboundModifyGuildConditionPacket.TYPE);
 
         CHANNEL.register(ClientboundAddPartyPacket.TYPE);
         CHANNEL.register(ClientboundRemovePartyPacket.TYPE);

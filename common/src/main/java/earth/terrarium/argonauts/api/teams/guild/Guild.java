@@ -16,6 +16,10 @@ import earth.terrarium.argonauts.api.util.ModUtils;
 import earth.terrarium.argonauts.common.guild.GuildRoleDefaults;
 import earth.terrarium.argonauts.common.permissions.Permissions;
 import earth.terrarium.argonauts.common.settings.Settings;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import it.unimi.dsi.fastutil.objects.ObjectSet;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -26,16 +30,18 @@ import java.util.stream.Collectors;
 /**
  * Guilds are a more permanent form of team. They are persistent across logins and feature role management, setting headquarters, displaying messages of the day, and more. Guilds also integrate with Cadmus for chunk claiming as a team, and Heracles for completing quests together.
  *
- * @param id       The guild ID
- * @param members  A map of members to their corresponding permissions and member status
- * @param settings A map of setting IDs to their corresponding values
- * @param roles    A map of role IDs to their corresponding roles
+ * @param id         The guild ID
+ * @param members    A map of members to their corresponding permissions and member status
+ * @param settings   A map of setting IDs to their corresponding values
+ * @param roles      A map of role IDs to their corresponding roles
+ * @param conditions A map of role IDs to the extra setting condition ids attached to that role
  */
 public record Guild(
     UUID id,
     Map<UUID, Member> members,
     Map<String, Setting<?>> settings,
-    Map<String, Role> roles
+    Map<String, Role> roles,
+    Object2ObjectMap<String, ObjectSet<String>> conditions
 ) implements Team {
 
     public static final ByteCodec<Guild> BYTE_CODEC = ObjectByteCodec.create(
@@ -43,11 +49,19 @@ public record Guild(
         new MapCodec<>(ByteCodec.UUID, Member.BYTE_CODEC).fieldOf(Guild::members),
         new MapCodec<>(ByteCodec.STRING, Setting.BYTE_CODEC).fieldOf(Guild::settings),
         new MapCodec<>(ByteCodec.STRING, Role.BYTE_CODEC).fieldOf(Guild::roles),
+        new MapCodec<>(ByteCodec.STRING, ByteCodec.STRING.setOf()
+            .map(set -> (ObjectSet<String>) new ObjectOpenHashSet<>(set), set -> set)
+            ).map(map -> {
+                Object2ObjectMap<String, ObjectSet<String>> conditions = new Object2ObjectOpenHashMap<>();
+                map.forEach((role, set) -> conditions.put(role, (ObjectSet<String>) new ObjectOpenHashSet<>(set)));
+                return conditions;
+            }, map -> map
+            ).fieldOf(Guild::conditions),
         Guild::new
     );
 
     public Guild(UUID creator, String name) {
-        this(UUID.randomUUID(), new HashMap<>(), new HashMap<>(), new HashMap<>());
+        this(UUID.randomUUID(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new Object2ObjectOpenHashMap<>());
         this.members.put(creator, new Member(MemberStatus.OWNER, MemberPermissionsApi.API.getGuildPermissions()));
         this.settings.put(Settings.DISPLAY_NAME.id(), new StringSetting(Settings.DISPLAY_NAME.id(), name));
         this.settings.put(Settings.COLOR.id(), new ColorSettings(Settings.COLOR.id(), ModUtils.uuidToColor(this.id)));
@@ -140,6 +154,47 @@ public record Guild(
         if (member == null || member.status().isInvited()) return Role.ALL;
         if (member.status().isAllied()) return Role.ALLY;
         return member.role().isEmpty() ? Role.MEMBER : member.role();
+    }
+
+    /**
+     * Gets the extra condition ids attached directly to the role.
+     *
+     * @param roleId the role id
+     * @return the condition ids
+     */
+    public Set<String> getConditions(String roleId) {
+        ObjectSet<String> conditions = this.conditions.get(roleId);
+        return conditions == null ? Set.of() : conditions;
+    }
+
+    /**
+     * Gets every extra condition id attached to the role or one of its parents.
+     *
+     * @param roleId the role id
+     * @return the condition ids
+     */
+    public Set<String> getEffectiveConditions(String roleId) {
+        Set<String> result = new HashSet<>();
+        Set<String> visited = new HashSet<>();
+        String current = roleId;
+        while (current != null && !current.isEmpty() && visited.add(current)) {
+            result.addAll(this.getConditions(current));
+            Role role = this.roles().get(current);
+            if (role == null) break;
+            current = role.parent();
+        }
+        return result;
+    }
+
+    /**
+     * Gets every extra condition id attached to any role of the guild.
+     *
+     * @return the condition ids
+     */
+    public Set<String> getConditions() {
+        Set<String> result = new HashSet<>();
+        this.conditions.values().forEach(result::addAll);
+        return result;
     }
 
     /**

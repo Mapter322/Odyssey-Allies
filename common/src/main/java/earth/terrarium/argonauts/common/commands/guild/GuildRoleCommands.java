@@ -6,6 +6,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.teamresourceful.resourcefullib.common.utils.TriState;
+import earth.terrarium.argonauts.Argonauts;
 import earth.terrarium.argonauts.api.teams.guild.Guild;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.api.teams.guild.GuildRoleApi;
@@ -152,6 +153,7 @@ public final class GuildRoleCommands {
                             )
                         )
                     )
+                    .then(Argonauts.IS_CLAIMS_LOADED ? GuildConditionCommands.node() : Commands.literal("condition"))
                 )
             ));
     }
@@ -238,6 +240,9 @@ public final class GuildRoleCommands {
             .filter(entry -> entry.id().equals(settingId))
             .findFirst()
             .orElseThrow(() -> TeamExceptions.SETTING_NOT_FOUND.create());
+        if (guild.getConditions().contains(settingId) && !guild.getConditions(roleId).contains(settingId)) {
+            throw TeamExceptions.SETTING_NOT_FOUND.create();
+        }
 
         role.setOverride(setting.id(), value);
         GuildRoleApi.API.modifyRole(source.getLevel(), guild, role);

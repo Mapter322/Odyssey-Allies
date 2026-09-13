@@ -24,6 +24,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public final class GuildPermissionCommands {
 
@@ -93,7 +94,7 @@ public final class GuildPermissionCommands {
         if (!guild.canManagePermissions(player.getUUID())) throw TeamExceptions.NO_PERMISSION_MANAGE_PERMISSIONS.create();
 
         Component name = keyName(guild, key);
-        if (name == null) throw TeamExceptions.PERMISSION_NOT_FOUND.create();
+        if (name == null || !canUseCondition(guild, target.getUUID(), key)) throw TeamExceptions.PERMISSION_NOT_FOUND.create();
 
         GuildApi.API.modifyPermission(source.getLevel(), guild, target.getUUID(), key, value);
 
@@ -110,7 +111,7 @@ public final class GuildPermissionCommands {
         if (guild == null) throw TeamExceptions.NOT_IN_GUILD.create();
 
         Component name = keyName(guild, key);
-        if (name == null) throw TeamExceptions.PERMISSION_NOT_FOUND.create();
+        if (name == null || !canUseCondition(guild, target.getUUID(), key)) throw TeamExceptions.PERMISSION_NOT_FOUND.create();
 
         boolean value = MemberPermissionsApi.API.getGuildPermissions().containsKey(key)
             ? guild.hasPermission(target.getUUID(), key)
@@ -148,5 +149,10 @@ public final class GuildPermissionCommands {
             .map(MemberSetting::name)
             .findFirst()
             .orElse(null);
+    }
+
+    private static boolean canUseCondition(Guild guild, UUID player, String key) {
+        if (!guild.getConditions().contains(key)) return true;
+        return guild.getEffectiveConditions(guild.getRoleId(player)).contains(key);
     }
 }

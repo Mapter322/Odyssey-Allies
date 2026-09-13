@@ -6,12 +6,16 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import net.minecraft.network.chat.Component;
 import earth.terrarium.argonauts.api.teams.Team;
+import earth.terrarium.argonauts.api.teams.guild.Guild;
 import earth.terrarium.argonauts.api.teams.settings.MemberSetting;
 import earth.terrarium.argonauts.api.teams.settings.MemberSettingState;
 import earth.terrarium.argonauts.api.teams.settings.MemberSettingsApi;
 import earth.terrarium.argonauts.api.teams.settings.MemberSettingsHandler;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class MemberPermissionsApiImpl implements MemberPermissionsApi, MemberSettingsApi {
@@ -43,7 +47,18 @@ public class MemberPermissionsApiImpl implements MemberPermissionsApi, MemberSet
 
     @Override
     public List<MemberSetting> getSettings(Team team) {
-        return List.copyOf(memberSettings);
+        Map<String, MemberSetting> settings = new LinkedHashMap<>();
+        memberSettings.forEach(setting -> settings.put(setting.id(), setting));
+        if (team instanceof Guild guild) {
+            for (Set<String> conditions : guild.conditions().values()) {
+                for (String id : conditions) {
+                    int index = id.indexOf('/');
+                    if (index <= 0) continue;
+                    settings.putIfAbsent(id, new MemberSetting(id, Component.literal(id.substring(index + 1)), Component.empty(), id.substring(0, index)));
+                }
+            }
+        }
+        return List.copyOf(settings.values());
     }
 
     @Override

@@ -18,6 +18,7 @@ public final class Config {
     public static int maxGuildMembers = Argonauts.DEFAULT_MAX_GUILD_MEMBERS;
     public static int maxPartyMembers = Argonauts.DEFAULT_MAX_PARTY_MEMBERS;
     public static boolean teleportEnabled = false;
+    public static int maxGuildTargets = 128;
 
     private Config() {}
 
@@ -28,6 +29,7 @@ public final class Config {
         maxPartyMembers = clamp("maxPartyMembers", data.maxPartyMembers,
             Argonauts.MIN_PARTY_MEMBERS, Argonauts.MAX_PARTY_MEMBERS);
         teleportEnabled = data.teleportEnabled;
+        maxGuildTargets = clamp("maxGuildTargets", data.maxGuildTargets, 1, 1024);
         if (!Files.exists(CONFIG_PATH)) {
             save();
         }
@@ -56,7 +58,7 @@ public final class Config {
     private static void save() {
         try {
             Files.createDirectories(CONFIG_PATH.getParent());
-            Files.writeString(CONFIG_PATH, GSON.toJson(new ConfigData(maxGuildMembers, maxPartyMembers, teleportEnabled)));
+            Files.writeString(CONFIG_PATH, GSON.toJson(new ConfigData(maxGuildMembers, maxPartyMembers, teleportEnabled, maxGuildTargets)));
         } catch (Exception e) {
             LOGGER.error("Failed to save config", e);
         }
@@ -66,13 +68,15 @@ public final class Config {
         int maxGuildMembers = Argonauts.DEFAULT_MAX_GUILD_MEMBERS;
         int maxPartyMembers = Argonauts.DEFAULT_MAX_PARTY_MEMBERS;
         boolean teleportEnabled = false;
+        int maxGuildTargets = 128;
 
         ConfigData() {}
 
-        ConfigData(int maxGuildMembers, int maxPartyMembers, boolean teleportEnabled) {
+        ConfigData(int maxGuildMembers, int maxPartyMembers, boolean teleportEnabled, int maxGuildTargets) {
             this.maxGuildMembers = maxGuildMembers;
             this.maxPartyMembers = maxPartyMembers;
             this.teleportEnabled = teleportEnabled;
+            this.maxGuildTargets = maxGuildTargets;
         }
     }
 }

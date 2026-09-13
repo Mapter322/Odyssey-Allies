@@ -82,6 +82,28 @@ public interface GuildApi {
     void modifySetting(Level level, Guild guild, Setting<?> setting, String settingId);
 
     /**
+     * Adds an extra setting condition to the role. The condition is visible only to that role and
+     * starts as inherited.
+     *
+     * @param level     the level
+     * @param guild     the guild
+     * @param role      the role id
+     * @param condition the condition id, e.g. {@code block-place/minecraft:dirt}
+     */
+    void addCondition(Level level, Guild guild, String role, String condition);
+
+    /**
+     * Removes an extra setting condition from the role and clears the role override for it. Member
+     * overrides are cleared too when no other role uses the condition.
+     *
+     * @param level     the level
+     * @param guild     the guild
+     * @param role      the role id
+     * @param condition the condition id, e.g. {@code block-place/minecraft:dirt}
+     */
+    void removeCondition(Level level, Guild guild, String role, String condition);
+
+    /**
      * Gets a guild by its ID.
      *
      * @param level the level
