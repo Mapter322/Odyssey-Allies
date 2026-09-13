@@ -53,12 +53,17 @@ public final class GuildRoleCommands {
     };
 
     private static final SuggestionProvider<CommandSourceStack> PERMISSION_SUGGESTION_PROVIDER = (context, builder) ->
-        SharedSuggestionProvider.suggest(MemberPermissionsApi.API.getGuildPermissions().keySet(), builder);
+        SharedSuggestionProvider.suggest(MemberPermissionsApi.API.getGuildPermissions().keySet().stream()
+            .map(key -> key.contains(":") ? "\"" + key + "\"" : key)
+            .toList(), builder);
 
     private static final SuggestionProvider<CommandSourceStack> SETTING_SUGGESTION_PROVIDER = (context, builder) -> {
         Guild guild = getGuild(context.getSource());
         if (guild == null) return builder.buildFuture();
-        return SharedSuggestionProvider.suggest(MemberSettingsApi.API.getSettings(guild).stream().map(MemberSetting::id).toList(), builder);
+        return SharedSuggestionProvider.suggest(MemberSettingsApi.API.getSettings(guild).stream()
+            .map(MemberSetting::id)
+            .map(key -> key.contains(":") ? "\"" + key + "\"" : key)
+            .toList(), builder);
     };
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -118,7 +123,7 @@ public final class GuildRoleCommands {
                     .then(Commands.literal("permission")
                         .then(Commands.argument("role", StringArgumentType.word())
                             .suggests(ROLE_SUGGESTION_PROVIDER)
-                            .then(Commands.argument("permission", StringArgumentType.word())
+                            .then(Commands.argument("permission", StringArgumentType.string())
                                 .suggests(PERMISSION_SUGGESTION_PROVIDER)
                                 .then(Commands.argument("value", StringArgumentType.word())
                                     .suggests(TeamArguments.TRI_STATE_SUGGESTION_PROVIDER)
@@ -134,7 +139,7 @@ public final class GuildRoleCommands {
                     .then(Commands.literal("setting")
                         .then(Commands.argument("role", StringArgumentType.word())
                             .suggests(ROLE_SUGGESTION_PROVIDER)
-                            .then(Commands.argument("setting", StringArgumentType.word())
+                            .then(Commands.argument("setting", StringArgumentType.string())
                                 .suggests(SETTING_SUGGESTION_PROVIDER)
                                 .then(Commands.argument("value", StringArgumentType.word())
                                     .suggests(TeamArguments.TRI_STATE_SUGGESTION_PROVIDER)

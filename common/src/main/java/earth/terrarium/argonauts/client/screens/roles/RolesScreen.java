@@ -255,7 +255,7 @@ public class RolesScreen extends BaseScreen {
         LayoutWidget<LinearViewLayout> toggle = tristate(
             displayState(role, setting.id()),
             canEdit,
-            "argonauts guild role setting " + role.id() + " " + setting.id()
+            "argonauts guild role setting " + role.id() + " \"" + setting.id() + "\""
         );
         toggle.withTooltip(setting.description());
         return new LabelledEntry(this.font, setting.name(), toggle)

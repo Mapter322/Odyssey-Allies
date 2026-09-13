@@ -33,7 +33,9 @@ public final class GuildPermissionCommands {
         if (guild == null) return builder.buildFuture();
         List<String> keys = new ArrayList<>(MemberPermissionsApi.API.getGuildPermissions().keySet());
         MemberSettingsApi.API.getSettings(guild).forEach(setting -> keys.add(setting.id()));
-        return SharedSuggestionProvider.suggest(keys, builder);
+        return SharedSuggestionProvider.suggest(keys.stream()
+            .map(key -> key.contains(":") ? "\"" + key + "\"" : key)
+            .toList(), builder);
     };
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -41,25 +43,25 @@ public final class GuildPermissionCommands {
             .then(Commands.literal("guild")
                 .then(Commands.literal("permissions")
                     .then(Commands.literal("set")
-                        .then(Commands.argument("key", StringArgumentType.word())
+                        .then(Commands.argument("key", StringArgumentType.string())
                             .suggests(KEY_SUGGESTION_PROVIDER)
                             .then(Commands.argument("player", EntityArgument.player())
                                 .suggests(TeamSuggestionProviders.CURRENT_GUILD_MEMBERS_SUGGESTION_PROVIDER)
                                 .then(Commands.argument("value", StringArgumentType.word())
                                     .suggests(TeamArguments.TRI_STATE_SUGGESTION_PROVIDER)
                                     .executes(context -> {
-                                        TriState value = TeamArguments.parseTriState(StringArgumentType.getString(context, "value"));
-                                        if (value == null) throw TeamExceptions.INVALID_PERMISSION_VALUE.create();
-                                        set(context.getSource(), StringArgumentType.getString(context, "key"),
-                                            EntityArgument.getPlayer(context, "player"), value);
-                                        return 1;
+                                            TriState value = TeamArguments.parseTriState(StringArgumentType.getString(context, "value"));
+                                            if (value == null) throw TeamExceptions.INVALID_PERMISSION_VALUE.create();
+                                            set(context.getSource(), StringArgumentType.getString(context, "key"),
+                                                EntityArgument.getPlayer(context, "player"), value);
+                                            return 1;
                                     })
                                 )
                             )
                         )
                     )
                     .then(Commands.literal("get")
-                        .then(Commands.argument("key", StringArgumentType.word())
+                        .then(Commands.argument("key", StringArgumentType.string())
                             .suggests(KEY_SUGGESTION_PROVIDER)
                             .then(Commands.argument("player", EntityArgument.player())
                                 .suggests(TeamSuggestionProviders.CURRENT_GUILD_MEMBERS_SUGGESTION_PROVIDER)

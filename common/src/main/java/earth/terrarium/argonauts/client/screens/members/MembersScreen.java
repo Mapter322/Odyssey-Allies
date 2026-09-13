@@ -331,7 +331,7 @@ public class MembersScreen extends BaseScreen {
                     .withCentered(10, 10)
             ))
             .withSize(TRISTATE_W, TRISTATE_H)
-            .withCallback(selected -> ScreenUtils.sendCommand("argonauts %s permissions set %s %s %s".formatted(
+            .withCallback(selected -> ScreenUtils.sendCommand("argonauts %s permissions set \"%s\" %s %s".formatted(
                 team.type(), key, profile.getName(), TeamArguments.triStateName(selected)))), layout -> {});
         toggle.withTooltip(description);
         toggle.active = canEdit;
