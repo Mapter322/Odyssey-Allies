@@ -249,9 +249,5 @@
     "gui.argonauts.max_guild_members": "Max Guild Members",
     "gui.argonauts.max_party_members": "Max Party Members",
     "gui.argonauts.inventory.guild_button": "Guild",
-    "gui.argonauts.inventory.party_button": "Party",
-
-    "rei.sections.project_odyssey": "Project Odyssey",
-    "rei.argonauts.party_chat.tooltip": "Open Party Chat",
-    "rei.argonauts.party_management.tooltip": "Open Party Management"
+    "gui.argonauts.inventory.party_button": "Party"
 }

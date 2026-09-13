@@ -25,9 +25,6 @@
         ],
         "client": [
             "earth.terrarium.argonauts.client.fabric.ArgonautsClientFabric"
-        ],
-        "rei_client": [
-            "earth.terrarium.argonauts.client.compat.rei.ArgonautsReiClientPlugin"
         ]
     },
     "mixins": [

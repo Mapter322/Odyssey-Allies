@@ -49,7 +49,6 @@ subprojects {
         val resourcefulLibVersion: String by project
         val cadmusVersion: String by project
         val heraclesVersion: String by project
-        val reiVersion: String by project
 
         "minecraft"("::$minecraftVersion")
 
@@ -75,15 +74,9 @@ subprojects {
             "modCompileOnly"(group = "earth.terrarium.heracles", name = "heracles-$modLoader-1.20.1", version = heraclesVersion) {
                 isTransitive = false
             }
-
-            "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-api", version = reiVersion)
-            "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-default-plugin", version = reiVersion)
         } else {
 //            "modLocalRuntime"(group = "earth.terrarium.heracles", name = "heracles-$modLoader-1.20.1", version = heraclesVersion)
 
-            "modRuntimeOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-$modLoader", version = reiVersion)
-            "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-api-$modLoader", version = reiVersion)
-            "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-default-plugin-$modLoader", version = reiVersion)
             "include"(olympus)
         }
     }
