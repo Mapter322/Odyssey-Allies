@@ -5,6 +5,7 @@ import com.teamresourceful.resourcefullib.client.utils.ScreenUtils;
 import com.teamresourceful.resourcefullib.common.color.Color;
 import earth.terrarium.argonauts.api.teams.Team;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
+import earth.terrarium.argonauts.Argonauts;
 import earth.terrarium.argonauts.client.Modals;
 import earth.terrarium.argonauts.client.screens.BaseScreen;
 import earth.terrarium.argonauts.client.screens.chat.ChatScreen;
@@ -128,6 +129,9 @@ public class GuildMainMenuScreen extends BaseScreen {
         list.add(navButton(width, Component.translatable("gui.argonauts.info.chat_button"), ChatScreen::openGuild));
         list.add(navButton(width, Component.translatable("gui.argonauts.info.settings_button"), SettingsScreen::openGuild));
         list.add(navButton(width, Component.translatable("gui.argonauts.info.claim_map_button"), () -> CadmusClient.openClaimMap(this)));
+        if (Argonauts.IS_CLAIMS_LOADED) {
+            list.add(navButton(width, Component.translatable("gui.argonauts.info.claim_settings_button"), () -> CadmusClient.requestGuildClaimSettings(this.team.id())));
+        }
 
         list.add(new DividerWidget());
 
