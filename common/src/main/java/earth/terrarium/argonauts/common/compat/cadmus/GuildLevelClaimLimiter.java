@@ -20,6 +20,10 @@ public class GuildLevelClaimLimiter implements ClaimLimiter {
 
     @Override
     public int getMaxChunkLoadedClaims(MinecraftServer server, TeamId id) {
-        return Integer.MAX_VALUE;
+        if (!ArgonautsTeam.ID.equals(id.provider())) return Integer.MAX_VALUE;
+        return GuildApi.API.get(server.overworld(), id.id())
+            .map(guild -> Config.getMaxForceloads(Settings.LEVEL.get(guild)))
+            .filter(limit -> limit > 0)
+            .orElse(Integer.MAX_VALUE);
     }
 }
