@@ -63,6 +63,11 @@ public abstract class BaseScreen extends BaseCursorScreen implements ScreenHisto
     }
 
     @Override
+    public boolean isPauseScreen() {
+        return false;
+    }
+
+    @Override
     public boolean mouseClicked(double mx, double my, int button) {
         double relMx = mx - this.leftPos;
         double relMy = my - this.topPos;

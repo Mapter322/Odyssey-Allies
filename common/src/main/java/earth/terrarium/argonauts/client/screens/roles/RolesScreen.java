@@ -436,6 +436,7 @@ public class RolesScreen extends BaseScreen {
     @Override
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         graphics.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
+        this.renderBlurredBackground(partialTick);
         this.renderBg(graphics, partialTick, mouseX, mouseY);
     }
 
