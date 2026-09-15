@@ -4,6 +4,7 @@ import earth.terrarium.argonauts.api.teams.settings.Setting;
 import earth.terrarium.argonauts.api.teams.settings.TeamSettingsApi;
 import earth.terrarium.argonauts.api.teams.settings.types.BooleanSetting;
 import earth.terrarium.argonauts.api.teams.settings.types.ColorSettings;
+import earth.terrarium.argonauts.api.teams.settings.types.IntegerSetting;
 import earth.terrarium.argonauts.api.teams.settings.types.OptionalGlobalPosSetting;
 import earth.terrarium.argonauts.api.teams.settings.types.StringSetting;
 import earth.terrarium.argonauts.common.utils.Config;
@@ -18,6 +19,8 @@ public class Settings {
 
     public static final StringSetting DISPLAY_NAME = register(new StringSetting("displayName", ""));
     public static final ColorSettings COLOR = register(new ColorSettings("color", MinecraftColors.WHITE));
+
+    public static final IntegerSetting LEVEL = register(new IntegerSetting("level", 1));
 
     public static final BooleanSetting PUBLIC = register(new BooleanSetting("public", false));
     public static final BooleanSetting FRIENDLY_FIRE = register(new BooleanSetting("friendlyFire", true));

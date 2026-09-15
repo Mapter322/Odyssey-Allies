@@ -28,6 +28,7 @@ public class ArgonautsCommands {
         }
         GuildFakePlayerCommands.register(dispatcher);
         GuildAdminCommands.register(dispatcher);
+        GuildLevelCommand.register(dispatcher);
 
         PartyCreateCommand.register(dispatcher);
         PartyDisbandCommand.register(dispatcher);

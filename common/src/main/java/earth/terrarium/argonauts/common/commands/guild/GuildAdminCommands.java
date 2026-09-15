@@ -10,6 +10,7 @@ import earth.terrarium.argonauts.common.commands.TeamExceptions;
 import earth.terrarium.argonauts.common.guild.GuildSaveData;
 import earth.terrarium.argonauts.common.permissions.Permissions;
 import earth.terrarium.argonauts.common.settings.Settings;
+import earth.terrarium.argonauts.common.utils.Config;
 import earth.terrarium.argonauts.api.util.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -32,8 +33,8 @@ public class GuildAdminCommands {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("argonauts")
             .then(Commands.literal("guild")
-                .requires(source -> source.hasPermission(2))
                 .then(Commands.literal("admin")
+                    .requires(source -> source.hasPermission(2))
                     .then(Commands.literal("join")
                         .then(Commands.argument("id", UuidArgument.uuid())
                             .suggests(GUILDS_SUGGESTION_PROVIDER)
@@ -67,6 +68,7 @@ public class GuildAdminCommands {
         Guild guild = GuildApi.API.get(source.getLevel(), id).orElse(null);
         if (guild == null) throw TeamExceptions.GUILD_DOES_NOT_EXIST.create();
         if (GuildApi.API.getPlayerGuild(player).isPresent()) throw TeamExceptions.ALREADY_IN_GUILD.create();
+        if (guild.realMembersCount() >= Config.getMaxMembers(Settings.LEVEL.get(guild))) throw TeamExceptions.GUILD_FULL.create();
 
         GuildApi.API.join(source.getLevel(), guild, id);
         GuildApi.API.modifyPermission(source.getLevel(), guild, player.getUUID(), Permissions.OPERATOR, TriState.TRUE);

@@ -9,6 +9,7 @@ import earth.terrarium.argonauts.api.teams.guild.Role;
 import earth.terrarium.argonauts.api.teams.permissions.MemberPermissionsApi;
 import earth.terrarium.argonauts.api.teams.settings.MemberSetting;
 import earth.terrarium.argonauts.api.teams.settings.MemberSettingsApi;
+import earth.terrarium.argonauts.common.utils.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,7 +116,7 @@ public final class RoleDefaultsConfig {
 
     private static Map<String, TriState> parse(String text) {
         Map<String, TriState> values = new LinkedHashMap<>();
-        JsonObject root = JsonParser.parseString(stripComments(text)).getAsJsonObject();
+        JsonObject root = JsonParser.parseString(JsonUtils.stripComments(text)).getAsJsonObject();
 
         JsonObject permissions = asObject(root.get("permissions"), "permissions");
         if (permissions != null) {
@@ -256,38 +257,6 @@ public final class RoleDefaultsConfig {
         if (element.isJsonObject()) return element.getAsJsonObject();
         LOGGER.warn("Role defaults section '{}' is not an object, skipping", key);
         return null;
-    }
-
-    private static String stripComments(String text) {
-        StringBuilder sb = new StringBuilder(text.length());
-        boolean inString = false;
-        boolean escape = false;
-        for (int i = 0; i < text.length(); i++) {
-            char c = text.charAt(i);
-            if (inString) {
-                sb.append(c);
-                if (escape) {
-                    escape = false;
-                } else if (c == '\\') {
-                    escape = true;
-                } else if (c == '"') {
-                    inString = false;
-                }
-                continue;
-            }
-            if (c == '"') {
-                inString = true;
-                sb.append(c);
-                continue;
-            }
-            if (c == '/' && i + 1 < text.length() && text.charAt(i + 1) == '/') {
-                while (i < text.length() && text.charAt(i) != '\n') i++;
-                if (i < text.length()) sb.append('\n');
-                continue;
-            }
-            sb.append(c);
-        }
-        return sb.toString();
     }
 
     public record RoleTarget(String parent, String key) {

@@ -176,6 +176,7 @@ public class GuildMainMenuScreen extends BaseScreen {
 
         list.add(section(Component.translatable("gui.argonauts.menu.section.general")));
         list.add(labelled(Component.translatable("gui.argonauts.info.owner"), ownerName()));
+        list.add(labelled(Component.translatable("gui.argonauts.info.level"), Component.literal(String.valueOf(Settings.LEVEL.get(this.team)))));
         list.add(labelled(Component.translatable("gui.argonauts.info.members"), membersValue()));
         list.add(labelled(Component.translatable("gui.argonauts.info.online"), onlineValue()));
         list.add(labelled(Component.translatable("gui.argonauts.info.public"), yesNo(Settings.PUBLIC.get(this.team))));
@@ -243,13 +244,13 @@ public class GuildMainMenuScreen extends BaseScreen {
 
     private Component membersValue() {
         int count = this.team.realMembersCount();
-        int max = Config.maxGuildMembers;
+        int max = Config.getMaxMembers(Settings.LEVEL.get(this.team));
         return Component.literal(count + "/" + max);
     }
 
     private Component onlineValue() {
         int online = this.team.onlineMembers(Objects.requireNonNull(Minecraft.getInstance().level)).size();
-        int max = Config.maxGuildMembers;
+        int max = Config.getMaxMembers(Settings.LEVEL.get(this.team));
         return Component.literal(online + "/" + max);
     }
 

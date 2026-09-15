@@ -7,6 +7,7 @@ import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.common.commands.TeamExceptions;
 import earth.terrarium.argonauts.common.commands.TeamSuggestionProviders;
 import earth.terrarium.argonauts.common.settings.Settings;
+import earth.terrarium.argonauts.common.utils.Config;
 import earth.terrarium.argonauts.api.util.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -37,6 +38,7 @@ public final class GuildJoinCommand {
         if (GuildApi.API.getPlayerGuild(player).isPresent()) throw TeamExceptions.ALREADY_IN_GUILD.create();
         if (player.getUUID().equals(targetPlayer.getUUID())) throw TeamExceptions.NOT_IN_GUILD.create();
         if (!guild.isPublic() && !guild.isInvited(player.getUUID())) throw TeamExceptions.NOT_INVITED_TO_GUILD.create();
+        if (guild.realMembersCount() >= Config.getMaxMembers(Settings.LEVEL.get(guild))) throw TeamExceptions.GUILD_FULL.create();
 
         GuildApi.API.join(source.getLevel(), guild, player.getUUID());
 

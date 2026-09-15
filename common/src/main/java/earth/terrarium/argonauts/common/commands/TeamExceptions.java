@@ -19,6 +19,7 @@ public class TeamExceptions {
     public static final SimpleCommandExceptionType FAKE_PLAYER_ALREADY_IN_GUILD = create("command.argonauts.exception.fake_player_already_in_guild");
     public static final SimpleCommandExceptionType FAKE_PLAYER_NOT_IN_GUILD = create("command.argonauts.exception.fake_player_not_in_guild");
     public static final SimpleCommandExceptionType GUILD_DOES_NOT_EXIST = create("command.argonauts.exception.guild_does_not_exist");
+    public static final SimpleCommandExceptionType INVALID_GUILD_LEVEL = create("command.argonauts.exception.invalid_guild_level");
 
     public static final SimpleCommandExceptionType ALREADY_IN_PARTY = create("command.argonauts.exception.already_in_party");
     public static final SimpleCommandExceptionType NOT_IN_PARTY = create("command.argonauts.exception.not_in_party");

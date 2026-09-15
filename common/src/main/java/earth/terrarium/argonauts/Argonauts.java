@@ -30,10 +30,6 @@ public class Argonauts {
     public static final boolean IS_CLAIMS_LOADED = ModInfoUtils.isModLoaded("cadmus");
     public static final boolean IS_QUESTS_LOADED = ModInfoUtils.isModLoaded("odyssey_quests");
 
-    public static final int MIN_GUILD_MEMBERS = 6;
-    public static final int MAX_GUILD_MEMBERS = 64;
-    public static final int DEFAULT_MAX_GUILD_MEMBERS = 16;
-
     public static final int MIN_PARTY_MEMBERS = 2;
     public static final int MAX_PARTY_MEMBERS = 8;
     public static final int DEFAULT_MAX_PARTY_MEMBERS = 4;

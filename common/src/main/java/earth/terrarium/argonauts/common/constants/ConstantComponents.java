@@ -68,9 +68,6 @@ public class ConstantComponents {
     public static final Component INVITE_MEMBER_DESCRIPTION = Component.translatable("gui.argonauts.invite_member.description");
     public static final Component INVITE_MEMBER_PLACEHOLDER = Component.translatable("gui.argonauts.invite_member.placeholder");
 
-    public static final Component MAX_GUILD_MEMBERS = Component.translatable("gui.argonauts.max_guild_members");
-    public static final Component MAX_PARTY_MEMBERS = Component.translatable("gui.argonauts.max_party_members");
-
     public static final Component INVENTORY_GUILD_BUTTON = Component.translatable("gui.argonauts.inventory.guild_button");
     public static final Component INVENTORY_PARTY_BUTTON = Component.translatable("gui.argonauts.inventory.party_button");
 }

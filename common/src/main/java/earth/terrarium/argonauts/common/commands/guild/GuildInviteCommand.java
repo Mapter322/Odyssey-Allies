@@ -7,6 +7,7 @@ import earth.terrarium.argonauts.api.teams.guild.Guild;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.common.commands.TeamExceptions;
 import earth.terrarium.argonauts.common.constants.ConstantComponents;
+import earth.terrarium.argonauts.common.settings.Settings;
 import earth.terrarium.argonauts.common.utils.Config;
 import earth.terrarium.argonauts.api.util.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
@@ -40,7 +41,7 @@ public final class GuildInviteCommand {
         if (player.getUUID().equals(targetPlayer.getUUID())) throw TeamExceptions.CANT_INVITE_YOURSELF.create();
         if (!guild.isPublic() && !guild.canManageMembers(player.getUUID())) throw TeamExceptions.NO_PERMISSION_MANAGE_MEMBERS.create();
         if (guild.isMember(targetPlayer.getUUID())) throw TeamExceptions.PLAYER_IS_GUILD_MEMBER.create();
-        if (guild.realMembersCount() >= Config.maxGuildMembers) throw TeamExceptions.GUILD_FULL.create();
+        if (guild.realMembersCount() >= Config.getMaxMembers(Settings.LEVEL.get(guild))) throw TeamExceptions.GUILD_FULL.create();
 
         GuildApi.API.modifyMember(source.getLevel(), guild, targetPlayer.getUUID(), MemberStatus.INVITED);
 

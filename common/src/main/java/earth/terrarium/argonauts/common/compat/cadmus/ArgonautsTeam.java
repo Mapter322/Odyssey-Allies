@@ -5,6 +5,8 @@ import com.teamresourceful.resourcefullib.common.color.Color;
 import earth.terrarium.argonauts.Argonauts;
 import earth.terrarium.argonauts.api.teams.guild.Guild;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
+import earth.terrarium.argonauts.common.settings.Settings;
+import earth.terrarium.argonauts.common.utils.Config;
 import earth.terrarium.cadmus.api.teams.TeamProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -54,6 +56,13 @@ public class ArgonautsTeam implements TeamProvider {
     public boolean canModifySettings(Level level, UUID teamId, GameProfile player) {
          return GuildApi.API.get(level, teamId)
             .map(guild -> guild.canManageSettings(player.getId())).orElse(false);
+    }
+
+    @Override
+    public int getMaxTowns(Level level, UUID teamId) {
+        return GuildApi.API.get(level, teamId)
+            .map(guild -> Config.getMaxTowns(Settings.LEVEL.get(guild)))
+            .orElse(DEFAULT_MAX_TOWNS);
     }
 
     @Override

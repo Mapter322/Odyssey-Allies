@@ -133,6 +133,9 @@
     "command.argonauts.setting.set": "§7Set setting§b %s§7 from §6%s§7 to §6%s",
     "command.argonauts.setting.get": "§b%s§7 is set to §b%s",
 
+    "command.argonauts.level.set": "§7Set level§b %s§7 for guild §6%s",
+    "command.argonauts.level.get": "§6%s§7 is level§b %s",
+
     "command.argonauts.exception.already_in_guild": "You are already in a guild.",
     "command.argonauts.exception.not_in_guild": "You are not in a guild.",
     "command.argonauts.exception.player_not_in_guild": "This player is not in your guild.",
@@ -147,6 +150,7 @@
     "command.argonauts.exception.fake_player_already_in_guild": "This fake player is already in your guild.",
     "command.argonauts.exception.fake_player_not_in_guild": "This fake player is not in your guild.",
     "command.argonauts.exception.guild_does_not_exist": "This guild does not exist.",
+    "command.argonauts.exception.invalid_guild_level": "This guild level does not exist.",
     "command.argonauts.exception.guild_not_empty": "You can't leave a guild that still has members.",
 
     "command.argonauts.exception.already_in_party": "You are already in a party.",
@@ -188,15 +192,10 @@
     "command.argonauts.exception.condition_not_found": "This guild has no such condition.",
     "command.argonauts.exception.condition_limit": "This guild has reached the condition limit.",
 
-    "gamerule.maxGuildMembers": "Max Guild Members",
-    "gamerule.maxPartyMembers": "Max Party Members",
-
-    "gamerule.maxGuildMembers.description": "Max Guild Members",
-    "gamerule.maxPartyMembers.description": "Max Party Members",
-
     "gui.argonauts.guild_info.title": "Guild Menu",
     "gui.argonauts.party_info.title": "Party Menu",
     "gui.argonauts.info.owner": "Owner:",
+    "gui.argonauts.info.level": "Level:",
     "gui.argonauts.info.members": "Members:",
     "gui.argonauts.info.online": "Online:",
     "gui.argonauts.info.members_button": "Members",
@@ -257,8 +256,6 @@
     "gui.argonauts.remove_member": "Remove Member",
     "gui.argonauts.remove": "Remove",
 
-    "gui.argonauts.max_guild_members": "Max Guild Members",
-    "gui.argonauts.max_party_members": "Max Party Members",
     "gui.argonauts.inventory.guild_button": "Guild",
     "gui.argonauts.inventory.party_button": "Party"
 }
