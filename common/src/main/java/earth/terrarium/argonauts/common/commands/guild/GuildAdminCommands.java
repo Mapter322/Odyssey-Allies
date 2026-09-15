@@ -3,12 +3,10 @@ package earth.terrarium.argonauts.common.commands.guild;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import com.teamresourceful.resourcefullib.common.utils.TriState;
 import earth.terrarium.argonauts.api.teams.guild.Guild;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.common.commands.TeamExceptions;
 import earth.terrarium.argonauts.common.guild.GuildSaveData;
-import earth.terrarium.argonauts.common.permissions.Permissions;
 import earth.terrarium.argonauts.common.settings.Settings;
 import earth.terrarium.argonauts.common.utils.Config;
 import earth.terrarium.argonauts.api.util.ModUtils;
@@ -71,7 +69,6 @@ public class GuildAdminCommands {
         if (guild.realMembersCount() >= Config.getMaxMembers(Settings.LEVEL.get(guild))) throw TeamExceptions.GUILD_FULL.create();
 
         GuildApi.API.join(source.getLevel(), guild, id);
-        GuildApi.API.modifyPermission(source.getLevel(), guild, player.getUUID(), Permissions.OPERATOR, TriState.TRUE);
 
         if (Settings.ANNOUNCE_JOIN.get(guild)) {
             guild.onlineMembers(source.getLevel())

@@ -109,7 +109,6 @@ public interface Team {
     default boolean hasPermission(UUID player, String permission) {
         Member member = this.members().get(player);
         return member != null && member.status().isMember() && (member.isOwner() ||
-            member.hasPermission(Permissions.OPERATOR) ||
             member.hasPermission(permission));
     }
 
@@ -131,6 +130,16 @@ public interface Team {
      */
     default boolean canManageSettings(UUID player) {
         return hasPermission(player, Permissions.MANAGE_SETTINGS);
+    }
+
+    /**
+     * Checks if the player can manage the claims of the team.
+     *
+     * @param player the player
+     * @return if the player can manage the claims
+     */
+    default boolean canManageClaims(UUID player) {
+        return hasPermission(player, Permissions.MANAGE_CLAIMS);
     }
 
     /**

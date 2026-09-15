@@ -68,6 +68,12 @@ public class ArgonautsTeam implements TeamProvider {
     }
 
     @Override
+    public boolean canManageClaims(Level level, UUID teamId, GameProfile player) {
+        return GuildApi.API.get(level, teamId)
+            .map(guild -> guild.canManageClaims(player.getId())).orElse(false);
+    }
+
+    @Override
     public Set<UUID> getAllTeams(MinecraftServer server) {
         return GuildApi.API.getAll(server.overworld()).stream()
             .map(Guild::id).collect(Collectors.toSet());

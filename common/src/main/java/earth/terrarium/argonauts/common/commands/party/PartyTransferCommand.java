@@ -7,7 +7,6 @@ import earth.terrarium.argonauts.api.teams.party.Party;
 import earth.terrarium.argonauts.api.teams.party.PartyApi;
 import earth.terrarium.argonauts.common.commands.TeamExceptions;
 import earth.terrarium.argonauts.common.commands.TeamSuggestionProviders;
-import earth.terrarium.argonauts.common.permissions.Permissions;
 import earth.terrarium.argonauts.api.util.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -40,7 +39,6 @@ public final class PartyTransferCommand {
         if (player.getUUID().equals(targetPlayer.getUUID())) throw TeamExceptions.CANT_TRANSFER_TO_YOURSELF.create();
 
         PartyApi.API.modifyMember(source.getLevel(), party, player.getUUID(), MemberStatus.MEMBER);
-        PartyApi.API.modifyPermission(source.getLevel(), party, player.getUUID(), Permissions.OPERATOR, true);
         PartyApi.API.modifyMember(source.getLevel(), party, targetPlayer.getUUID(), MemberStatus.OWNER);
 
         source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.transfer_party", targetPlayer.getName()), false);

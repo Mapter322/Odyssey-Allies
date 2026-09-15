@@ -14,7 +14,6 @@ import earth.terrarium.argonauts.api.teams.settings.types.ColorSettings;
 import earth.terrarium.argonauts.api.teams.settings.types.StringSetting;
 import earth.terrarium.argonauts.api.util.ModUtils;
 import earth.terrarium.argonauts.common.guild.GuildRoleDefaults;
-import earth.terrarium.argonauts.common.permissions.Permissions;
 import earth.terrarium.argonauts.common.settings.Settings;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -284,7 +283,6 @@ public record Guild(
         Member member = this.members().get(player);
         if (member == null || !member.status().isMember()) return false;
         if (member.isOwner()) return true;
-        if (this.getPermission(member, Permissions.OPERATOR) == TriState.TRUE) return true;
         return this.getPermission(member, permission) == TriState.TRUE;
     }
 }
