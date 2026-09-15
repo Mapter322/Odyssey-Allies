@@ -21,6 +21,10 @@ public final class PartyHudData {
         }
     }
 
+    public static void clear() {
+        MEMBERS.clear();
+    }
+
     public static MemberData get(UUID id) {
         return MEMBERS.get(id);
     }

@@ -92,6 +92,11 @@ public class PartySaveData extends SaveHandler {
         return read(level, HandlerType.create(CLIENT_SIDE, PartySaveData::new), "argonauts_parties");
     }
 
+    public static void clearClientSide() {
+        CLIENT_SIDE.parties.clear();
+        CLIENT_SIDE.partiesByPlayer.clear();
+    }
+
     public Map<UUID, Party> parties() {
         return this.parties;
     }

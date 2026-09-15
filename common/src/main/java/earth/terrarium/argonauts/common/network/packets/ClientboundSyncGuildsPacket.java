@@ -9,6 +9,7 @@ import earth.terrarium.argonauts.Argonauts;
 import earth.terrarium.argonauts.api.teams.guild.Guild;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.client.ArgonautsClient;
+import earth.terrarium.argonauts.common.guild.GuildSaveData;
 
 import java.util.Set;
 
@@ -38,7 +39,10 @@ public record ClientboundSyncGuildsPacket(
 
         @Override
         public Runnable handle(ClientboundSyncGuildsPacket packet) {
-            return () -> packet.guilds.forEach(guild -> GuildApi.API.create(ArgonautsClient.level(), guild));
+            return () -> {
+                GuildSaveData.clearClientSide();
+                packet.guilds.forEach(guild -> GuildApi.API.create(ArgonautsClient.level(), guild));
+            };
         }
     }
 }

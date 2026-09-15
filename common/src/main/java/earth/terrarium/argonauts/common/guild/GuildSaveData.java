@@ -180,6 +180,11 @@ public class GuildSaveData extends SaveHandler {
         return read(level, HandlerType.create(CLIENT_SIDE, GuildSaveData::new), "argonauts_guilds");
     }
 
+    public static void clearClientSide() {
+        CLIENT_SIDE.guilds.clear();
+        CLIENT_SIDE.guildsByPlayer.clear();
+    }
+
     public void markDirty() {
         setDirty();
     }

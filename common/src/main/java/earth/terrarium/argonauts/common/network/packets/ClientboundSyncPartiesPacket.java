@@ -9,6 +9,7 @@ import earth.terrarium.argonauts.Argonauts;
 import earth.terrarium.argonauts.api.teams.party.Party;
 import earth.terrarium.argonauts.api.teams.party.PartyApi;
 import earth.terrarium.argonauts.client.ArgonautsClient;
+import earth.terrarium.argonauts.common.party.PartySaveData;
 
 import java.util.Set;
 
@@ -38,7 +39,10 @@ public record ClientboundSyncPartiesPacket(
 
         @Override
         public Runnable handle(ClientboundSyncPartiesPacket packet) {
-            return () -> packet.parties.forEach(party -> PartyApi.API.create(ArgonautsClient.level(), party));
+            return () -> {
+                PartySaveData.clearClientSide();
+                packet.parties.forEach(party -> PartyApi.API.create(ArgonautsClient.level(), party));
+            };
         }
     }
 }

@@ -6,9 +6,12 @@ import earth.terrarium.argonauts.client.screens.chat.ChatScreen;
 import earth.terrarium.argonauts.client.screens.menu.guild.GuildMainMenuScreen;
 import earth.terrarium.argonauts.client.screens.menu.party.PartyMainMenuScreen;
 import earth.terrarium.argonauts.client.screens.widgets.IconButton;
+import earth.terrarium.argonauts.client.hud.PartyHudData;
 import earth.terrarium.argonauts.client.hud.PartyHudRenderer;
 import earth.terrarium.argonauts.common.chat.ChatHandler;
 import earth.terrarium.argonauts.common.constants.ConstantComponents;
+import earth.terrarium.argonauts.common.guild.GuildSaveData;
+import earth.terrarium.argonauts.common.party.PartySaveData;
 import earth.terrarium.argonauts.mixins.client.ScreenWidgetInvoker;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -112,5 +115,8 @@ public class ArgonautsClient {
     public static void onPlayerLoggedOut() {
         ChatHandler.clearChannels();
         NotificationManager.clear();
+        PartyHudData.clear();
+        GuildSaveData.clearClientSide();
+        PartySaveData.clearClientSide();
     }
 }

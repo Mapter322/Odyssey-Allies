@@ -16,13 +16,13 @@ import net.minecraft.commands.Commands;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 @Mod(value = Argonauts.MOD_ID, dist = Dist.CLIENT)
 public class ArgonautsClientNeoForge {
@@ -66,7 +66,7 @@ public class ArgonautsClientNeoForge {
         event.register(ArgonautsClient.KEY_OPEN_GUILD_CHAT);
     }
 
-    private static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+    private static void onPlayerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
         ArgonautsClient.onPlayerLoggedOut();
     }
 
