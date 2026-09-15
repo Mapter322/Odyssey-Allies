@@ -1,6 +1,7 @@
 package earth.terrarium.argonauts.common.compat.cadmus;
 
 import earth.terrarium.argonauts.api.events.ArgonautsEvents;
+import earth.terrarium.cadmus.api.claims.limit.ClaimLimitApi;
 import earth.terrarium.cadmus.api.teams.TeamApi;
 import net.minecraft.server.level.ServerLevel;
 
@@ -8,6 +9,7 @@ public class CadmusCompat {
 
     public static void init() {
         TeamApi.API.register(ArgonautsTeam.ID, ArgonautsTeam.INSTANCE);
+        ClaimLimitApi.API.register(new GuildLevelClaimLimiter());
 
         ArgonautsEvents.CreateGuildEvent.register((level, guild) -> {
             if (!level.isClientSide()) {

@@ -7,6 +7,8 @@ import earth.terrarium.argonauts.api.teams.guild.Guild;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.common.settings.Settings;
 import earth.terrarium.argonauts.common.utils.Config;
+import earth.terrarium.cadmus.api.claims.limit.ClaimLimitApi;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.api.teams.TeamProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -69,5 +71,11 @@ public class ArgonautsTeam implements TeamProvider {
     public Set<UUID> getAllTeams(MinecraftServer server) {
         return GuildApi.API.getAll(server.overworld()).stream()
             .map(Guild::id).collect(Collectors.toSet());
+    }
+
+    @Override
+    public void onChange(MinecraftServer server, UUID id) {
+        TeamProvider.super.onChange(server, id);
+        ClaimLimitApi.API.calculate(server, new TeamId(ID, id), true);
     }
 }

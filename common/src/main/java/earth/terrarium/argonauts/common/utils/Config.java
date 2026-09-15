@@ -15,7 +15,7 @@ public final class Config {
     private static final Logger LOGGER = LoggerFactory.getLogger(Argonauts.MOD_ID);
     private static final Gson GSON = new Gson();
     private static final Path CONFIG_PATH = Path.of("config", Argonauts.MOD_ID, "argonauts-common.json");
-    private static final GuildLevel FALLBACK = new GuildLevel(1, 8);
+    private static final GuildLevel FALLBACK = new GuildLevel(1, 8, 50);
 
     public static int maxPartyMembers = Argonauts.DEFAULT_MAX_PARTY_MEMBERS;
     public static boolean teleportEnabled = false;
@@ -51,6 +51,10 @@ public final class Config {
         return resolve(level).maxMembers;
     }
 
+    public static int getMaxClaims(int level) {
+        return Math.max(0, resolve(level).maxClaims);
+    }
+
     private static GuildLevel resolve(int level) {
         GuildLevel exact = guildLevels.get(level);
         if (exact != null) return exact;
@@ -81,9 +85,9 @@ public final class Config {
 
     private static Map<Integer, GuildLevel> defaultGuildLevels() {
         Map<Integer, GuildLevel> levels = new LinkedHashMap<>();
-        levels.put(1, new GuildLevel(1, 8));
-        levels.put(2, new GuildLevel(2, 16));
-        levels.put(3, new GuildLevel(3, 32));
+        levels.put(1, new GuildLevel(1, 8, 50));
+        levels.put(2, new GuildLevel(2, 16, 120));
+        levels.put(3, new GuildLevel(3, 32, 300));
         return levels;
     }
 
@@ -112,7 +116,7 @@ public final class Config {
         sb.append("  \"maxPartyMembers\": ").append(maxPartyMembers).append(",\n");
         sb.append("  \"teleportEnabled\": ").append(teleportEnabled).append(",\n");
         sb.append("  \"maxGuildTargets\": ").append(maxGuildTargets).append(",\n");
-        sb.append("  // Guild levels: maxTowns and maxMembers per level.\n");
+        sb.append("  // Guild levels: maxTowns, maxMembers and maxClaims per level (maxClaims 0 means no level cap).\n");
         sb.append("  // New levels like 4, 5, etc. can be added; assign a guild's level with /argonauts guild admin level set <guild> <level>.\n");
         sb.append("  \"guildLevels\": ").append(GSON.toJson(guildLevels)).append("\n");
         sb.append("}\n");
@@ -127,12 +131,14 @@ public final class Config {
     public static final class GuildLevel {
         public int maxTowns;
         public int maxMembers;
+        public int maxClaims;
 
         GuildLevel() {}
 
-        GuildLevel(int maxTowns, int maxMembers) {
+        GuildLevel(int maxTowns, int maxMembers, int maxClaims) {
             this.maxTowns = maxTowns;
             this.maxMembers = maxMembers;
+            this.maxClaims = maxClaims;
         }
     }
 
