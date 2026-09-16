@@ -280,13 +280,14 @@ public record Guild(
 
     /**
      * Resolves the value of a permission for a member, applying personal overrides before the
-     * role chain.
+     * role chain. The guild owner always has every permission.
      *
      * @param member     the member
      * @param permission the permission
      * @return the resolved value
      */
     public TriState getPermission(Member member, String permission) {
+        if (member.isOwner()) return TriState.TRUE;
         String roleId = member.role().isEmpty() ? Role.MEMBER : member.role();
         if (this.isTargetRemoved(roleId, permission)) return TriState.UNDEFINED;
         if (this.isTargetExclusive(roleId, permission)) return TriState.UNDEFINED;
@@ -297,7 +298,7 @@ public record Guild(
 
     /**
      * Resolves the value of a permission for the player, applying personal overrides before the
-     * role chain.
+     * role chain. The guild owner always has every permission.
      *
      * @param player     the player
      * @param permission the permission or setting id
@@ -305,6 +306,7 @@ public record Guild(
      */
     public TriState getPermission(UUID player, String permission) {
         Member member = this.members().get(player);
+        if (member != null && member.isOwner()) return TriState.TRUE;
         String roleId = this.getRoleId(player);
         if (this.isTargetRemoved(roleId, permission)) return TriState.UNDEFINED;
         if (this.isTargetExclusive(roleId, permission)) return TriState.UNDEFINED;
