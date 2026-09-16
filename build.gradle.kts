@@ -42,6 +42,7 @@ subprojects {
         maven(url = "https://maven.neoforged.net/releases/")
         maven(url = "https://api.modrinth.com/maven/")
         maven(url = "https://chocolateminecraft.com/maven/")
+        mavenCentral()
         mavenLocal()
     }
 
@@ -69,6 +70,8 @@ subprojects {
         "modCompileOnly"(group = "earth.terrarium.cadmus", name = "cadmus-$modLoader-$minecraftVersion", version = cadmusVersion) {
             isTransitive = false
         }
+
+        "compileOnly"(group = "com.electronwill.night-config", name = "toml", version = "3.8.0")
 
         if (isCommon) {
             "modCompileOnly"(group = "earth.terrarium.heracles", name = "heracles-$modLoader-1.20.1", version = heraclesVersion) {

@@ -91,7 +91,7 @@ public final class GuildConditionCommands {
             }
             throw TeamExceptions.CONDITION_ALREADY_EXISTS.create();
         }
-        if (guild.getConditions().size() >= Config.maxGuildTargets) {
+        if (guild.getConditions().size() >= Config.maxGuildConditions) {
             throw TeamExceptions.CONDITION_LIMIT.create();
         }
 

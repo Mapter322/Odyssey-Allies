@@ -22,6 +22,9 @@ dependencies {
     modApi(group = "net.fabricmc.fabric-api", name = "fabric-api", version = "$fabricApiVersion+$minecraftVersion")
     modImplementation(include(group = "eu.pb4", name = "placeholder-api", version = placeholderApiVersion))
 
+    include("com.electronwill.night-config:toml:3.8.0")
+    include("com.electronwill.night-config:core:3.8.0")
+
     common(project(":common", configuration = "namedElements")) {
         isTransitive = false
     }

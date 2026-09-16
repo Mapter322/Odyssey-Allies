@@ -1,18 +1,18 @@
 package earth.terrarium.argonauts.common.config;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.electronwill.nightconfig.core.CommentedConfig;
+import com.electronwill.nightconfig.toml.TomlParser;
 import com.teamresourceful.resourcefullib.common.utils.TriState;
 import earth.terrarium.argonauts.Argonauts;
 import earth.terrarium.argonauts.api.teams.guild.Role;
 import earth.terrarium.argonauts.api.teams.permissions.MemberPermissionsApi;
 import earth.terrarium.argonauts.api.teams.settings.MemberSetting;
 import earth.terrarium.argonauts.api.teams.settings.MemberSettingsApi;
-import earth.terrarium.argonauts.common.utils.JsonUtils;
+import earth.terrarium.argonauts.common.utils.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
@@ -25,11 +25,10 @@ import java.util.Set;
 public final class RoleDefaultsConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Argonauts.MOD_ID);
-    private static final Path CONFIG_DIR = Path.of("config", Argonauts.MOD_ID);
     private static final Map<String, String> FILE_NAMES = Map.of(
-        Role.ALL, "allsettingsdefault.json",
-        Role.MEMBER, "membersettingsdefault.json",
-        Role.ALLY, "allysettingsdefault.json"
+        Role.ALL, "role_all.toml",
+        Role.MEMBER, "role_member.toml",
+        Role.ALLY, "role_ally.toml"
     );
     private static final List<String> ROLES = List.of(Role.ALL, Role.MEMBER, Role.ALLY);
     public static final List<String> CONDITION_PARENTS = List.of(
@@ -94,7 +93,7 @@ public final class RoleDefaultsConfig {
     }
 
     private static Map<String, TriState> load(String role) {
-        Path path = CONFIG_DIR.resolve(FILE_NAMES.get(role));
+        Path path = Config.DEFAULT_FOLDER.resolve(FILE_NAMES.get(role));
         if (Files.exists(path)) {
             try {
                 return parse(Files.readString(path));
@@ -106,7 +105,7 @@ public final class RoleDefaultsConfig {
 
         Map<String, TriState> defaults = generate(role);
         try {
-            Files.createDirectories(CONFIG_DIR);
+            Files.createDirectories(path.getParent());
             Files.writeString(path, write(role, defaults));
         } catch (Exception e) {
             LOGGER.warn("Failed to write role defaults to {} ({})", path, e.toString());
@@ -116,33 +115,29 @@ public final class RoleDefaultsConfig {
 
     private static Map<String, TriState> parse(String text) {
         Map<String, TriState> values = new LinkedHashMap<>();
-        JsonObject root = JsonParser.parseString(JsonUtils.stripComments(text)).getAsJsonObject();
+        CommentedConfig root = new TomlParser().parse(new StringReader(text));
 
-        JsonObject permissions = asObject(root.get("permissions"), "permissions");
-        if (permissions != null) {
-            for (Map.Entry<String, JsonElement> entry : permissions.entrySet()) {
-                values.put(entry.getKey(), parseState(entry.getKey(), entry.getValue()));
-            }
+        Object permissions = root.get("permissions");
+        if (permissions instanceof com.electronwill.nightconfig.core.Config table) {
+            table.valueMap().forEach((key, value) -> values.put(key, parseState(key, value)));
         }
 
-        JsonObject settings = asObject(root.get("settings"), "settings");
-        if (settings != null) {
-            for (Map.Entry<String, JsonElement> entry : settings.entrySet()) {
-                String parent = entry.getKey();
-                JsonElement element = entry.getValue();
-                if (element.isJsonObject()) {
-                    JsonObject object = element.getAsJsonObject();
-                    if (object.has("value")) {
-                        values.put(parent, parseState(parent, object.get("value")));
-                    }
-                    for (Map.Entry<String, JsonElement> child : object.entrySet()) {
-                        if (child.getKey().equals("value")) continue;
-                        values.put(parent + "/" + child.getKey(), parseState(parent + "/" + child.getKey(), child.getValue()));
-                    }
+        Object settings = root.get("settings");
+        if (settings instanceof com.electronwill.nightconfig.core.Config table) {
+            table.valueMap().forEach((key, value) -> {
+                if (value instanceof com.electronwill.nightconfig.core.Config child) {
+                    child.valueMap().forEach((childKey, childValue) -> {
+                        String name = String.valueOf(childKey);
+                        if (name.equals("value")) {
+                            values.put(key, parseState(key, childValue));
+                        } else {
+                            values.put(key + "/" + name, parseState(key + "/" + name, childValue));
+                        }
+                    });
                 } else {
-                    values.put(parent, parseState(parent, element));
+                    values.put(key, parseState(key, value));
                 }
-            }
+            });
         }
         return values;
     }
@@ -170,17 +165,20 @@ public final class RoleDefaultsConfig {
         return name.startsWith("#") ? id.substring(0, index) + "/" + name : id;
     }
 
-    private static TriState parseState(String key, JsonElement element) {
-        if (element == null || !element.isJsonPrimitive()) {
+    private static TriState parseState(String key, Object element) {
+        if (element instanceof Boolean bool) {
+            return bool ? TriState.TRUE : TriState.FALSE;
+        }
+        if (!(element instanceof String string)) {
             LOGGER.warn("Invalid value for role default '{}', treating as inherit", key);
             return TriState.UNDEFINED;
         }
-        return switch (element.getAsString().toLowerCase(Locale.ROOT)) {
+        return switch (string.toLowerCase(Locale.ROOT)) {
             case "allow", "true" -> TriState.TRUE;
             case "deny", "false" -> TriState.FALSE;
             case "inherit", "undefined" -> TriState.UNDEFINED;
             default -> {
-                LOGGER.warn("Unknown role default value '{}' for '{}', treating as inherit", element.getAsString(), key);
+                LOGGER.warn("Unknown role default value '{}' for '{}', treating as inherit", string, key);
                 yield TriState.UNDEFINED;
             }
         };
@@ -188,47 +186,32 @@ public final class RoleDefaultsConfig {
 
     private static String write(String role, Map<String, TriState> values) {
         StringBuilder sb = new StringBuilder();
-        sb.append("// Argonauts role defaults for \"").append(role).append("\".\n");
-        sb.append("// Applied to new guilds and to missing keys of existing guilds.\n");
-        sb.append("// Values: allow, deny, inherit; targets may be ids (minecraft:dirt) or tags (#minecraft:doors).\n");
-        sb.append("{\n");
+        sb.append("# Argonauts role defaults for \"").append(role).append("\".\n");
+        sb.append("# Applied to new guilds and to missing keys of existing guilds.\n");
+        sb.append("# Values: allow, deny, inherit; targets may be ids (minecraft:dirt) or tags (#minecraft:doors).\n");
 
         Map<String, Entry> groups = group(values);
-        boolean first;
 
-        sb.append("  \"permissions\": {");
-        first = true;
-        for (Map.Entry<String, Entry> group : groups.entrySet()) {
-            if (!MemberPermissionsApi.API.getGuildPermissions().containsKey(group.getKey())) continue;
-            sb.append(first ? "\n" : ",\n");
-            first = false;
-            sb.append("    \"").append(group.getKey()).append("\": \"").append(stateName(group.getValue().value)).append("\"");
-        }
-        sb.append(first ? "},\n" : "\n  },\n");
+        sb.append("\n[permissions]\n");
+        groups.forEach((key, entry) -> {
+            if (!MemberPermissionsApi.API.getGuildPermissions().containsKey(key)) return;
+            sb.append(quote(key)).append(" = \"").append(stateName(entry.value)).append("\"\n");
+        });
 
-        sb.append("  \"settings\": {");
-        first = true;
-        for (Map.Entry<String, Entry> group : groups.entrySet()) {
-            if (MemberPermissionsApi.API.getGuildPermissions().containsKey(group.getKey())) continue;
-            sb.append(first ? "\n" : ",\n");
-            first = false;
-            Entry entry = group.getValue();
-            if (entry.children.isEmpty()) {
-                sb.append("    \"").append(group.getKey()).append("\": \"").append(stateName(entry.value)).append("\"");
-                continue;
-            }
-            sb.append("    \"").append(group.getKey()).append("\": {\n");
+        sb.append("\n[settings]\n");
+        groups.forEach((key, entry) -> {
+            if (MemberPermissionsApi.API.getGuildPermissions().containsKey(key) || !entry.children.isEmpty()) return;
+            sb.append(quote(key)).append(" = \"").append(stateName(entry.value)).append("\"\n");
+        });
+        groups.forEach((key, entry) -> {
+            if (MemberPermissionsApi.API.getGuildPermissions().containsKey(key) || entry.children.isEmpty()) return;
+            sb.append("\n[settings.").append(quote(key)).append("]\n");
             if (entry.value != null) {
-                sb.append("      \"value\": \"").append(stateName(entry.value)).append("\",\n");
+                sb.append("value = \"").append(stateName(entry.value)).append("\"\n");
             }
-            int index = 0;
-            for (Map.Entry<String, TriState> child : entry.children.entrySet()) {
-                sb.append("      \"").append(child.getKey()).append("\": \"").append(stateName(child.getValue())).append("\"");
-                sb.append(++index < entry.children.size() ? ",\n" : "\n");
-            }
-            sb.append("    }");
-        }
-        sb.append("\n  }\n}\n");
+            entry.children.forEach((childKey, childValue) ->
+                sb.append(quote(childKey)).append(" = \"").append(stateName(childValue)).append("\"\n"));
+        });
         return sb.toString();
     }
 
@@ -252,11 +235,8 @@ public final class RoleDefaultsConfig {
         return state == TriState.TRUE ? "allow" : "deny";
     }
 
-    private static JsonObject asObject(JsonElement element, String key) {
-        if (element == null) return null;
-        if (element.isJsonObject()) return element.getAsJsonObject();
-        LOGGER.warn("Role defaults section '{}' is not an object, skipping", key);
-        return null;
+    private static String quote(String value) {
+        return "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
     }
 
     public record RoleTarget(String parent, String key) {

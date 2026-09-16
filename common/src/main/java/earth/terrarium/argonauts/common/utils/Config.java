@@ -1,25 +1,29 @@
 package earth.terrarium.argonauts.common.utils;
 
-import com.google.gson.Gson;
+import com.electronwill.nightconfig.core.CommentedConfig;
+import com.electronwill.nightconfig.toml.TomlParser;
 import earth.terrarium.argonauts.Argonauts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class Config {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Argonauts.MOD_ID);
-    private static final Gson GSON = new Gson();
-    private static final Path CONFIG_PATH = Path.of("config", Argonauts.MOD_ID, "argonauts-common.json");
+    private static final Path CONFIG_PATH = Path.of("config", "odyssey", "argonauts-server.toml");
     private static final GuildLevel FALLBACK = new GuildLevel(1, 8, 50, 10);
+
+    public static final Path DEFAULT_FOLDER = Path.of("config", "odyssey", "default");
 
     public static int maxPartyMembers = Argonauts.DEFAULT_MAX_PARTY_MEMBERS;
     public static boolean teleportEnabled = false;
-    public static int maxGuildTargets = 128;
+    public static int maxGuildConditions = 128;
     public static Map<Integer, GuildLevel> guildLevels = defaultGuildLevels();
 
     private Config() {}
@@ -29,14 +33,51 @@ public final class Config {
             save();
             return;
         }
-        ConfigData data = read();
-        if (data == null) return;
-        maxPartyMembers = clamp("maxPartyMembers", data.maxPartyMembers,
-            Argonauts.MIN_PARTY_MEMBERS, Argonauts.MAX_PARTY_MEMBERS);
-        teleportEnabled = data.teleportEnabled;
-        maxGuildTargets = clamp("maxGuildTargets", data.maxGuildTargets, 1, 1024);
-        guildLevels = sanitize(data.guildLevels);
+
+        int partyMembers;
+        boolean teleport;
+        int guildConditions;
+        Map<Integer, GuildLevel> levels;
+        try (Reader reader = Files.newBufferedReader(CONFIG_PATH)) {
+            CommentedConfig root = new TomlParser().parse(reader);
+            partyMembers = root.getIntOrElse("party.max-members", maxPartyMembers);
+            teleport = root.getOrElse("party.teleport-enabled", teleportEnabled);
+            guildConditions = root.getIntOrElse("guild.conditions", maxGuildConditions);
+            levels = parseLevels(root);
+        } catch (Exception e) {
+            LOGGER.error("Failed to read config, falling back to defaults", e);
+            return;
+        }
+
+        maxPartyMembers = clamp("maxPartyMembers", partyMembers, Argonauts.MIN_PARTY_MEMBERS, Argonauts.MAX_PARTY_MEMBERS);
+        teleportEnabled = teleport;
+        maxGuildConditions = clamp("maxGuildConditions", guildConditions, 1, 1024);
+        if (!levels.isEmpty()) guildLevels = sanitize(levels);
         save();
+    }
+
+    private static Map<Integer, GuildLevel> parseLevels(CommentedConfig root) {
+        Map<Integer, GuildLevel> parsed = new LinkedHashMap<>();
+        Object value = root.get("guild-levels");
+        if (!(value instanceof List<?> list)) return parsed;
+        for (Object item : list) {
+            if (!(item instanceof com.electronwill.nightconfig.core.Config table)) {
+                LOGGER.warn("Invalid guild level entry, skipping");
+                continue;
+            }
+            int number = table.getIntOrElse("level", 0);
+            if (number < 1) {
+                LOGGER.warn("Invalid guild level entry without a positive level, skipping");
+                continue;
+            }
+            parsed.put(number, new GuildLevel(
+                table.getIntOrElse("max-towns", 1),
+                table.getIntOrElse("max-members", 1),
+                table.getIntOrElse("max-claims", 0),
+                table.getIntOrElse("max-forceloads", 0)
+            ));
+        }
+        return parsed;
     }
 
     public static boolean hasLevel(int level) {
@@ -104,26 +145,33 @@ public final class Config {
         return clamped;
     }
 
-    private static ConfigData read() {
-        if (!Files.exists(CONFIG_PATH)) return null;
-        try {
-            return GSON.fromJson(JsonUtils.stripComments(Files.readString(CONFIG_PATH)), ConfigData.class);
-        } catch (Exception e) {
-            LOGGER.error("Failed to read config, falling back to defaults", e);
-            return null;
-        }
-    }
-
     private static void save() {
         StringBuilder sb = new StringBuilder();
-        sb.append("{\n");
-        sb.append("  \"maxPartyMembers\": ").append(maxPartyMembers).append(",\n");
-        sb.append("  \"teleportEnabled\": ").append(teleportEnabled).append(",\n");
-        sb.append("  \"maxGuildTargets\": ").append(maxGuildTargets).append(",\n");
-        sb.append("  // Guild levels: maxTowns, maxMembers, maxClaims and maxForceloads per level (0 means no level cap).\n");
-        sb.append("  // New levels like 4, 5, etc. can be added; assign a guild's level with /argonauts guild admin level set <guild> <level>.\n");
-        sb.append("  \"guildLevels\": ").append(GSON.toJson(guildLevels)).append("\n");
-        sb.append("}\n");
+        sb.append("# Argonauts server configuration.\n");
+        sb.append("# Generated at config/odyssey/argonauts-server.toml; edit values below and restart the server.\n\n");
+
+        sb.append("[party]\n");
+        sb.append("# Maximum number of party members.\n");
+        sb.append("max-members = ").append(maxPartyMembers).append("\n\n");
+        sb.append("# Whether party teleportation is enabled.\n");
+        sb.append("teleport-enabled = ").append(teleportEnabled).append("\n\n");
+
+        sb.append("[guild]\n");
+        sb.append("# Maximum number of conditions a guild can have.\n");
+        sb.append("conditions = ").append(maxGuildConditions).append("\n\n");
+
+        sb.append("# Guild levels: towns, members, claims and forceloads per level (0 means no level cap).\n");
+        sb.append("# New levels like 4, 5, etc. can be added; assign a guild's level with\n");
+        sb.append("# /argonauts guild admin level set <guild> <level>.\n");
+        guildLevels.forEach((level, data) -> {
+            sb.append("\n[[guild-levels]]\n");
+            sb.append("level = ").append(level).append("\n");
+            sb.append("max-towns = ").append(data.maxTowns).append("\n");
+            sb.append("max-members = ").append(data.maxMembers).append("\n");
+            sb.append("max-claims = ").append(data.maxClaims).append("\n");
+            sb.append("max-forceloads = ").append(data.maxForceloads).append("\n");
+        });
+
         try {
             Files.createDirectories(CONFIG_PATH.getParent());
             Files.writeString(CONFIG_PATH, sb.toString());
@@ -138,20 +186,11 @@ public final class Config {
         public int maxClaims;
         public int maxForceloads;
 
-        GuildLevel() {}
-
         GuildLevel(int maxTowns, int maxMembers, int maxClaims, int maxForceloads) {
             this.maxTowns = maxTowns;
             this.maxMembers = maxMembers;
             this.maxClaims = maxClaims;
             this.maxForceloads = maxForceloads;
         }
-    }
-
-    private static final class ConfigData {
-        int maxPartyMembers = Argonauts.DEFAULT_MAX_PARTY_MEMBERS;
-        boolean teleportEnabled = false;
-        int maxGuildTargets = 128;
-        Map<Integer, GuildLevel> guildLevels;
     }
 }
