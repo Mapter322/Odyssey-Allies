@@ -342,7 +342,7 @@ public class RolesScreen extends BaseScreen {
             () -> openConditionModal(role, parent),
             9,
             -1
-        );
+        ).withRowPress(() -> openConditionModal(role, parent));
     }
 
     private void openConditionModal(Role role, String parent) {

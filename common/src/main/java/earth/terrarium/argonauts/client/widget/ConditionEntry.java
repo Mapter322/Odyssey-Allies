@@ -20,6 +20,7 @@ public class ConditionEntry extends BaseParentWidget {
     private static final int ICON_PADDING = 2;
     private static final int TEXT_GAP = 3;
     private static final int ENTRY_Y_OFFSET = -2;
+    private static final int ROW_GAP = 3;
 
     private final Font font;
     private final Component label;
@@ -30,6 +31,8 @@ public class ConditionEntry extends BaseParentWidget {
     private final Button button;
     @Nullable
     private final AbstractWidget entry;
+    @Nullable
+    private Runnable rowPress;
 
     public ConditionEntry(Font font, Component label, int labelColor, @Nullable ResourceLocation icon, Color iconColor,
                           @Nullable Component tooltip, boolean enabled, Runnable onPress) {
@@ -56,6 +59,7 @@ public class ConditionEntry extends BaseParentWidget {
         this.iconSize = iconSize;
         this.iconYOffset = iconYOffset;
         this.entry = entry;
+        this.active = enabled;
 
         if (icon == null) {
             this.button = null;
@@ -87,8 +91,30 @@ public class ConditionEntry extends BaseParentWidget {
         if (this.entry != null) this.entry.setY(y + (this.height - this.entry.getHeight()) / 2 + ENTRY_Y_OFFSET);
     }
 
+    public ConditionEntry withRowPress(Runnable rowPress) {
+        this.rowPress = rowPress;
+        return this;
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (super.mouseClicked(mouseX, mouseY, button)) return true;
+        if (this.rowPress == null || !this.active || !this.isRowOver(mouseX, mouseY)) return false;
+        this.rowPress.run();
+        return true;
+    }
+
+    private boolean isRowOver(double mouseX, double mouseY) {
+        int top = this.rowPress == null ? this.getY() : this.getY() - ROW_GAP;
+        return mouseX >= this.getX() && mouseX < this.getX() + this.width
+            && mouseY >= top && mouseY < this.getY() + this.height;
+    }
+
     @Override
     protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        if (this.rowPress != null && this.active && this.isRowOver(mouseX, mouseY)) {
+            graphics.fill(this.getX(), this.getY() - ROW_GAP, this.getX() + this.width, this.getY() + this.height - 1, 0x20FFFFFF);
+        }
         graphics.drawString(
             this.font,
             this.label,
@@ -99,5 +125,7 @@ public class ConditionEntry extends BaseParentWidget {
         );
         if (this.button != null) this.button.render(graphics, mouseX, mouseY, partialTick);
         if (this.entry != null) this.entry.render(graphics, mouseX, mouseY, partialTick);
+        int dividerY = this.getY() + this.height - 1;
+        graphics.fill(this.getX(), dividerY, this.getX() + this.width, dividerY + 1, 0x20FFFFFF);
     }
 }

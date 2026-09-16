@@ -253,7 +253,7 @@
     "gui.argonauts.delete_role": "Delete Role",
     "gui.argonauts.delete_role.description": "Are you sure you want to delete this role? Members with this role will be moved to the member role.",
     "gui.argonauts.condition.add": "Add Condition",
-    "gui.argonauts.condition.add.description": "Enter an extra target for this category, e.g. \"minecraft:stone\" or \"#minecraft:logs\".",
+    "gui.argonauts.condition.add.description": "Enter an extra target for this category, e.g. \"minecraft:stone\" or \"#c:chests\".",
     "gui.argonauts.condition.add.placeholder": "minecraft:stone",
     "gui.argonauts.condition.remove": "Remove condition: %s",
     "gui.argonauts.actions": "Actions",
