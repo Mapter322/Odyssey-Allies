@@ -76,7 +76,15 @@ public class GuildSaveData extends SaveHandler {
                 if (!roleConditions.isEmpty()) conditions.put(roleId, roleConditions);
             });
 
-            Guild guild = new Guild(UUID.fromString(id), members, settings, roles, conditions);
+            Object2ObjectMap<String, ObjectSet<String>> removedConditions = new Object2ObjectOpenHashMap<>();
+            CompoundTag removedTag = guildTag.getCompound("removedConditions");
+            removedTag.getAllKeys().forEach(roleId -> {
+                ObjectOpenHashSet<String> roleConditions = new ObjectOpenHashSet<>();
+                removedTag.getCompound(roleId).getAllKeys().forEach(roleConditions::add);
+                if (!roleConditions.isEmpty()) removedConditions.put(roleId, roleConditions);
+            });
+
+            Guild guild = new Guild(UUID.fromString(id), members, settings, roles, conditions, removedConditions);
             if (guild.roles().isEmpty()) {
                 guild.roles().putAll(GuildRoleDefaults.create(guild));
             } else if (GuildRoleDefaults.applyMissingDefaults(guild, guild.roles())) {
@@ -137,6 +145,14 @@ public class GuildSaveData extends SaveHandler {
                 conditionsTag.put(roleId, roleTag);
             });
             guildTag.put("conditions", conditionsTag);
+
+            CompoundTag removedTag = new CompoundTag();
+            guild.removedConditions().forEach((roleId, conditions) -> {
+                CompoundTag roleTag = new CompoundTag();
+                conditions.forEach(condition -> roleTag.putBoolean(condition, true));
+                removedTag.put(roleId, roleTag);
+            });
+            guildTag.put("removedConditions", removedTag);
 
             guildsTag.put(id.toString(), guildTag);
         });

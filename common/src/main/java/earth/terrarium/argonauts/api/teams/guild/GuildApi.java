@@ -104,6 +104,28 @@ public interface GuildApi {
     void removeCondition(Level level, Guild guild, String role, String condition);
 
     /**
+     * Removes a default condition from the role and clears the role override for it. The condition
+     * can be brought back with {@link #restoreDefaultCondition(Level, Guild, String, String)}.
+     *
+     * @param level     the level
+     * @param guild     the guild
+     * @param role      the role id
+     * @param condition the condition id, e.g. {@code block-place/minecraft:dirt}
+     */
+    void removeDefaultCondition(Level level, Guild guild, String role, String condition);
+
+    /**
+     * Brings back a default condition removed with
+     * {@link #removeDefaultCondition(Level, Guild, String, String)}.
+     *
+     * @param level     the level
+     * @param guild     the guild
+     * @param role      the role id
+     * @param condition the condition id, e.g. {@code block-place/minecraft:dirt}
+     */
+    void restoreDefaultCondition(Level level, Guild guild, String role, String condition);
+
+    /**
      * Gets a guild by its ID.
      *
      * @param level the level

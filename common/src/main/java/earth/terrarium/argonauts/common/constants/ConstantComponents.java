@@ -58,6 +58,9 @@ public class ConstantComponents {
     public static final Component DELETE_ROLE_DESCRIPTION = Component.translatable("gui.argonauts.delete_role.description");
     public static final Component MEMBER_PERMISSIONS = Component.translatable("gui.argonauts.member_permissions");
     public static final Component MEMBER_ACTIONS = Component.translatable("gui.argonauts.member_actions");
+    public static final Component ADD_CONDITION = Component.translatable("gui.argonauts.condition.add");
+    public static final Component ADD_CONDITION_DESCRIPTION = Component.translatable("gui.argonauts.condition.add.description");
+    public static final Component ADD_CONDITION_PLACEHOLDER = Component.translatable("gui.argonauts.condition.add.placeholder");
     public static final Component SETTINGS = Component.translatable("gui.argonauts.settings");
     public static final Component SAVE = Component.translatable("gui.argonauts.save");
 

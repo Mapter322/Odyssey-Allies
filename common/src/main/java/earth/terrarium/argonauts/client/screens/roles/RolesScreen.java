@@ -11,9 +11,11 @@ import earth.terrarium.argonauts.api.teams.settings.MemberSetting;
 import earth.terrarium.argonauts.api.teams.settings.MemberSettingsApi;
 import earth.terrarium.argonauts.client.Modals;
 import earth.terrarium.argonauts.client.screens.BaseScreen;
+import earth.terrarium.argonauts.client.widget.ConditionEntry;
 import earth.terrarium.argonauts.client.widget.LabelledEntry;
 import earth.terrarium.argonauts.client.widget.SettingCategoryEntry;
 import earth.terrarium.argonauts.common.commands.TeamArguments;
+import earth.terrarium.argonauts.common.config.RoleDefaultsConfig;
 import earth.terrarium.argonauts.common.constants.ConstantComponents;
 import earth.terrarium.argonauts.common.guild.GuildRoleDefaults;
 import earth.terrarium.olympus.client.components.Widgets;
@@ -28,12 +30,14 @@ import earth.terrarium.olympus.client.components.string.TextWidget;
 import earth.terrarium.olympus.client.constants.MinecraftColors;
 import earth.terrarium.olympus.client.layouts.LinearViewLayout;
 import earth.terrarium.olympus.client.ui.UIConstants;
+import earth.terrarium.olympus.client.ui.UIIcons;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -233,11 +237,7 @@ public class RolesScreen extends BaseScreen {
             permissions.forEach(permission -> list.add(rolePermissionRow(role, permission, canEdit)));
         }
 
-        var guildConditions = this.guild.getConditions();
-        var roleConditions = this.guild.getConditions(role.id());
-        List<MemberSetting> settings = MemberSettingsApi.API.getSettings(this.guild).stream()
-            .filter(setting -> !guildConditions.contains(setting.id()) || roleConditions.contains(setting.id()))
-            .toList();
+        List<MemberSetting> settings = MemberSettingsApi.API.getSettings(this.guild);
         if (!settings.isEmpty()) {
             list.add(section(Component.translatable("gui.argonauts.member_claim_permissions")));
             buildSettingRows(list, settings, role, canEdit);
@@ -278,6 +278,8 @@ public class RolesScreen extends BaseScreen {
     }
 
     private void buildSettingRows(ListWidget list, List<MemberSetting> settings, Role role, boolean canEdit) {
+        Set<String> guildConditions = this.guild.getConditions();
+        Set<String> roleConditions = this.guild.getConditions(role.id());
         Map<String, List<MemberSetting>> children = new LinkedHashMap<>();
         List<MemberSetting> roots = new ArrayList<>();
         for (MemberSetting setting : settings) {
@@ -290,7 +292,9 @@ public class RolesScreen extends BaseScreen {
         for (MemberSetting setting : roots) {
             List<MemberSetting> group = children.get(setting.id());
             if (group == null || group.isEmpty()) {
-                list.add(roleSettingRow(role, setting, canEdit, false));
+                if (isSettingVisible(setting, guildConditions, roleConditions)) {
+                    list.add(roleSettingRow(role, setting, canEdit, false));
+                }
             }
         }
         for (MemberSetting setting : roots) {
@@ -298,8 +302,94 @@ public class RolesScreen extends BaseScreen {
             if (group == null || group.isEmpty()) continue;
             list.add(categoryRow(role, setting, canEdit));
             if (!this.expandedCategories.contains(setting.id())) continue;
-            group.forEach(child -> list.add(roleSettingRow(role, child, canEdit, true)));
+            Set<String> removedConditions = this.guild.getRemovedConditions(role.id());
+            group.stream()
+                .filter(child -> isSettingVisible(child, guildConditions, roleConditions))
+                .filter(child -> roleConditions.contains(child.id()) || !removedConditions.contains(child.id()))
+                .sorted(Comparator.comparing(MemberSetting::id))
+                .forEach(child -> list.add(targetRow(role, child, canEdit)));
+            if (RoleDefaultsConfig.CONDITION_PARENTS.contains(setting.id())) {
+                list.add(addConditionEntry(role, setting.id(), canEdit));
+            }
         }
+    }
+
+    private static boolean isSettingVisible(MemberSetting setting, Set<String> guildConditions, Set<String> roleConditions) {
+        return !guildConditions.contains(setting.id()) || roleConditions.contains(setting.id());
+    }
+
+    private ConditionEntry targetRow(Role role, MemberSetting setting, boolean canEdit) {
+        LayoutWidget<LinearViewLayout> toggle = tristate(
+            displayState(role, setting.id()),
+            canEdit,
+            "argonauts guild role setting " + role.id() + " \"" + setting.id() + "\""
+        );
+        if (!setting.description().getString().isEmpty()) toggle.withTooltip(setting.description());
+        return new ConditionEntry(
+            this.font,
+            setting.name(),
+            0xFFFFFF,
+            UIIcons.TRASH,
+            MinecraftColors.RED,
+            Component.translatable("gui.argonauts.condition.remove", setting.id()),
+            canEdit,
+            () -> ScreenUtils.sendCommand("argonauts guild role condition remove " + role.id() + " \"" + setting.id() + "\""),
+            toggle
+        );
+    }
+
+    private ConditionEntry addConditionEntry(Role role, String parent, boolean canEdit) {
+        return new ConditionEntry(
+            this.font,
+            ConstantComponents.ADD_CONDITION,
+            0xFFAAAAAA,
+            UIIcons.PLUS,
+            MinecraftColors.WHITE,
+            null,
+            canEdit,
+            () -> openConditionModal(role, parent),
+            9,
+            -1
+        );
+    }
+
+    private void openConditionModal(Role role, String parent) {
+        Modals.input(
+            ConstantComponents.ADD_CONDITION,
+            ConstantComponents.ADD_CONDITION_DESCRIPTION,
+            ConstantComponents.ADD_CONDITION_PLACEHOLDER,
+            64,
+            ConstantComponents.ADD_CONDITION,
+            input -> normalizeCondition(role, parent, input) != null,
+            input -> {
+                String condition = normalizeCondition(role, parent, input);
+                if (condition != null) {
+                    ScreenUtils.sendCommand("argonauts guild role condition add " + role.id() + " \"" + condition + "\"");
+                }
+            }
+        );
+    }
+
+    @Nullable
+    private String normalizeCondition(Role role, String parent, String input) {
+        String value = input.strip();
+        if (value.isEmpty()) return null;
+        int index = value.indexOf('/');
+        if (index >= 0) {
+            if (!value.substring(0, index).equals(parent)) return null;
+            value = value.substring(index + 1);
+            if (value.isEmpty()) return null;
+        }
+        boolean tag = value.startsWith("#");
+        ResourceLocation location = ResourceLocation.tryParse(tag ? value.substring(1) : value);
+        if (location == null) return null;
+        String condition = parent + "/" + value;
+        if (this.guild.getConditions(role.id()).contains(condition)) return null;
+        if (!this.guild.getRemovedConditions(role.id()).contains(condition)
+            && MemberSettingsApi.API.getSettings(null).stream().anyMatch(setting -> setting.id().equals(condition))) {
+            return null;
+        }
+        return condition;
     }
 
     private SettingCategoryEntry categoryRow(Role role, MemberSetting setting, boolean canEdit) {

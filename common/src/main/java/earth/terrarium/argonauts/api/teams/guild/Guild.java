@@ -34,13 +34,15 @@ import java.util.stream.Collectors;
  * @param settings   A map of setting IDs to their corresponding values
  * @param roles      A map of role IDs to their corresponding roles
  * @param conditions A map of role IDs to the extra setting condition ids attached to that role
+ * @param removedConditions A map of role IDs to the default condition ids removed from that role
  */
 public record Guild(
     UUID id,
     Map<UUID, Member> members,
     Map<String, Setting<?>> settings,
     Map<String, Role> roles,
-    Object2ObjectMap<String, ObjectSet<String>> conditions
+    Object2ObjectMap<String, ObjectSet<String>> conditions,
+    Object2ObjectMap<String, ObjectSet<String>> removedConditions
 ) implements Team {
 
     public static final ByteCodec<Guild> BYTE_CODEC = ObjectByteCodec.create(
@@ -56,11 +58,19 @@ public record Guild(
                 return conditions;
             }, map -> map
             ).fieldOf(Guild::conditions),
+        new MapCodec<>(ByteCodec.STRING, ByteCodec.STRING.setOf()
+            .map(set -> (ObjectSet<String>) new ObjectOpenHashSet<>(set), set -> set)
+            ).map(map -> {
+                Object2ObjectMap<String, ObjectSet<String>> removed = new Object2ObjectOpenHashMap<>();
+                map.forEach((role, set) -> removed.put(role, (ObjectSet<String>) new ObjectOpenHashSet<>(set)));
+                return removed;
+            }, map -> map
+            ).fieldOf(Guild::removedConditions),
         Guild::new
     );
 
     public Guild(UUID creator, String name) {
-        this(UUID.randomUUID(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new Object2ObjectOpenHashMap<>());
+        this(UUID.randomUUID(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new Object2ObjectOpenHashMap<>(), new Object2ObjectOpenHashMap<>());
         this.members.put(creator, new Member(MemberStatus.OWNER, MemberPermissionsApi.API.getGuildPermissions()));
         this.settings.put(Settings.DISPLAY_NAME.id(), new StringSetting(Settings.DISPLAY_NAME.id(), name));
         this.settings.put(Settings.COLOR.id(), new ColorSettings(Settings.COLOR.id(), ModUtils.uuidToColor(this.id)));
@@ -163,6 +173,17 @@ public record Guild(
      */
     public Set<String> getConditions(String roleId) {
         ObjectSet<String> conditions = this.conditions.get(roleId);
+        return conditions == null ? Set.of() : conditions;
+    }
+
+    /**
+     * Gets the default condition ids removed from the role.
+     *
+     * @param roleId the role id
+     * @return the removed condition ids
+     */
+    public Set<String> getRemovedConditions(String roleId) {
+        ObjectSet<String> conditions = this.removedConditions.get(roleId);
         return conditions == null ? Set.of() : conditions;
     }
 

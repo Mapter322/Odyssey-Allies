@@ -171,6 +171,33 @@ public class GuildApiImpl implements GuildApi {
     }
 
     @Override
+    public void removeDefaultCondition(Level level, Guild guild, String role, String condition) {
+        var data = GuildSaveData.read(level);
+        ObjectSet<String> conditions = guild.removedConditions().computeIfAbsent(role, ignored -> new ObjectOpenHashSet<>());
+        if (!conditions.add(condition)) return;
+        Role guildRole = guild.roles().get(role);
+        if (guildRole != null) guildRole.setOverride(condition, TriState.UNDEFINED);
+        if (level instanceof ServerLevel serverLevel) {
+            data.setDirty();
+            NetworkHandler.sendToAllClientPlayers(new ClientboundModifyGuildRemovedConditionPacket(guild.id(), role, condition, true), serverLevel.getServer());
+        }
+        ArgonautsEvents.GuildChangedEvent.fire(level, guild);
+    }
+
+    @Override
+    public void restoreDefaultCondition(Level level, Guild guild, String role, String condition) {
+        var data = GuildSaveData.read(level);
+        ObjectSet<String> conditions = guild.removedConditions().get(role);
+        if (conditions == null || !conditions.remove(condition)) return;
+        if (conditions.isEmpty()) guild.removedConditions().remove(role);
+        if (level instanceof ServerLevel serverLevel) {
+            data.setDirty();
+            NetworkHandler.sendToAllClientPlayers(new ClientboundModifyGuildRemovedConditionPacket(guild.id(), role, condition, false), serverLevel.getServer());
+        }
+        ArgonautsEvents.GuildChangedEvent.fire(level, guild);
+    }
+
+    @Override
     public Optional<Guild> get(Level level, UUID id) {
         return Optional.ofNullable(GuildSaveData.read(level).guilds().get(id));
     }

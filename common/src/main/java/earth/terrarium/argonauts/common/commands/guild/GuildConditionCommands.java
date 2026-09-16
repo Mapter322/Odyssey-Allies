@@ -76,6 +76,11 @@ public final class GuildConditionCommands {
 
         String condition = StringArgumentType.getString(context, "condition");
         if (!isValid(condition)) throw TeamExceptions.INVALID_CONDITION.create();
+        if (guild.getRemovedConditions(role).contains(condition)) {
+            GuildApi.API.restoreDefaultCondition(source.getLevel(), guild, role, condition);
+            source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.condition.add", Component.literal(condition), Component.literal(role)), false);
+            return 1;
+        }
         if (guild.getConditions(role).contains(condition) || isGlobal(condition)) {
             throw TeamExceptions.CONDITION_ALREADY_EXISTS.create();
         }
@@ -95,11 +100,18 @@ public final class GuildConditionCommands {
         String role = requireRole(guild, StringArgumentType.getString(context, "role"));
 
         String condition = StringArgumentType.getString(context, "condition");
-        if (!guild.getConditions(role).contains(condition)) throw TeamExceptions.CONDITION_NOT_FOUND.create();
+        if (guild.getConditions(role).contains(condition)) {
+            GuildApi.API.removeCondition(source.getLevel(), guild, role, condition);
+            source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.condition.remove", Component.literal(condition), Component.literal(role)), false);
+            return 1;
+        }
+        if (!guild.getRemovedConditions(role).contains(condition) && isKnownCondition(guild, condition)) {
+            GuildApi.API.removeDefaultCondition(source.getLevel(), guild, role, condition);
+            source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.condition.remove", Component.literal(condition), Component.literal(role)), false);
+            return 1;
+        }
 
-        GuildApi.API.removeCondition(source.getLevel(), guild, role, condition);
-        source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.condition.remove", Component.literal(condition), Component.literal(role)), false);
-        return 1;
+        throw TeamExceptions.CONDITION_NOT_FOUND.create();
     }
 
     private static int list(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
@@ -132,6 +144,11 @@ public final class GuildConditionCommands {
 
     private static boolean isGlobal(String condition) {
         return MemberSettingsApi.API.getSettings(null).stream().anyMatch(setting -> setting.id().equals(condition));
+    }
+
+    private static boolean isKnownCondition(Guild guild, String condition) {
+        return MemberSettingsApi.API.getSettings(guild).stream()
+            .anyMatch(setting -> setting.hasParent() && setting.id().equals(condition));
     }
 
     private static boolean isValid(String condition) {

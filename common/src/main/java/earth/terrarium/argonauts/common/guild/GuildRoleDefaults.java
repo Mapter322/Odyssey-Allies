@@ -2,12 +2,14 @@ package earth.terrarium.argonauts.common.guild;
 
 import com.teamresourceful.resourcefullib.common.utils.TriState;
 import earth.terrarium.argonauts.api.teams.Team;
+import earth.terrarium.argonauts.api.teams.guild.Guild;
 import earth.terrarium.argonauts.api.teams.guild.Role;
 import earth.terrarium.argonauts.common.config.RoleDefaultsConfig;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public final class GuildRoleDefaults {
 
@@ -26,9 +28,9 @@ public final class GuildRoleDefaults {
         if (roles.get(Role.ALL) == null) return false;
 
         boolean changed = false;
-        changed |= applyValues(roles.get(Role.ALL), RoleDefaultsConfig.values(Role.ALL));
-        changed |= applyValues(roles.get(Role.MEMBER), RoleDefaultsConfig.values(Role.MEMBER));
-        changed |= applyValues(roles.get(Role.ALLY), RoleDefaultsConfig.values(Role.ALLY));
+        changed |= applyValues(team, roles.get(Role.ALL), RoleDefaultsConfig.values(Role.ALL));
+        changed |= applyValues(team, roles.get(Role.MEMBER), RoleDefaultsConfig.values(Role.MEMBER));
+        changed |= applyValues(team, roles.get(Role.ALLY), RoleDefaultsConfig.values(Role.ALLY));
         return changed;
     }
 
@@ -42,11 +44,13 @@ public final class GuildRoleDefaults {
         return new Role(id, parent, overrides);
     }
 
-    private static boolean applyValues(Role role, Map<String, TriState> values) {
+    private static boolean applyValues(Team team, Role role, Map<String, TriState> values) {
         if (role == null) return false;
+        Set<String> removed = team instanceof Guild guild ? guild.getRemovedConditions(role.id()) : Set.of();
         boolean changed = false;
         for (Map.Entry<String, TriState> entry : values.entrySet()) {
             if (entry.getValue() == TriState.UNDEFINED) continue;
+            if (removed.contains(entry.getKey())) continue;
             changed |= apply(role, entry.getKey(), entry.getValue());
         }
         return changed;
