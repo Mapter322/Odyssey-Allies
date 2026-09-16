@@ -76,12 +76,19 @@ public final class GuildConditionCommands {
 
         String condition = StringArgumentType.getString(context, "condition");
         if (!isValid(condition)) throw TeamExceptions.INVALID_CONDITION.create();
-        if (guild.getRemovedConditions(role).contains(condition)) {
+
+        boolean removed = guild.getRemovedConditions(role).contains(condition);
+        if (removed) {
             GuildApi.API.restoreDefaultCondition(source.getLevel(), guild, role, condition);
-            source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.condition.add", Component.literal(condition), Component.literal(role)), false);
-            return 1;
         }
-        if (guild.getConditions(role).contains(condition) || isGlobal(condition)) {
+        if (guild.getConditions(role).contains(condition)) {
+            throw TeamExceptions.CONDITION_ALREADY_EXISTS.create();
+        }
+        if (isGlobal(condition)) {
+            if (removed) {
+                source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.condition.add", Component.literal(condition), Component.literal(role)), false);
+                return 1;
+            }
             throw TeamExceptions.CONDITION_ALREADY_EXISTS.create();
         }
         if (guild.getConditions().size() >= Config.maxGuildTargets) {
@@ -105,7 +112,10 @@ public final class GuildConditionCommands {
             source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.condition.remove", Component.literal(condition), Component.literal(role)), false);
             return 1;
         }
-        if (!guild.getRemovedConditions(role).contains(condition) && isKnownCondition(guild, condition)) {
+        if (!guild.getConditions().contains(condition)
+            && !guild.getRemovedConditions(role).contains(condition)
+            && guild.isTargetVisible(role, condition)
+            && isKnownCondition(guild, condition)) {
             GuildApi.API.removeDefaultCondition(source.getLevel(), guild, role, condition);
             source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.condition.remove", Component.literal(condition), Component.literal(role)), false);
             return 1;

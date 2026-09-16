@@ -188,22 +188,50 @@ public record Guild(
     }
 
     /**
-     * Gets every extra condition id attached to the role or one of its parents.
+     * Checks if the target was removed from the role.
      *
      * @param roleId the role id
-     * @return the condition ids
+     * @param target the target id
+     * @return if the target is removed
      */
-    public Set<String> getEffectiveConditions(String roleId) {
-        Set<String> result = new HashSet<>();
-        Set<String> visited = new HashSet<>();
-        String current = roleId;
-        while (current != null && !current.isEmpty() && visited.add(current)) {
-            result.addAll(this.getConditions(current));
-            Role role = this.roles().get(current);
-            if (role == null) break;
-            current = role.parent();
-        }
-        return result;
+    public boolean isTargetRemoved(String roleId, String target) {
+        return this.getRemovedConditions(roleId).contains(target);
+    }
+
+    /**
+     * Checks if the role owns the target as one of its conditions.
+     *
+     * @param roleId the role id
+     * @param target the target id
+     * @return if the role owns the target
+     */
+    public boolean ownsTarget(String roleId, String target) {
+        return this.getConditions(roleId).contains(target);
+    }
+
+    /**
+     * Checks if the target is a condition owned by another role. Exceptions only apply to the role
+     * that owns them, every other role follows the parent category setting instead.
+     *
+     * @param roleId the role id
+     * @param target the target id
+     * @return if the target belongs to another role
+     */
+    public boolean isTargetExclusive(String roleId, String target) {
+        return !this.ownsTarget(roleId, target) && this.getConditions().contains(target);
+    }
+
+    /**
+     * Checks if the target is available to the role: it is not removed, and it is either owned by
+     * the role or is a default target that no role has claimed.
+     *
+     * @param roleId the role id
+     * @param target the target id
+     * @return if the target is visible
+     */
+    public boolean isTargetVisible(String roleId, String target) {
+        if (this.isTargetRemoved(roleId, target)) return false;
+        return !this.isTargetExclusive(roleId, target);
     }
 
     /**
@@ -237,6 +265,7 @@ public record Guild(
      * @return the resolved value, or {@link TriState#UNDEFINED} if no role sets it
      */
     public TriState getRoleValue(String roleId, String permission) {
+        if (this.isTargetRemoved(roleId, permission)) return TriState.UNDEFINED;
         Set<String> visited = new HashSet<>();
         String current = roleId;
         while (current != null && !current.isEmpty() && visited.add(current)) {
@@ -258,9 +287,12 @@ public record Guild(
      * @return the resolved value
      */
     public TriState getPermission(Member member, String permission) {
+        String roleId = member.role().isEmpty() ? Role.MEMBER : member.role();
+        if (this.isTargetRemoved(roleId, permission)) return TriState.UNDEFINED;
+        if (this.isTargetExclusive(roleId, permission)) return TriState.UNDEFINED;
         TriState personal = member.permissionOverride(permission);
         if (personal != TriState.UNDEFINED) return personal;
-        return this.getRoleValue(member.role().isEmpty() ? Role.MEMBER : member.role(), permission);
+        return this.getRoleValue(roleId, permission);
     }
 
     /**
@@ -273,11 +305,14 @@ public record Guild(
      */
     public TriState getPermission(UUID player, String permission) {
         Member member = this.members().get(player);
+        String roleId = this.getRoleId(player);
+        if (this.isTargetRemoved(roleId, permission)) return TriState.UNDEFINED;
+        if (this.isTargetExclusive(roleId, permission)) return TriState.UNDEFINED;
         if (member != null) {
             TriState personal = member.permissionOverride(permission);
             if (personal != TriState.UNDEFINED) return personal;
         }
-        return this.getRoleValue(player, permission);
+        return this.getRoleValue(roleId, permission);
     }
 
     /**

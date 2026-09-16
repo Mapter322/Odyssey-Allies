@@ -240,7 +240,7 @@ public final class GuildRoleCommands {
             .filter(entry -> entry.id().equals(settingId))
             .findFirst()
             .orElseThrow(() -> TeamExceptions.SETTING_NOT_FOUND.create());
-        if (guild.getConditions().contains(settingId) && !guild.getConditions(roleId).contains(settingId)) {
+        if (!guild.isTargetVisible(roleId, settingId)) {
             throw TeamExceptions.SETTING_NOT_FOUND.create();
         }
 

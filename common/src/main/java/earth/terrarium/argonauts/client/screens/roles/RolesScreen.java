@@ -278,8 +278,6 @@ public class RolesScreen extends BaseScreen {
     }
 
     private void buildSettingRows(ListWidget list, List<MemberSetting> settings, Role role, boolean canEdit) {
-        Set<String> guildConditions = this.guild.getConditions();
-        Set<String> roleConditions = this.guild.getConditions(role.id());
         Map<String, List<MemberSetting>> children = new LinkedHashMap<>();
         List<MemberSetting> roots = new ArrayList<>();
         for (MemberSetting setting : settings) {
@@ -292,7 +290,7 @@ public class RolesScreen extends BaseScreen {
         for (MemberSetting setting : roots) {
             List<MemberSetting> group = children.get(setting.id());
             if (group == null || group.isEmpty()) {
-                if (isSettingVisible(setting, guildConditions, roleConditions)) {
+                if (this.guild.isTargetVisible(role.id(), setting.id())) {
                     list.add(roleSettingRow(role, setting, canEdit, false));
                 }
             }
@@ -302,20 +300,14 @@ public class RolesScreen extends BaseScreen {
             if (group == null || group.isEmpty()) continue;
             list.add(categoryRow(role, setting, canEdit));
             if (!this.expandedCategories.contains(setting.id())) continue;
-            Set<String> removedConditions = this.guild.getRemovedConditions(role.id());
             group.stream()
-                .filter(child -> isSettingVisible(child, guildConditions, roleConditions))
-                .filter(child -> roleConditions.contains(child.id()) || !removedConditions.contains(child.id()))
+                .filter(child -> this.guild.isTargetVisible(role.id(), child.id()))
                 .sorted(Comparator.comparing(MemberSetting::id))
                 .forEach(child -> list.add(targetRow(role, child, canEdit)));
             if (RoleDefaultsConfig.CONDITION_PARENTS.contains(setting.id())) {
                 list.add(addConditionEntry(role, setting.id(), canEdit));
             }
         }
-    }
-
-    private static boolean isSettingVisible(MemberSetting setting, Set<String> guildConditions, Set<String> roleConditions) {
-        return !guildConditions.contains(setting.id()) || roleConditions.contains(setting.id());
     }
 
     private ConditionEntry targetRow(Role role, MemberSetting setting, boolean canEdit) {
@@ -385,8 +377,8 @@ public class RolesScreen extends BaseScreen {
         if (location == null) return null;
         String condition = parent + "/" + value;
         if (this.guild.getConditions(role.id()).contains(condition)) return null;
-        if (!this.guild.getRemovedConditions(role.id()).contains(condition)
-            && MemberSettingsApi.API.getSettings(null).stream().anyMatch(setting -> setting.id().equals(condition))) {
+        if (this.guild.getRemovedConditions(role.id()).contains(condition)) return condition;
+        if (MemberSettingsApi.API.getSettings(null).stream().anyMatch(setting -> setting.id().equals(condition))) {
             return null;
         }
         return condition;

@@ -152,7 +152,6 @@ public final class GuildPermissionCommands {
     }
 
     private static boolean canUseCondition(Guild guild, UUID player, String key) {
-        if (!guild.getConditions().contains(key)) return true;
-        return guild.getEffectiveConditions(guild.getRoleId(player)).contains(key);
+        return guild.isTargetVisible(guild.getRoleId(player), key);
     }
 }

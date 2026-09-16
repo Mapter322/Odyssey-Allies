@@ -9,6 +9,8 @@ import earth.terrarium.argonauts.common.network.NetworkHandler;
 import earth.terrarium.argonauts.common.network.packets.ClientboundModifyGuildMemberRolePacket;
 import earth.terrarium.argonauts.common.network.packets.ClientboundRemoveGuildRolePacket;
 import earth.terrarium.argonauts.common.network.packets.ClientboundUpdateGuildRolePacket;
+import com.teamresourceful.resourcefullib.common.utils.TriState;
+import it.unimi.dsi.fastutil.objects.ObjectSet;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 
@@ -32,6 +34,18 @@ public class GuildRoleApiImpl implements GuildRoleApi {
     public void removeRole(Level level, Guild guild, String roleId) {
         Role removed = guild.roles().remove(roleId);
         if (removed == null) return;
+
+        ObjectSet<String> conditions = guild.conditions().remove(roleId);
+        guild.removedConditions().remove(roleId);
+        if (conditions != null) {
+            for (String condition : conditions) {
+                if (guild.getConditions().contains(condition)) continue;
+                guild.members().values().forEach(member -> {
+                    member.setPermissionOverride(condition, TriState.UNDEFINED);
+                    member.permissions().remove(condition);
+                });
+            }
+        }
 
         List<Role> reParented = new ArrayList<>();
         guild.roles().values().forEach(role -> {

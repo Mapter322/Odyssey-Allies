@@ -26,26 +26,27 @@ public class ConditionEntry extends BaseParentWidget {
     private final int labelColor;
     private final int iconSize;
     private final int iconYOffset;
+    @Nullable
     private final Button button;
     @Nullable
     private final AbstractWidget entry;
 
-    public ConditionEntry(Font font, Component label, int labelColor, ResourceLocation icon, Color iconColor,
+    public ConditionEntry(Font font, Component label, int labelColor, @Nullable ResourceLocation icon, Color iconColor,
                           @Nullable Component tooltip, boolean enabled, Runnable onPress) {
         this(font, label, labelColor, icon, iconColor, tooltip, enabled, onPress, ICON_SIZE, 0, null);
     }
 
-    public ConditionEntry(Font font, Component label, int labelColor, ResourceLocation icon, Color iconColor,
+    public ConditionEntry(Font font, Component label, int labelColor, @Nullable ResourceLocation icon, Color iconColor,
                           @Nullable Component tooltip, boolean enabled, Runnable onPress, int iconSize, int iconYOffset) {
         this(font, label, labelColor, icon, iconColor, tooltip, enabled, onPress, iconSize, iconYOffset, null);
     }
 
-    public ConditionEntry(Font font, Component label, int labelColor, ResourceLocation icon, Color iconColor,
+    public ConditionEntry(Font font, Component label, int labelColor, @Nullable ResourceLocation icon, Color iconColor,
                           @Nullable Component tooltip, boolean enabled, Runnable onPress, @Nullable AbstractWidget entry) {
         this(font, label, labelColor, icon, iconColor, tooltip, enabled, onPress, ICON_SIZE, 0, entry);
     }
 
-    public ConditionEntry(Font font, Component label, int labelColor, ResourceLocation icon, Color iconColor,
+    public ConditionEntry(Font font, Component label, int labelColor, @Nullable ResourceLocation icon, Color iconColor,
                           @Nullable Component tooltip, boolean enabled, Runnable onPress, int iconSize, int iconYOffset,
                           @Nullable AbstractWidget entry) {
         super(0, HEIGHT);
@@ -56,28 +57,33 @@ public class ConditionEntry extends BaseParentWidget {
         this.iconYOffset = iconYOffset;
         this.entry = entry;
 
-        this.button = Widgets.button()
-            .withRenderer(WidgetRenderers.icon(icon).withColor(enabled ? iconColor : MinecraftColors.DARK_GRAY))
-            .withTexture(null)
-            .withCallback(onPress);
-        this.button.withSize(iconSize);
-        if (tooltip != null) this.button.withTooltip(tooltip);
-        this.button.active = enabled;
-        this.children.add(this.button);
+        if (icon == null) {
+            this.button = null;
+        } else {
+            Button button = Widgets.button()
+                .withRenderer(WidgetRenderers.icon(icon).withColor(enabled ? iconColor : MinecraftColors.DARK_GRAY))
+                .withTexture(null)
+                .withCallback(onPress);
+            button.withSize(iconSize);
+            if (tooltip != null) button.withTooltip(tooltip);
+            button.active = enabled;
+            this.button = button;
+            this.children.add(button);
+        }
         if (entry != null) this.children.add(entry);
     }
 
     @Override
     public void setX(int x) {
         super.setX(x);
-        this.button.setX(x + ICON_PADDING);
+        if (this.button != null) this.button.setX(x + ICON_PADDING);
         if (this.entry != null) this.entry.setX(x + this.width - this.entry.getWidth());
     }
 
     @Override
     public void setY(int y) {
         super.setY(y);
-        this.button.setY(y + (this.height - this.iconSize) / 2 + this.iconYOffset);
+        if (this.button != null) this.button.setY(y + (this.height - this.iconSize) / 2 + this.iconYOffset);
         if (this.entry != null) this.entry.setY(y + (this.height - this.entry.getHeight()) / 2 + ENTRY_Y_OFFSET);
     }
 
@@ -91,7 +97,7 @@ public class ConditionEntry extends BaseParentWidget {
             this.labelColor,
             false
         );
-        this.button.render(graphics, mouseX, mouseY, partialTick);
+        if (this.button != null) this.button.render(graphics, mouseX, mouseY, partialTick);
         if (this.entry != null) this.entry.render(graphics, mouseX, mouseY, partialTick);
     }
 }

@@ -263,10 +263,9 @@ public class MembersScreen extends BaseScreen {
         );
 
         if (this.team.type().equals("guild")) {
-            var guildConditions = this.guild.getConditions();
-            var memberConditions = this.guild.getEffectiveConditions(this.guild.getRoleId(profile.getId()));
+            String memberRole = this.guild.getRoleId(profile.getId());
             List<MemberSetting> settings = MemberSettingsApi.API.getSettings(this.team).stream()
-                .filter(setting -> !guildConditions.contains(setting.id()) || memberConditions.contains(setting.id()))
+                .filter(setting -> this.guild.isTargetVisible(memberRole, setting.id()))
                 .toList();
             if (!settings.isEmpty()) {
                 list.add(section(Component.translatable("gui.argonauts.member_claim_permissions")));

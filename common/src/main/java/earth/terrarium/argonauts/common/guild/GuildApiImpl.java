@@ -141,7 +141,13 @@ public class GuildApiImpl implements GuildApi {
     public void addCondition(Level level, Guild guild, String role, String condition) {
         var data = GuildSaveData.read(level);
         ObjectSet<String> conditions = guild.conditions().computeIfAbsent(role, ignored -> new ObjectOpenHashSet<>());
-        if (!conditions.add(condition)) return;
+        boolean changed = conditions.add(condition);
+        ObjectSet<String> removed = guild.removedConditions().get(role);
+        if (removed != null) {
+            changed |= removed.remove(condition);
+            if (removed.isEmpty()) guild.removedConditions().remove(role);
+        }
+        if (!changed) return;
         if (level instanceof ServerLevel serverLevel) {
             data.setDirty();
             NetworkHandler.sendToAllClientPlayers(new ClientboundModifyGuildConditionPacket(guild.id(), role, condition, true), serverLevel.getServer());
@@ -153,8 +159,11 @@ public class GuildApiImpl implements GuildApi {
     public void removeCondition(Level level, Guild guild, String role, String condition) {
         var data = GuildSaveData.read(level);
         ObjectSet<String> conditions = guild.conditions().get(role);
-        if (conditions == null || !conditions.remove(condition)) return;
-        if (conditions.isEmpty()) guild.conditions().remove(role);
+        if (conditions != null) {
+            conditions.remove(condition);
+            if (conditions.isEmpty()) guild.conditions().remove(role);
+        }
+        guild.removedConditions().computeIfAbsent(role, ignored -> new ObjectOpenHashSet<>()).add(condition);
         Role guildRole = guild.roles().get(role);
         if (guildRole != null) guildRole.setOverride(condition, TriState.UNDEFINED);
         if (!guild.getConditions().contains(condition)) {
