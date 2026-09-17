@@ -17,7 +17,7 @@ public final class Config {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Argonauts.MOD_ID);
     private static final Path CONFIG_PATH = Path.of("config", "odyssey", "argonauts-server.toml");
-    private static final GuildLevel FALLBACK = new GuildLevel(1, 8, 50, 10);
+    private static final GuildLevel FALLBACK = new GuildLevel(1, 8, 50, 10, 8);
 
     public static final Path DEFAULT_FOLDER = Path.of("config", "odyssey", "default");
 
@@ -74,7 +74,8 @@ public final class Config {
                 table.getIntOrElse("max-towns", 1),
                 table.getIntOrElse("max-members", 1),
                 table.getIntOrElse("max-claims", 0),
-                table.getIntOrElse("max-forceloads", 0)
+                table.getIntOrElse("max-forceloads", 0),
+                table.getIntOrElse("max-outpost-chunks", 0)
             ));
         }
         return parsed;
@@ -98,6 +99,10 @@ public final class Config {
 
     public static int getMaxForceloads(int level) {
         return Math.max(0, resolve(level).maxForceloads);
+    }
+
+    public static int getMaxOutpostChunks(int level) {
+        return Math.max(0, resolve(level).maxOutpostChunks);
     }
 
     private static GuildLevel resolve(int level) {
@@ -130,9 +135,9 @@ public final class Config {
 
     private static Map<Integer, GuildLevel> defaultGuildLevels() {
         Map<Integer, GuildLevel> levels = new LinkedHashMap<>();
-        levels.put(1, new GuildLevel(1, 8, 50, 10));
-        levels.put(2, new GuildLevel(2, 16, 120, 25));
-        levels.put(3, new GuildLevel(3, 32, 300, 60));
+        levels.put(1, new GuildLevel(1, 8, 50, 10, 8));
+        levels.put(2, new GuildLevel(2, 16, 120, 25, 16));
+        levels.put(3, new GuildLevel(3, 32, 300, 60, 24));
         return levels;
     }
 
@@ -160,7 +165,7 @@ public final class Config {
         sb.append("# Maximum number of conditions a guild can have.\n");
         sb.append("conditions = ").append(maxGuildConditions).append("\n\n");
 
-        sb.append("# Guild levels: towns, members, claims and forceloads per level (0 means no level cap).\n");
+        sb.append("# Guild levels: towns, members, claims, forceloads and outpost chunks per level (0 means no level cap).\n");
         sb.append("# New levels like 4, 5, etc. can be added; assign a guild's level with\n");
         sb.append("# /argonauts guild admin level set <guild> <level>.\n");
         guildLevels.forEach((level, data) -> {
@@ -170,6 +175,7 @@ public final class Config {
             sb.append("max-members = ").append(data.maxMembers).append("\n");
             sb.append("max-claims = ").append(data.maxClaims).append("\n");
             sb.append("max-forceloads = ").append(data.maxForceloads).append("\n");
+            sb.append("max-outpost-chunks = ").append(data.maxOutpostChunks).append("\n");
         });
 
         try {
@@ -185,12 +191,14 @@ public final class Config {
         public int maxMembers;
         public int maxClaims;
         public int maxForceloads;
+        public int maxOutpostChunks;
 
-        GuildLevel(int maxTowns, int maxMembers, int maxClaims, int maxForceloads) {
+        GuildLevel(int maxTowns, int maxMembers, int maxClaims, int maxForceloads, int maxOutpostChunks) {
             this.maxTowns = maxTowns;
             this.maxMembers = maxMembers;
             this.maxClaims = maxClaims;
             this.maxForceloads = maxForceloads;
+            this.maxOutpostChunks = maxOutpostChunks;
         }
     }
 }

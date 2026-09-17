@@ -68,6 +68,14 @@ public class ArgonautsTeam implements TeamProvider {
     }
 
     @Override
+    public int getMaxOutpostChunks(Level level, UUID teamId) {
+        return GuildApi.API.get(level, teamId)
+            .map(guild -> Config.getMaxOutpostChunks(Settings.LEVEL.get(guild)))
+            .filter(limit -> limit > 0)
+            .orElse(Integer.MAX_VALUE);
+    }
+
+    @Override
     public boolean canManageClaims(Level level, UUID teamId, GameProfile player) {
         return GuildApi.API.get(level, teamId)
             .map(guild -> guild.canManageClaims(player.getId())).orElse(false);
