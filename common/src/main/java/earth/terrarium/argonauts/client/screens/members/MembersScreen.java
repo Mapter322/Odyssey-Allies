@@ -263,10 +263,7 @@ public class MembersScreen extends BaseScreen {
         );
 
         if (this.team.type().equals("guild")) {
-            String memberRole = this.guild.getRoleId(profile.getId());
-            List<MemberSetting> settings = MemberSettingsApi.API.getSettings(this.team).stream()
-                .filter(setting -> this.guild.isTargetVisible(memberRole, setting.id()))
-                .toList();
+            List<MemberSetting> settings = MemberSettingsApi.API.getSettings(this.team);
             if (!settings.isEmpty()) {
                 list.add(section(Component.translatable("gui.argonauts.member_claim_permissions")));
                 buildSettingRows(list, settings, profile, member, canEditPermissions);
@@ -329,17 +326,24 @@ public class MembersScreen extends BaseScreen {
         });
         var toggle = Widgets.tristate(state, builder -> builder
             .withRenderer((option, active) -> WidgetRenderers.layered(
-                WidgetRenderers.sprite(active ? TristateRenderers.getButtonSprites(option) : UIConstants.BUTTON),
+                WidgetRenderers.sprite(active && canEdit ? TristateRenderers.getButtonSprites(option) : UIConstants.BUTTON),
                 WidgetRenderers.icon(TristateRenderers.getIcon(option))
-                    .withColor(active ? MinecraftColors.WHITE : TristateRenderers.getColor(option))
+                    .withColor(canEdit
+                        ? (active ? MinecraftColors.WHITE : TristateRenderers.getColor(option))
+                        : MinecraftColors.GRAY)
                     .withPaddingBottom(1)
                     .withCentered(10, 10)
             ))
             .withSize(TRISTATE_W, TRISTATE_H)
-            .withCallback(selected -> ScreenUtils.sendCommand("argonauts %s permissions set \"%s\" %s %s".formatted(
-                team.type(), key, profile.getName(), TeamArguments.triStateName(selected)))), layout -> {});
+            .withCallback(selected -> {
+                if (canEdit) ScreenUtils.sendCommand("argonauts %s permissions set \"%s\" %s %s".formatted(
+                    team.type(), key, profile.getName(), TeamArguments.triStateName(selected)));
+            }), layout -> {});
         toggle.withTooltip(description);
-        toggle.active = canEdit;
+        if (!canEdit) {
+            toggle.asDisabled();
+            toggle.visit(Button.class, button -> button.asDisabled());
+        }
         LabelledEntry entry = new LabelledEntry(this.font, title, toggle)
             .setLockedWidth()
             .setEntryYOffset(-2)
@@ -350,6 +354,7 @@ public class MembersScreen extends BaseScreen {
     }
 
     private void buildSettingRows(ListWidget list, List<MemberSetting> settings, GameProfile profile, Member member, boolean canEdit) {
+        String memberRole = this.guild.getRoleId(profile.getId());
         Map<String, List<MemberSetting>> children = new LinkedHashMap<>();
         List<MemberSetting> roots = new ArrayList<>();
         for (MemberSetting setting : settings) {
@@ -362,7 +367,9 @@ public class MembersScreen extends BaseScreen {
         for (MemberSetting setting : roots) {
             List<MemberSetting> group = children.get(setting.id());
             if (group == null || group.isEmpty()) {
-                list.add(permissionRow(setting.id(), setting.name(), setting.description(), profile, member, canEdit, false));
+                if (this.guild.isTargetVisible(memberRole, setting.id())) {
+                    list.add(permissionRow(setting.id(), setting.name(), setting.description(), profile, member, canEdit, false));
+                }
             }
         }
         for (MemberSetting setting : roots) {
@@ -370,8 +377,22 @@ public class MembersScreen extends BaseScreen {
             if (group == null || group.isEmpty()) continue;
             list.add(categoryRow(setting, profile, member, canEdit));
             if (!this.expandedCategories.contains(setting.id())) continue;
-            group.forEach(child -> list.add(permissionRow(child.id(), child.name(), child.description(), profile, member, canEdit, true)));
+            List<MemberSetting> visible = group.stream()
+                .filter(child -> this.guild.isTargetVisible(memberRole, child.id()))
+                .toList();
+            if (visible.isEmpty()) {
+                list.add(noConditionsRow());
+            } else {
+                visible.forEach(child -> list.add(permissionRow(child.id(), child.name(), child.description(), profile, member, canEdit, true)));
+            }
         }
+    }
+
+    private LabelledEntry noConditionsRow() {
+        return new LabelledEntry(this.font, Component.translatable("gui.argonauts.no_conditions"), Widgets.text(Component.empty()))
+            .setLockedWidth()
+            .setLeftPadding(14)
+            .setColor(MinecraftColors.GRAY.getValue());
     }
 
     private SettingCategoryEntry categoryRow(MemberSetting setting, GameProfile profile, Member member, boolean canEdit) {

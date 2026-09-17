@@ -256,6 +256,7 @@
     "gui.argonauts.condition.add.description": "Enter an extra target for this category, e.g. \"minecraft:stone\" or \"#c:chests\".",
     "gui.argonauts.condition.add.placeholder": "minecraft:stone",
     "gui.argonauts.condition.remove": "Remove condition: %s",
+    "gui.argonauts.no_conditions": "No conditions",
     "gui.argonauts.actions": "Actions",
     "gui.argonauts.remove_member": "Remove Member",
     "gui.argonauts.remove": "Remove",

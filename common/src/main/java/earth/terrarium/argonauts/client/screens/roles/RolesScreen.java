@@ -414,16 +414,23 @@ public class RolesScreen extends BaseScreen {
         });
         LayoutWidget<LinearViewLayout> toggle = Widgets.tristate(state, builder -> builder
             .withRenderer((option, active) -> WidgetRenderers.layered(
-                WidgetRenderers.sprite(active ? TristateRenderers.getButtonSprites(option) : UIConstants.BUTTON),
+                WidgetRenderers.sprite(active && canEdit ? TristateRenderers.getButtonSprites(option) : UIConstants.BUTTON),
                 WidgetRenderers.icon(TristateRenderers.getIcon(option))
-                    .withColor(active ? MinecraftColors.WHITE : TristateRenderers.getColor(option))
+                    .withColor(canEdit
+                        ? (active ? MinecraftColors.WHITE : TristateRenderers.getColor(option))
+                        : MinecraftColors.GRAY)
                     .withPaddingBottom(1)
                     .withCentered(10, 10)
             ))
             .withSize(TRISTATE_W, TRISTATE_H)
-            .withCallback(value -> ScreenUtils.sendCommand(command + " " + TeamArguments.triStateName(value))),
+            .withCallback(value -> {
+                if (canEdit) ScreenUtils.sendCommand(command + " " + TeamArguments.triStateName(value));
+            }),
             layout -> {});
-        toggle.active = canEdit;
+        if (!canEdit) {
+            toggle.asDisabled();
+            toggle.visit(Button.class, button -> button.asDisabled());
+        }
         return toggle;
     }
 

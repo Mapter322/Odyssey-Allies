@@ -60,9 +60,11 @@ public class SettingCategoryEntry extends Button {
             int left = stripX + i * OPTION_WIDTH - context.getX();
             int right = context.getWidth() - (left + OPTION_WIDTH);
             WidgetRenderer<Button> zoneRenderer = WidgetRenderers.layered(
-                WidgetRenderers.<Button>sprite(active ? TristateRenderers.getButtonSprites(option) : UIConstants.BUTTON),
+                WidgetRenderers.<Button>sprite(active && this.editable ? TristateRenderers.getButtonSprites(option) : UIConstants.BUTTON),
                 WidgetRenderers.<Button>icon(TristateRenderers.getIcon(option))
-                    .withColor(active ? MinecraftColors.WHITE : TristateRenderers.getColor(option))
+                    .withColor(this.editable
+                        ? (active ? MinecraftColors.WHITE : TristateRenderers.getColor(option))
+                        : MinecraftColors.GRAY)
                     .withPaddingBottom(1)
                     .withCentered(10, 10)
             );
