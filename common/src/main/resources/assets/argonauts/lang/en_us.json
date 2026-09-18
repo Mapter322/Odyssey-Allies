@@ -232,6 +232,8 @@
     "gui.argonauts.party_members.title": "Party Members",
     "gui.argonauts.party_settings.title": "Party Settings",
     "gui.argonauts.guild_chat.title": "Guild Chat",
+    "gui.argonauts.chat.placeholder": "Message...",
+    "gui.argonauts.chat.send": "Send",
     "gui.argonauts.guild_members.title": "Guild Members",
     "gui.argonauts.guild_roles.title": "Guild Roles",
     "gui.argonauts.guild_settings.title": "Guild Settings",

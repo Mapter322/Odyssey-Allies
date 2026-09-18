@@ -27,6 +27,8 @@ public class ConstantComponents {
     public static final Component PARTY_SETTINGS_TITLE = Component.translatable("gui.argonauts.party_settings.title");
 
     public static final Component GUILD_CHAT_TITLE = Component.translatable("gui.argonauts.guild_chat.title");
+    public static final Component CHAT_PLACEHOLDER = Component.translatable("gui.argonauts.chat.placeholder");
+    public static final Component SEND_CHAT = Component.translatable("gui.argonauts.chat.send");
     public static final Component GUILD_MEMBERS_TITLE = Component.translatable("gui.argonauts.guild_members.title");
     public static final Component GUILD_ROLES_TITLE = Component.translatable("gui.argonauts.guild_roles.title");
     public static final Component GUILD_SETTINGS_TITLE = Component.translatable("gui.argonauts.guild_settings.title");
