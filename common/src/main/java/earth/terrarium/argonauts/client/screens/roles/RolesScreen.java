@@ -33,9 +33,11 @@ import earth.terrarium.olympus.client.ui.UIConstants;
 import earth.terrarium.olympus.client.ui.UIIcons;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
@@ -513,8 +515,23 @@ public class RolesScreen extends BaseScreen {
             super(width, height);
         }
 
+        @Override
+        public void setFocused(@Nullable GuiEventListener listener) {
+            double scroll = this.scroll;
+            super.setFocused(listener);
+            this.scroll = scroll;
+        }
+
         void restoreScroll(int scroll) {
-            this.scroll = Math.max(0, Math.min(scroll, Math.max(0, this.getContentHeight() - this.getHeight())));
+            this.scroll = Math.max(0, Math.min(scroll, Math.max(0, this.contentHeight() - this.getHeight())));
+        }
+
+        private int contentHeight() {
+            int height = 0;
+            for (AbstractWidget item : this.items) {
+                height += item.getHeight() + this.gap;
+            }
+            return height;
         }
     }
 

@@ -179,6 +179,8 @@ public class GuildMainMenuScreen extends BaseScreen {
         list.add(labelled(Component.translatable("gui.argonauts.info.level"), Component.literal(String.valueOf(Settings.LEVEL.get(this.team)))));
         list.add(labelled(Component.translatable("gui.argonauts.info.members"), membersValue()));
         list.add(labelled(Component.translatable("gui.argonauts.info.online"), onlineValue()));
+        list.add(labelled(Component.translatable("gui.argonauts.info.town"), townValue()));
+        list.add(labelled(Component.translatable("gui.argonauts.info.outpost"), outpostValue()));
         list.add(labelled(Component.translatable("gui.argonauts.info.public"), yesNo(Settings.PUBLIC.get(this.team))));
         list.add(labelled(Component.translatable("gui.argonauts.info.friendly_fire"), yesNo(Settings.FRIENDLY_FIRE.get(this.team))));
 
@@ -250,8 +252,25 @@ public class GuildMainMenuScreen extends BaseScreen {
 
     private Component onlineValue() {
         int online = this.team.onlineMembers(Objects.requireNonNull(Minecraft.getInstance().level)).size();
-        int max = Config.getMaxMembers(Settings.LEVEL.get(this.team));
-        return Component.literal(online + "/" + max);
+        return Component.literal(online + "/" + this.team.realMembersCount());
+    }
+
+    private Component townValue() {
+        int max = Config.getMaxTowns(Settings.LEVEL.get(this.team));
+        int count = 0;
+        for (CadmusClient.ClientTown town : CadmusClient.TOWNS.values()) {
+            if (town.team().id().equals(this.team.id())) count++;
+        }
+        return Component.literal(count + "/" + max);
+    }
+
+    private Component outpostValue() {
+        int max = Config.getMaxOutpostChunks(Settings.LEVEL.get(this.team));
+        int count = 0;
+        for (var entry : CadmusClient.OUTPOSTS.entrySet()) {
+            if (entry.getKey().id().equals(this.team.id())) count += entry.getValue().size();
+        }
+        return max > 0 ? Component.literal(count + "/" + max) : Component.literal(String.valueOf(count));
     }
 
     private Component yesNo(boolean value) {

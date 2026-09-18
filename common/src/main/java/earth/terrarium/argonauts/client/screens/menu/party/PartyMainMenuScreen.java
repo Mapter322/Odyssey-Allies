@@ -191,8 +191,7 @@ public class PartyMainMenuScreen extends BaseScreen {
 
     private Component onlineValue() {
         int online = this.team.onlineMembers(Objects.requireNonNull(Minecraft.getInstance().level)).size();
-        int max = Config.maxPartyMembers;
-        return Component.literal(online + "/" + max);
+        return Component.literal(online + "/" + this.team.realMembersCount());
     }
 
     private void sendCommand(String command) {
