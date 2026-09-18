@@ -42,6 +42,7 @@ public class TeamExceptions {
     public static final SimpleCommandExceptionType NO_PERMISSION_CREATE_PARTY = create("command.argonauts.exception.no_permission_create_party");
     public static final SimpleCommandExceptionType PASSIVE_TELEPORT_DISABLED = create("command.argonauts.exception.passive_teleport_disabled");
     public static final SimpleCommandExceptionType NAME_TOO_LONG = create("command.argonauts.exception.name_too_long");
+    public static final SimpleCommandExceptionType GUILD_NAME_TAKEN = create("command.argonauts.exception.guild_name_taken");
 
     public static final SimpleCommandExceptionType INVALID_PERMISSION_VALUE = create("command.argonauts.exception.invalid_permission_value");
     public static final SimpleCommandExceptionType PERMISSION_NOT_FOUND = create("command.argonauts.exception.permission_not_found");

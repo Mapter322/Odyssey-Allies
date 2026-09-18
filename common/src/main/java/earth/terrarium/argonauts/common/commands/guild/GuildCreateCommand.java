@@ -6,11 +6,15 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import earth.terrarium.argonauts.api.teams.guild.Guild;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.api.util.ModUtils;
+import earth.terrarium.argonauts.api.NotificationApi;
 import earth.terrarium.argonauts.common.commands.TeamExceptions;
 import earth.terrarium.argonauts.common.settings.Settings;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 import static earth.terrarium.argonauts.common.utils.ModUtils.formatTextColors;
 
@@ -38,9 +42,23 @@ public final class GuildCreateCommand {
         ServerPlayer player = source.getPlayerOrException();
         if (GuildApi.API.getPlayerGuild(player).isPresent()) throw TeamExceptions.ALREADY_IN_GUILD.create();
         if (name.length() > Settings.MAX_NAME_LENGTH) throw TeamExceptions.NAME_TOO_LONG.create();
+        if (isNameTaken(source.getLevel(), null, name)) {
+            NotificationApi.notify(player, "command.argonauts.exception.guild_name_taken");
+            throw TeamExceptions.GUILD_NAME_TAKEN.create();
+        }
         Guild guild = new Guild(player.getUUID(), name);
         GuildApi.API.create(source.getLevel(), guild);
 
         source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.guild_create", guild.displayName()), false);
+    }
+
+    /**
+     * Checks if another guild already uses the given name, ignoring text colors.
+     */
+    public static boolean isNameTaken(Level level, @Nullable Guild exclude, String name) {
+        String clean = ChatFormatting.stripFormatting(name);
+        return GuildApi.API.getAll(level).stream()
+            .filter(guild -> guild != exclude)
+            .anyMatch(guild -> ChatFormatting.stripFormatting(Settings.DISPLAY_NAME.get(guild)).equalsIgnoreCase(clean));
     }
 }
