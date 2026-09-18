@@ -22,7 +22,6 @@ import earth.terrarium.argonauts.common.guild.GuildRoleDefaults;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.GameProfileCache;
@@ -33,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 public final class GuildRoleCommands {
@@ -101,12 +101,12 @@ public final class GuildRoleCommands {
                         )
                     )
                     .then(Commands.literal("assign")
-                        .then(Commands.argument("player", EntityArgument.player())
+                        .then(Commands.argument("player", StringArgumentType.word())
                             .suggests(TeamSuggestionProviders.CURRENT_GUILD_MEMBERS_SUGGESTION_PROVIDER)
                             .then(Commands.argument("role", StringArgumentType.word())
                                 .suggests(ROLE_SUGGESTION_PROVIDER)
                                 .executes(context -> {
-                                    assign(context.getSource(), EntityArgument.getPlayer(context, "player"), roleId(context));
+                                    assign(context.getSource(), StringArgumentType.getString(context, "player"), roleId(context));
                                     return 1;
                                 })
                             )
@@ -200,17 +200,19 @@ public final class GuildRoleCommands {
         source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.role.parent", roleId, resolved), false);
     }
 
-    private static void assign(CommandSourceStack source, ServerPlayer target, String roleId) throws CommandSyntaxException {
+    private static void assign(CommandSourceStack source, String targetName, String roleId) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         Guild guild = requireGuildAndPermission(source, player);
 
-        if (!guild.isMember(target.getUUID())) throw TeamExceptions.PLAYER_NOT_IN_GUILD.create();
-        if (guild.isOwner(target.getUUID())) throw TeamExceptions.CANNOT_CHANGE_OWNER_ROLE.create();
+        UUID targetId = TeamArguments.resolveMember(source, guild, targetName);
+        if (targetId == null || !guild.isMember(targetId)) throw TeamExceptions.PLAYER_NOT_IN_GUILD.create();
+        if (guild.isOwner(targetId)) throw TeamExceptions.CANNOT_CHANGE_OWNER_ROLE.create();
         if (!guild.roles().containsKey(roleId)) throw TeamExceptions.ROLE_NOT_FOUND.create();
         if (roleId.equals(Role.ALL) || roleId.equals(Role.ALLY)) throw TeamExceptions.CANNOT_ASSIGN_ROLE.create();
 
-        GuildRoleApi.API.modifyMemberRole(source.getLevel(), guild, target.getUUID(), roleId);
-        source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.role.assign", roleId, target.getName()), false);
+        GuildRoleApi.API.modifyMemberRole(source.getLevel(), guild, targetId, roleId);
+        Component display = TeamArguments.memberName(source.getServer(), guild, targetId);
+        source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.role.assign", roleId, display), false);
     }
 
     private static void permission(CommandSourceStack source, String roleId, String permission, TriState value) throws CommandSyntaxException {

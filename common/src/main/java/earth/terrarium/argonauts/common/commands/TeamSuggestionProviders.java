@@ -37,17 +37,13 @@ public class TeamSuggestionProviders {
         ServerPlayer player = context.getSource().getPlayerOrException();
         Guild guild = GuildApi.API.getPlayerGuild(player).orElse(null);
         if (guild == null) throw TeamExceptions.NOT_IN_GUILD.create();
-        return SharedSuggestionProvider.suggest(guild.onlineMembers(player.level())
-            .stream()
-            .map(member -> member.getGameProfile().getName()), builder);
+        return SharedSuggestionProvider.suggest(TeamArguments.memberNames(context.getSource().getServer(), guild), builder);
     };
 
     public static final SuggestionProvider<CommandSourceStack> CURRENT_PARTY_MEMBERS_SUGGESTION_PROVIDER = (context, builder) -> {
         ServerPlayer player = context.getSource().getPlayerOrException();
         Party party = PartyApi.API.getPlayerParty(player).orElse(null);
         if (party == null) throw TeamExceptions.NOT_IN_PARTY.create();
-        return SharedSuggestionProvider.suggest(party.onlineMembers(player.level())
-            .stream()
-            .map(member -> member.getGameProfile().getName()), builder);
+        return SharedSuggestionProvider.suggest(TeamArguments.memberNames(context.getSource().getServer(), party), builder);
     };
 }

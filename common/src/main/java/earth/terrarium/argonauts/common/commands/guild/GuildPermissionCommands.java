@@ -18,7 +18,6 @@ import earth.terrarium.argonauts.api.util.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -46,16 +45,16 @@ public final class GuildPermissionCommands {
                     .then(Commands.literal("set")
                         .then(Commands.argument("key", StringArgumentType.string())
                             .suggests(KEY_SUGGESTION_PROVIDER)
-                            .then(Commands.argument("player", EntityArgument.player())
+                            .then(Commands.argument("player", StringArgumentType.word())
                                 .suggests(TeamSuggestionProviders.CURRENT_GUILD_MEMBERS_SUGGESTION_PROVIDER)
                                 .then(Commands.argument("value", StringArgumentType.word())
                                     .suggests(TeamArguments.TRI_STATE_SUGGESTION_PROVIDER)
                                     .executes(context -> {
-                                            TriState value = TeamArguments.parseTriState(StringArgumentType.getString(context, "value"));
-                                            if (value == null) throw TeamExceptions.INVALID_PERMISSION_VALUE.create();
-                                            set(context.getSource(), StringArgumentType.getString(context, "key"),
-                                                EntityArgument.getPlayer(context, "player"), value);
-                                            return 1;
+                                        TriState value = TeamArguments.parseTriState(StringArgumentType.getString(context, "value"));
+                                        if (value == null) throw TeamExceptions.INVALID_PERMISSION_VALUE.create();
+                                        set(context.getSource(), StringArgumentType.getString(context, "key"),
+                                            StringArgumentType.getString(context, "player"), value);
+                                        return 1;
                                     })
                                 )
                             )
@@ -64,21 +63,21 @@ public final class GuildPermissionCommands {
                     .then(Commands.literal("get")
                         .then(Commands.argument("key", StringArgumentType.string())
                             .suggests(KEY_SUGGESTION_PROVIDER)
-                            .then(Commands.argument("player", EntityArgument.player())
+                            .then(Commands.argument("player", StringArgumentType.word())
                                 .suggests(TeamSuggestionProviders.CURRENT_GUILD_MEMBERS_SUGGESTION_PROVIDER)
                                 .executes(context -> {
                                     get(context.getSource(), StringArgumentType.getString(context, "key"),
-                                        EntityArgument.getPlayer(context, "player"));
+                                        StringArgumentType.getString(context, "player"));
                                     return 1;
                                 })
                             )
                         )
                     )
                     .then(Commands.literal("list")
-                        .then(Commands.argument("player", EntityArgument.player())
+                        .then(Commands.argument("player", StringArgumentType.word())
                             .suggests(TeamSuggestionProviders.CURRENT_GUILD_MEMBERS_SUGGESTION_PROVIDER)
                             .executes(context -> {
-                                list(context.getSource(), EntityArgument.getPlayer(context, "player"));
+                                list(context.getSource(), StringArgumentType.getString(context, "player"));
                                 return 1;
                             })
                         )
@@ -87,49 +86,59 @@ public final class GuildPermissionCommands {
             ));
     }
 
-    private static void set(CommandSourceStack source, String key, ServerPlayer target, TriState value) throws CommandSyntaxException {
+    private static void set(CommandSourceStack source, String key, String targetName, TriState value) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         Guild guild = GuildApi.API.getPlayerGuild(player).orElse(null);
         if (guild == null) throw TeamExceptions.NOT_IN_GUILD.create();
         if (!guild.canManagePermissions(player.getUUID())) throw TeamExceptions.NO_PERMISSION_MANAGE_PERMISSIONS.create();
 
+        UUID targetId = TeamArguments.resolveMember(source, guild, targetName);
+        if (targetId == null) throw TeamExceptions.PLAYER_NOT_IN_GUILD.create();
+
         Component name = keyName(guild, key);
-        if (name == null || !canUseCondition(guild, target.getUUID(), key)) throw TeamExceptions.PERMISSION_NOT_FOUND.create();
+        if (name == null || !canUseCondition(guild, targetId, key)) throw TeamExceptions.PERMISSION_NOT_FOUND.create();
 
-        GuildApi.API.modifyPermission(source.getLevel(), guild, target.getUUID(), key, value);
+        GuildApi.API.modifyPermission(source.getLevel(), guild, targetId, key, value);
 
+        Component display = TeamArguments.memberName(source.getServer(), guild, targetId);
         source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.permissions.set",
             name,
             TeamArguments.triStateName(value),
-            target.getName()
+            display
         ), false);
     }
 
-    private static void get(CommandSourceStack source, String key, ServerPlayer target) throws CommandSyntaxException {
+    private static void get(CommandSourceStack source, String key, String targetName) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         Guild guild = GuildApi.API.getPlayerGuild(player).orElse(null);
         if (guild == null) throw TeamExceptions.NOT_IN_GUILD.create();
 
+        UUID targetId = TeamArguments.resolveMember(source, guild, targetName);
+        if (targetId == null) throw TeamExceptions.PLAYER_NOT_IN_GUILD.create();
+
         Component name = keyName(guild, key);
-        if (name == null || !canUseCondition(guild, target.getUUID(), key)) throw TeamExceptions.PERMISSION_NOT_FOUND.create();
+        if (name == null || !canUseCondition(guild, targetId, key)) throw TeamExceptions.PERMISSION_NOT_FOUND.create();
 
         boolean value = MemberPermissionsApi.API.getGuildPermissions().containsKey(key)
-            ? guild.hasPermission(target.getUUID(), key)
-            : guild.getPermission(target.getUUID(), key) == TriState.TRUE;
+            ? guild.hasPermission(targetId, key)
+            : guild.getPermission(targetId, key) == TriState.TRUE;
 
         source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.permissions.get",
             name,
             value,
-            target.getName()
+            TeamArguments.memberName(source.getServer(), guild, targetId)
         ), false);
     }
 
-    private static void list(CommandSourceStack source, ServerPlayer target) throws CommandSyntaxException {
+    private static void list(CommandSourceStack source, String targetName) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         Guild guild = GuildApi.API.getPlayerGuild(player).orElse(null);
         if (guild == null) throw TeamExceptions.NOT_IN_GUILD.create();
 
-        Member member = guild.getOrCreateMember(target.getUUID());
+        UUID targetId = TeamArguments.resolveMember(source, guild, targetName);
+        if (targetId == null) throw TeamExceptions.PLAYER_NOT_IN_GUILD.create();
+
+        Member member = guild.getOrCreateMember(targetId);
 
         member.permissionOverrides().forEach((key, value) -> source.sendSuccess(() -> {
             Component name = keyName(guild, key);
