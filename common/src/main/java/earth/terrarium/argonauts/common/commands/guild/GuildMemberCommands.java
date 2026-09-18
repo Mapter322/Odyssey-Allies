@@ -1,6 +1,7 @@
 package earth.terrarium.argonauts.common.commands.guild;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.teamresourceful.resourcefullib.common.utils.TriState;
 import earth.terrarium.argonauts.api.teams.Member;
@@ -10,11 +11,11 @@ import earth.terrarium.argonauts.api.teams.permissions.MemberPermissionsApi;
 import earth.terrarium.argonauts.api.teams.settings.MemberSetting;
 import earth.terrarium.argonauts.api.teams.settings.MemberSettingsApi;
 import earth.terrarium.argonauts.api.util.ModUtils;
+import earth.terrarium.argonauts.common.commands.TeamArguments;
 import earth.terrarium.argonauts.common.commands.TeamExceptions;
 import earth.terrarium.argonauts.common.commands.TeamSuggestionProviders;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.GameProfileCache;
@@ -22,6 +23,7 @@ import net.minecraft.server.players.GameProfileCache;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 public final class GuildMemberCommands {
 
@@ -36,10 +38,10 @@ public final class GuildMemberCommands {
                         })
                     )
                     .then(Commands.literal("info")
-                        .then(Commands.argument("player", EntityArgument.player())
+                        .then(Commands.argument("player", StringArgumentType.word())
                             .suggests(TeamSuggestionProviders.CURRENT_GUILD_MEMBERS_SUGGESTION_PROVIDER)
                             .executes(context -> {
-                                info(context.getSource(), EntityArgument.getPlayer(context, "player"));
+                                info(context.getSource(), StringArgumentType.getString(context, "player"));
                                 return 1;
                             })
                         )
@@ -65,18 +67,20 @@ public final class GuildMemberCommands {
                 ModUtils.translatableWithStyle("command.argonauts.list_member", profile.getName(), member.status().getDisplayName()), false)));
     }
 
-    private static void info(CommandSourceStack source, ServerPlayer target) throws CommandSyntaxException {
+    private static void info(CommandSourceStack source, String targetName) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         Guild guild = GuildApi.API.getPlayerGuild(player).orElse(null);
         if (guild == null) throw TeamExceptions.NOT_IN_GUILD.create();
         if (!guild.canManagePermissions(player.getUUID())) throw TeamExceptions.NO_PERMISSION_MANAGE_PERMISSIONS.create();
 
-        Member member = guild.members().get(target.getUUID());
+        UUID targetId = TeamArguments.resolveMember(source, guild, targetName);
+        Member member = targetId == null ? null : guild.members().get(targetId);
         if (member == null || !member.status().isMember()) throw TeamExceptions.PLAYER_NOT_IN_GUILD.create();
 
-        String roleId = guild.getRoleId(target.getUUID());
+        Component display = TeamArguments.memberName(source.getServer(), guild, targetId);
+        String roleId = guild.getRoleId(targetId);
         source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.member.info.name",
-            target.getName(),
+            display,
             Component.translatableWithFallback("gui.argonauts.role." + roleId, roleId)), false);
 
         source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.member.info.guild_permissions"), false);
@@ -93,7 +97,7 @@ public final class GuildMemberCommands {
             settings.sort(Comparator.comparing(MemberSetting::id));
             source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.member.info.claim_permissions"), false);
             for (MemberSetting setting : settings) {
-                TriState state = guild.getPermission(target.getUUID(), setting.id());
+                TriState state = guild.getPermission(targetId, setting.id());
                 String value = switch (state) {
                     case TRUE -> "allow";
                     case FALSE -> "deny";

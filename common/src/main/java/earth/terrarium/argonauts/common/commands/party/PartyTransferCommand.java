@@ -18,13 +18,15 @@ public final class PartyTransferCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("argonauts")
             .then(Commands.literal("party")
-                .then(Commands.literal("transfer")
-                    .then(Commands.argument("player", EntityArgument.player())
-                        .suggests(TeamSuggestionProviders.CURRENT_PARTY_MEMBERS_SUGGESTION_PROVIDER)
-                        .executes(context -> {
-                            transfer(context.getSource(), EntityArgument.getPlayer(context, "player"));
-                            return 1;
-                        })
+                .then(Commands.literal("owner")
+                    .then(Commands.literal("set")
+                        .then(Commands.argument("player", EntityArgument.player())
+                            .suggests(TeamSuggestionProviders.CURRENT_PARTY_MEMBERS_SUGGESTION_PROVIDER)
+                            .executes(context -> {
+                                transfer(context.getSource(), EntityArgument.getPlayer(context, "player"));
+                                return 1;
+                            })
+                        )
                     )
                 )
             ));
