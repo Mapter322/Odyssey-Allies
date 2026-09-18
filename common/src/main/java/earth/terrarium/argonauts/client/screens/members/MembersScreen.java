@@ -21,6 +21,7 @@ import earth.terrarium.argonauts.common.constants.ConstantComponents;
 import earth.terrarium.argonauts.common.guild.GuildRoleDefaults;
 import earth.terrarium.olympus.client.components.Widgets;
 import earth.terrarium.olympus.client.components.base.ListWidget;
+import earth.terrarium.olympus.client.components.base.renderer.WidgetRenderer;
 import earth.terrarium.olympus.client.components.buttons.Button;
 import earth.terrarium.olympus.client.components.compound.radio.RadioState;
 import earth.terrarium.olympus.client.components.dropdown.DropdownState;
@@ -29,6 +30,7 @@ import earth.terrarium.olympus.client.components.renderers.WidgetRenderers;
 import earth.terrarium.olympus.client.components.string.TextWidget;
 import earth.terrarium.olympus.client.constants.MinecraftColors;
 import earth.terrarium.olympus.client.ui.UIConstants;
+import earth.terrarium.olympus.client.utils.State;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -63,6 +65,10 @@ public class MembersScreen extends BaseScreen {
 
     private static final int TRISTATE_W = 36;
     private static final int TRISTATE_H = 14;
+    private static final int SWITCH_W = 26;
+    private static final int SWITCH_H = 14;
+    private static final int SWITCH_HIT_W = 32;
+    private static final int SWITCH_HIT_H = 16;
     private static final int BUTTON_HEIGHT = 20;
     private static final int INVITE_LIFT = 2;
     private static final int ROLE_DROPDOWN_W = 90;
@@ -257,12 +263,14 @@ public class MembersScreen extends BaseScreen {
         list.add(section(ConstantComponents.MEMBER_PERMISSIONS));
 
         boolean canEditPermissions = member.status().isMember() && team.canManagePermissions(this.selfId) && !team.isOwner(profile.getId());
-        this.permissions.forEach(permission ->
-            list.add(permissionRow(permission,
-                Component.translatable("permission.argonauts." + permission),
-                Component.translatable("permission.argonauts." + permission + ".description"),
-                profile, member, canEditPermissions, false))
-        );
+        boolean party = this.guild == null;
+        this.permissions.forEach(permission -> {
+            Component title = Component.translatable("permission.argonauts." + permission);
+            Component description = Component.translatable("permission.argonauts." + permission + ".description");
+            list.add(party
+                ? partyPermissionRow(permission, title, description, profile, member, canEditPermissions)
+                : permissionRow(permission, title, description, profile, member, canEditPermissions, false));
+        });
 
         if (this.team.type().equals("guild")) {
             List<MemberSetting> settings = MemberSettingsApi.API.getSettings(this.team);
@@ -353,6 +361,32 @@ public class MembersScreen extends BaseScreen {
             .setDividerYOffset(-1);
         if (indented) entry.setLeftPadding(14);
         return entry;
+    }
+
+    private LabelledEntry partyPermissionRow(String key, Component title, Component description, GameProfile profile, Member member, boolean canEdit) {
+        boolean defaultValue = MemberPermissionsApi.API.getPartyPermissions().getOrDefault(key, false);
+        State<Boolean> state = State.of(member.permissions().getOrDefault(key, defaultValue));
+        WidgetRenderer<Button> onRenderer = WidgetRenderers.center(SWITCH_W, SWITCH_H, WidgetRenderers.sprite(UIConstants.SWITCH_ON));
+        WidgetRenderer<Button> offRenderer = WidgetRenderers.center(SWITCH_W, SWITCH_H, WidgetRenderers.sprite(UIConstants.SWITCH));
+        Button toggle = Widgets.button(button -> {
+            button.withSize(SWITCH_HIT_W, SWITCH_HIT_H);
+            button.withTexture(null);
+            button.withRenderer((graphics, context, partialTick) ->
+                (state.get() ? onRenderer : offRenderer).render(graphics, context, partialTick));
+            button.withCallback(() -> {
+                if (!canEdit) return;
+                boolean value = !state.get();
+                state.set(value);
+                ScreenUtils.sendCommand("argonauts party permissions set %s %s %s".formatted(key, profile.getName(), value));
+            });
+            if (!canEdit) button.asDisabled();
+        });
+        toggle.withTooltip(description);
+        return new LabelledEntry(this.font, title, toggle)
+            .setLockedWidth()
+            .setEntryYOffset(-2)
+            .setDrawDivider(true)
+            .setDividerYOffset(-1);
     }
 
     private void buildSettingRows(ListWidget list, List<MemberSetting> settings, GameProfile profile, Member member, boolean canEdit) {
