@@ -73,4 +73,5 @@ public class ConstantComponents {
 
     public static final Component INVENTORY_GUILD_BUTTON = Component.translatable("gui.argonauts.inventory.guild_button");
     public static final Component INVENTORY_PARTY_BUTTON = Component.translatable("gui.argonauts.inventory.party_button");
+    public static final Component INVENTORY_CLAIM_BUTTON = Component.translatable("gui.argonauts.inventory.claim_button");
 }

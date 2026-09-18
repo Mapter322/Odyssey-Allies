@@ -13,6 +13,7 @@ import earth.terrarium.argonauts.common.constants.ConstantComponents;
 import earth.terrarium.argonauts.common.guild.GuildSaveData;
 import earth.terrarium.argonauts.common.party.PartySaveData;
 import earth.terrarium.argonauts.mixins.client.ScreenWidgetInvoker;
+import earth.terrarium.cadmus.client.CadmusClient;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -36,6 +37,7 @@ public class ArgonautsClient {
 
     private static final ResourceLocation GUILD_ICON = Argonauts.id("textures/gui/icons/guild.png");
     private static final ResourceLocation PARTY_ICON = Argonauts.id("textures/gui/icons/party.png");
+    private static final ResourceLocation CLAIM_ICON = Argonauts.id("textures/gui/icons/claim.png");
 
     private static final int INVENTORY_WIDTH = 176;
     private static final int INVENTORY_HEIGHT = 166;
@@ -47,6 +49,7 @@ public class ArgonautsClient {
 
     private static IconButton guildButton;
     private static IconButton partyButton;
+    private static IconButton claimButton;
 
     public static void init() {
     }
@@ -61,18 +64,27 @@ public class ArgonautsClient {
         int x = leftPos - BUTTON_SIZE - BUTTON_MARGIN;
 
         guildButton = new IconButton(
-            x, topPos, BUTTON_SIZE, ICON_SIZE, GUILD_ICON,
+            x, topPos + BUTTON_SIZE + BUTTON_GAP, BUTTON_SIZE, ICON_SIZE, GUILD_ICON,
             ConstantComponents.INVENTORY_GUILD_BUTTON,
             btn -> openGuildMenu()
         );
         partyButton = new IconButton(
-            x, topPos + BUTTON_SIZE + BUTTON_GAP, BUTTON_SIZE, ICON_SIZE, PARTY_ICON,
+            x, topPos, BUTTON_SIZE, ICON_SIZE, PARTY_ICON,
             ConstantComponents.INVENTORY_PARTY_BUTTON,
             btn -> openPartyMenu()
         );
 
         invoker.argonauts$addRenderableWidget(guildButton);
         invoker.argonauts$addRenderableWidget(partyButton);
+
+        if (Argonauts.IS_CLAIMS_LOADED) {
+            claimButton = new IconButton(
+                x, topPos + (BUTTON_SIZE + BUTTON_GAP) * 2, BUTTON_SIZE, ICON_SIZE, CLAIM_ICON,
+                ConstantComponents.INVENTORY_CLAIM_BUTTON,
+                btn -> CadmusClient.openClaimMap(screen)
+            );
+            invoker.argonauts$addRenderableWidget(claimButton);
+        }
     }
 
     public static boolean handleInventoryClick(Screen screen, double mouseX, double mouseY, int button) {
@@ -84,6 +96,10 @@ public class ArgonautsClient {
         }
         if (partyButton != null && partyButton.isMouseOver(mouseX, mouseY)) {
             partyButton.mouseClicked(mouseX, mouseY, button);
+            return true;
+        }
+        if (claimButton != null && claimButton.isMouseOver(mouseX, mouseY)) {
+            claimButton.mouseClicked(mouseX, mouseY, button);
             return true;
         }
         return false;

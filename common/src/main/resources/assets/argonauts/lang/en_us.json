@@ -265,5 +265,6 @@
     "gui.argonauts.remove": "Remove",
 
     "gui.argonauts.inventory.guild_button": "Guild",
-    "gui.argonauts.inventory.party_button": "Party"
+    "gui.argonauts.inventory.party_button": "Party",
+    "gui.argonauts.inventory.claim_button": "Claim Map"
 }
