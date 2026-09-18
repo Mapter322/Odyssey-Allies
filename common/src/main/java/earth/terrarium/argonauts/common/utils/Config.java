@@ -24,6 +24,7 @@ public final class Config {
     public static int maxPartyMembers = Argonauts.DEFAULT_MAX_PARTY_MEMBERS;
     public static boolean teleportEnabled = false;
     public static int maxGuildConditions = 128;
+    public static int maxChatHistory = 1000;
     public static Map<Integer, GuildLevel> guildLevels = defaultGuildLevels();
 
     private Config() {}
@@ -37,12 +38,14 @@ public final class Config {
         int partyMembers;
         boolean teleport;
         int guildConditions;
+        int chatHistory;
         Map<Integer, GuildLevel> levels;
         try (Reader reader = Files.newBufferedReader(CONFIG_PATH)) {
             CommentedConfig root = new TomlParser().parse(reader);
             partyMembers = root.getIntOrElse("party.max-members", maxPartyMembers);
             teleport = root.getOrElse("party.teleport-enabled", teleportEnabled);
             guildConditions = root.getIntOrElse("guild.conditions", maxGuildConditions);
+            chatHistory = root.getIntOrElse("chat.max-history", maxChatHistory);
             levels = parseLevels(root);
         } catch (Exception e) {
             LOGGER.error("Failed to read config, falling back to defaults", e);
@@ -52,6 +55,7 @@ public final class Config {
         maxPartyMembers = clamp("maxPartyMembers", partyMembers, Argonauts.MIN_PARTY_MEMBERS, Argonauts.MAX_PARTY_MEMBERS);
         teleportEnabled = teleport;
         maxGuildConditions = clamp("maxGuildConditions", guildConditions, 1, 1024);
+        maxChatHistory = clamp("maxChatHistory", chatHistory, 1, 10000);
         if (!levels.isEmpty()) guildLevels = sanitize(levels);
         save();
     }
@@ -164,6 +168,10 @@ public final class Config {
         sb.append("[guild]\n");
         sb.append("# Maximum number of conditions a guild can have.\n");
         sb.append("conditions = ").append(maxGuildConditions).append("\n\n");
+
+        sb.append("[chat]\n");
+        sb.append("# Maximum number of messages stored per guild/party chat history.\n");
+        sb.append("max-history = ").append(maxChatHistory).append("\n\n");
 
         sb.append("# Guild levels: towns, members, claims, forceloads and outpost chunks per level (0 means no level cap).\n");
         sb.append("# New levels like 4, 5, etc. can be added; assign a guild's level with\n");

@@ -16,6 +16,8 @@ import earth.terrarium.argonauts.client.utils.ClientUtils;
 import earth.terrarium.argonauts.common.chat.ChatHandler;
 import earth.terrarium.argonauts.common.chat.ChatMessage;
 import earth.terrarium.argonauts.common.constants.ConstantComponents;
+import earth.terrarium.argonauts.common.network.NetworkHandler;
+import earth.terrarium.argonauts.common.network.packets.RequestChatHistoryPacket;
 import earth.terrarium.olympus.client.components.Widgets;
 import earth.terrarium.olympus.client.components.base.ListWidget;
 import earth.terrarium.olympus.client.components.buttons.Button;
@@ -39,6 +41,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class ChatScreen extends BaseScreen {
 
@@ -80,6 +83,7 @@ public class ChatScreen extends BaseScreen {
             .stream()
             .map(Player::getGameProfile)
             .toList());
+        NetworkHandler.CHANNEL.sendToServer(new RequestChatHistoryPacket(this.team.id()));
     }
 
     @Override
@@ -211,6 +215,13 @@ public class ChatScreen extends BaseScreen {
 
     public void setEmbedUrl(String url) {
         this.embedUrl = url;
+    }
+
+    public static void setHistory(UUID teamId, List<ChatMessage> messages) {
+        ChatHandler.setHistory(teamId, messages);
+        if (Minecraft.getInstance().screen instanceof ChatScreen screen && screen.team.id().equals(teamId)) {
+            screen.rebuildWidgets();
+        }
     }
 
     @Override

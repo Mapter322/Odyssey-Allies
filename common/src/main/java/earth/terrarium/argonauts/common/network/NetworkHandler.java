@@ -35,7 +35,10 @@ public class NetworkHandler {
         CHANNEL.register(ClientboundSyncPartyStatusPacket.TYPE);
 
         CHANNEL.register(ClientboundSendMessagePacket.TYPE);
+        CHANNEL.register(ClientboundChatHistoryPacket.TYPE);
         CHANNEL.register(ClientboundNotificationPacket.TYPE);
+
+        CHANNEL.register(RequestChatHistoryPacket.TYPE);
     }
 
     /**
