@@ -10,6 +10,8 @@ import earth.terrarium.argonauts.Argonauts;
 import earth.terrarium.argonauts.api.teams.MemberStatus;
 import earth.terrarium.argonauts.api.teams.party.PartyApi;
 import earth.terrarium.argonauts.client.ArgonautsClient;
+import earth.terrarium.argonauts.client.screens.members.MembersScreen;
+import net.minecraft.client.Minecraft;
 
 import java.util.UUID;
 
@@ -45,12 +47,15 @@ public record ClientboundModifyPartyMemberPacket(
 
         @Override
         public Runnable handle(ClientboundModifyPartyMemberPacket packet) {
-            return () -> PartyApi.API.get(ArgonautsClient.level(), packet.id()).ifPresent(party -> {
-                PartyApi.API.modifyMember(ArgonautsClient.level(), party, packet.playerId(), packet.status());
-                if (!packet.playerName().isEmpty()) {
-                    party.members().get(packet.playerId()).setName(packet.playerName());
-                }
-            });
+            return () -> {
+                PartyApi.API.get(ArgonautsClient.level(), packet.id()).ifPresent(party -> {
+                    PartyApi.API.modifyMember(ArgonautsClient.level(), party, packet.playerId(), packet.status());
+                    if (!packet.playerName().isEmpty()) {
+                        party.members().get(packet.playerId()).setName(packet.playerName());
+                    }
+                });
+                if (Minecraft.getInstance().screen instanceof MembersScreen screen) screen.refresh();
+            };
         }
     }
 }

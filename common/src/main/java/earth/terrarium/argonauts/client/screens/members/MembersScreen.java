@@ -97,11 +97,15 @@ public class MembersScreen extends BaseScreen {
         this.guild = team instanceof Guild instance ? instance : null;
         this.permissions = permissions;
         this.selfId = Minecraft.getInstance().getGameProfile().getId();
+        this.rebuildMembers();
+    }
 
+    private void rebuildMembers() {
+        this.members.clear();
         var conn = Minecraft.getInstance().getConnection();
         var skinManager = Minecraft.getInstance().getSkinManager();
 
-        team.members().forEach((uuid, member) -> {
+        this.team.members().forEach((uuid, member) -> {
             if (member.status().isFakePlayer()) return;
 
             PlayerInfo info = conn != null ? conn.getPlayerInfo(uuid) : null;
@@ -281,7 +285,7 @@ public class MembersScreen extends BaseScreen {
         }
 
         list.add(section(ConstantComponents.MEMBER_ACTIONS));
-        list.add(removeButton(profile, width));
+        list.add(removeButton(profile, member, width));
     }
 
     private LabelledEntry roleRow(GameProfile profile, Member member) {
@@ -449,17 +453,29 @@ public class MembersScreen extends BaseScreen {
         rebuildWidgets();
     }
 
-    public void refreshMemberSettings() {
+    public void refresh() {
+        if (!this.team.members().containsKey(this.selfId)) {
+            this.onClose();
+            return;
+        }
         if (this.detailsList != null) this.pendingDetailsScroll = this.detailsList.getScroll();
+        this.rebuildMembers();
+        if (this.selectedProfile != null) {
+            this.selectedMember = this.team.members().get(this.selectedProfile.getId());
+            if (this.selectedMember == null) {
+                this.selectedProfile = null;
+            }
+        }
         this.clearWidgets();
         this.init();
     }
 
-    private Button removeButton(GameProfile profile, int width) {
+    private Button removeButton(GameProfile profile, Member member, int width) {
+        boolean invited = member.status().isInvited();
         boolean canManage = team.canManageMembers(this.selfId) && !team.isOwner(profile.getId());
         return Widgets.button(button -> {
             button.withSize(width, BUTTON_HEIGHT);
-            button.withRenderer(WidgetRenderers.text(ConstantComponents.REMOVE_MEMBER).withColor(MinecraftColors.WHITE));
+            button.withRenderer(WidgetRenderers.text(invited ? ConstantComponents.CANCEL_INVITE : ConstantComponents.REMOVE_MEMBER).withColor(MinecraftColors.WHITE));
             button.withTexture(UIConstants.DANGER_BUTTON);
             if (!canManage) button.asDisabled();
             button.withCallback(() -> {

@@ -9,6 +9,8 @@ import com.teamresourceful.resourcefullib.common.network.defaults.CodecPacketTyp
 import earth.terrarium.argonauts.Argonauts;
 import earth.terrarium.argonauts.api.teams.party.PartyApi;
 import earth.terrarium.argonauts.client.ArgonautsClient;
+import earth.terrarium.argonauts.client.screens.members.MembersScreen;
+import net.minecraft.client.Minecraft;
 
 import java.util.UUID;
 
@@ -44,8 +46,11 @@ public record ClientboundModifyPartyPermissionPacket(
 
         @Override
         public Runnable handle(ClientboundModifyPartyPermissionPacket packet) {
-            return () -> PartyApi.API.get(ArgonautsClient.level(), packet.id()).ifPresent(party ->
-                PartyApi.API.modifyPermission(ArgonautsClient.level(), party, packet.playerId(), packet.permission(), packet.value()));
+            return () -> {
+                PartyApi.API.get(ArgonautsClient.level(), packet.id()).ifPresent(party ->
+                    PartyApi.API.modifyPermission(ArgonautsClient.level(), party, packet.playerId(), packet.permission(), packet.value()));
+                if (Minecraft.getInstance().screen instanceof MembersScreen screen) screen.refresh();
+            };
         }
     }
 }

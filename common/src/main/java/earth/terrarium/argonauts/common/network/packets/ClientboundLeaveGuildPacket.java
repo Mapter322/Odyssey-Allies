@@ -9,6 +9,8 @@ import com.teamresourceful.resourcefullib.common.network.defaults.CodecPacketTyp
 import earth.terrarium.argonauts.Argonauts;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.client.ArgonautsClient;
+import earth.terrarium.argonauts.client.screens.members.MembersScreen;
+import net.minecraft.client.Minecraft;
 
 import java.util.UUID;
 
@@ -40,8 +42,11 @@ public record ClientboundLeaveGuildPacket(
 
         @Override
         public Runnable handle(ClientboundLeaveGuildPacket packet) {
-            return () -> GuildApi.API.get(ArgonautsClient.level(), packet.id()).ifPresent(guild ->
-                GuildApi.API.leave(ArgonautsClient.level(), guild, packet.playerId()));
+            return () -> {
+                GuildApi.API.get(ArgonautsClient.level(), packet.id()).ifPresent(guild ->
+                    GuildApi.API.leave(ArgonautsClient.level(), guild, packet.playerId()));
+                if (Minecraft.getInstance().screen instanceof MembersScreen screen) screen.refresh();
+            };
         }
     }
 }

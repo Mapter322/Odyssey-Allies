@@ -48,7 +48,7 @@ public record ClientboundModifyGuildMemberRolePacket(
             return () -> {
                 GuildApi.API.get(ArgonautsClient.level(), packet.id()).ifPresent(guild ->
                     GuildRoleApi.API.modifyMemberRole(ArgonautsClient.level(), guild, packet.playerId(), packet.roleId()));
-                if (Minecraft.getInstance().screen instanceof MembersScreen screen) screen.refreshMemberSettings();
+                if (Minecraft.getInstance().screen instanceof MembersScreen screen) screen.refresh();
             };
         }
     }

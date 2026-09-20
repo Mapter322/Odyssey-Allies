@@ -10,6 +10,8 @@ import com.teamresourceful.resourcefullib.common.utils.TriState;
 import earth.terrarium.argonauts.Argonauts;
 import earth.terrarium.argonauts.api.teams.guild.GuildApi;
 import earth.terrarium.argonauts.client.ArgonautsClient;
+import earth.terrarium.argonauts.client.screens.members.MembersScreen;
+import net.minecraft.client.Minecraft;
 
 import java.util.UUID;
 
@@ -45,8 +47,11 @@ public record ClientboundModifyGuildPermissionPacket(
 
         @Override
         public Runnable handle(ClientboundModifyGuildPermissionPacket packet) {
-            return () -> GuildApi.API.get(ArgonautsClient.level(), packet.id()).ifPresent(guild ->
-                GuildApi.API.modifyPermission(ArgonautsClient.level(), guild, packet.playerId(), packet.permission(), packet.value()));
+            return () -> {
+                GuildApi.API.get(ArgonautsClient.level(), packet.id()).ifPresent(guild ->
+                    GuildApi.API.modifyPermission(ArgonautsClient.level(), guild, packet.playerId(), packet.permission(), packet.value()));
+                if (Minecraft.getInstance().screen instanceof MembersScreen screen) screen.refresh();
+            };
         }
     }
 }

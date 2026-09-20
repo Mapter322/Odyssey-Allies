@@ -55,7 +55,7 @@ public record ClientboundModifyGuildConditionPacket(
                         GuildApi.API.removeCondition(ArgonautsClient.level(), guild, packet.role(), packet.condition());
                     }
                 });
-                if (Minecraft.getInstance().screen instanceof MembersScreen screen) screen.refreshMemberSettings();
+                if (Minecraft.getInstance().screen instanceof MembersScreen screen) screen.refresh();
                 if (Minecraft.getInstance().screen instanceof RolesScreen screen) screen.refreshRoles();
             };
         }
