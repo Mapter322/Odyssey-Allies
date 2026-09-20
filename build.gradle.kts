@@ -50,6 +50,7 @@ subprojects {
         val resourcefulLibVersion: String by project
         val cadmusVersion: String by project
         val heraclesVersion: String by project
+        val depsMinecraftVersion: String by project
 
         "minecraft"("::$minecraftVersion")
 
@@ -59,15 +60,15 @@ subprojects {
 
             officialMojangMappings()
 
-            parchment(create(group = "org.parchmentmc.data", name = "parchment-1.21", version = parchmentVersion))
+            parchment(create(group = "org.parchmentmc.data", name = "parchment-$minecraftVersion", version = parchmentVersion))
         })
 
-        "modApi"(group = "com.teamresourceful.resourcefullib", name = "resourcefullib-$modLoader-$minecraftVersion", version = resourcefulLibVersion)
-        val olympus = "modImplementation"(group = "earth.terrarium.olympus", name = "olympus-$modLoader-$minecraftVersion", version = "1.0.19") {
+        "modApi"(group = "com.teamresourceful.resourcefullib", name = "resourcefullib-$modLoader-$depsMinecraftVersion", version = resourcefulLibVersion)
+        val olympus = "modImplementation"(group = "earth.terrarium.olympus", name = "olympus-$modLoader-$depsMinecraftVersion", version = "1.0.19") {
             isTransitive = false
         }
 
-        "modCompileOnly"(group = "earth.terrarium.cadmus", name = "cadmus-$modLoader-$minecraftVersion", version = cadmusVersion) {
+        "modCompileOnly"(group = "earth.terrarium.cadmus", name = "cadmus-$modLoader-$depsMinecraftVersion", version = cadmusVersion) {
             isTransitive = false
         }
 
