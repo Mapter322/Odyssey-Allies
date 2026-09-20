@@ -9,12 +9,11 @@ import earth.terrarium.argonauts.common.commands.TeamExceptions;
 import earth.terrarium.argonauts.common.constants.ConstantComponents;
 import earth.terrarium.argonauts.common.utils.Config;
 import earth.terrarium.argonauts.api.util.ModUtils;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 public final class PartyInviteCommand {
@@ -46,8 +45,13 @@ public final class PartyInviteCommand {
 
         source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.invite", targetPlayer.getName()), false);
         targetPlayer.displayClientMessage(ModUtils.translatableWithStyle("command.argonauts.party_invited", player.getName(), party.displayName()), false);
-        targetPlayer.displayClientMessage(ConstantComponents.CLICK_TO_ACCEPT.copy().withStyle(Style.EMPTY
-            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, ModUtils.translatableWithStyle("command.argonauts.join", party.displayName())))
-            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/argonauts party join " + player.getGameProfile().getName()))), false);
+        targetPlayer.displayClientMessage(Component.empty()
+            .append(ConstantComponents.inviteButton(ConstantComponents.ACCEPT,
+                ModUtils.translatableWithStyle("command.argonauts.join", party.displayName()),
+                "/argonauts party join " + player.getGameProfile().getName(), ChatFormatting.GREEN))
+            .append(Component.literal("    "))
+            .append(ConstantComponents.inviteButton(ConstantComponents.DECLINE,
+                ModUtils.translatableWithStyle("command.argonauts.decline", party.displayName()),
+                "/argonauts party decline " + player.getGameProfile().getName(), ChatFormatting.RED)), false);
     }
 }

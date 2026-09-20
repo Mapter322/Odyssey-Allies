@@ -10,12 +10,11 @@ import earth.terrarium.argonauts.common.constants.ConstantComponents;
 import earth.terrarium.argonauts.common.settings.Settings;
 import earth.terrarium.argonauts.common.utils.Config;
 import earth.terrarium.argonauts.api.util.ModUtils;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 public final class GuildInviteCommand {
@@ -47,8 +46,13 @@ public final class GuildInviteCommand {
 
         source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.invite", targetPlayer.getName()), false);
         targetPlayer.displayClientMessage(ModUtils.translatableWithStyle("command.argonauts.guild_invited", player.getName(), guild.displayName()), false);
-        targetPlayer.displayClientMessage(ConstantComponents.CLICK_TO_ACCEPT.copy().withStyle(Style.EMPTY
-            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, ModUtils.translatableWithStyle("command.argonauts.join", guild.displayName())))
-            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/argonauts guild join " + player.getGameProfile().getName()))), false);
+        targetPlayer.displayClientMessage(Component.empty()
+            .append(ConstantComponents.inviteButton(ConstantComponents.ACCEPT,
+                ModUtils.translatableWithStyle("command.argonauts.join", guild.displayName()),
+                "/argonauts guild join " + player.getGameProfile().getName(), ChatFormatting.GREEN))
+            .append(Component.literal("    "))
+            .append(ConstantComponents.inviteButton(ConstantComponents.DECLINE,
+                ModUtils.translatableWithStyle("command.argonauts.decline", guild.displayName()),
+                "/argonauts guild decline " + player.getGameProfile().getName(), ChatFormatting.RED)), false);
     }
 }

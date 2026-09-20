@@ -18,6 +18,7 @@ public class ArgonautsCommands {
         GuildInviteCommand.register(dispatcher);
         GuildKickCommand.register(dispatcher);
         GuildJoinCommand.register(dispatcher);
+        GuildDeclineCommand.register(dispatcher);
         GuildLeaveCommand.register(dispatcher);
         GuildMemberCommands.register(dispatcher);
         GuildPermissionCommands.register(dispatcher);
@@ -38,6 +39,7 @@ public class ArgonautsCommands {
         PartyInviteCommand.register(dispatcher);
         PartyKickCommand.register(dispatcher);
         PartyJoinCommand.register(dispatcher);
+        PartyDeclineCommand.register(dispatcher);
         PartyLeaveCommand.register(dispatcher);
         PartyMemberCommands.register(dispatcher);
         PartyPermissionCommands.register(dispatcher);

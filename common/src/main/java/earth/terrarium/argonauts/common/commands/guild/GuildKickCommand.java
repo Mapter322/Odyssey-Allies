@@ -45,10 +45,20 @@ public final class GuildKickCommand {
             return;
         }
         if (!guild.canManageMembers(player.getUUID())) throw TeamExceptions.NO_PERMISSION_MANAGE_MEMBERS.create();
-        if (!guild.isMember(targetId)) throw TeamExceptions.PLAYER_NOT_IN_GUILD.create();
+        boolean invited = guild.isInvited(targetId);
+        if (!invited && !guild.isMember(targetId)) throw TeamExceptions.PLAYER_NOT_IN_GUILD.create();
         if (player.getUUID().equals(targetId)) throw TeamExceptions.CANT_KICK_YOURSELF.create();
 
         GuildApi.API.leave(source.getLevel(), guild, targetId);
+
+        if (invited) {
+            source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.uninvite", name), false);
+            ServerPlayer online = source.getServer().getPlayerList().getPlayer(targetId);
+            if (online != null) {
+                online.displayClientMessage(ModUtils.translatableWithStyle("command.argonauts.guild_uninvited", player.getName(), guild.displayName()), false);
+            }
+            return;
+        }
 
         source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.kick", name), false);
         ServerPlayer online = source.getServer().getPlayerList().getPlayer(targetId);

@@ -76,11 +76,19 @@
     "command.argonauts.invite": "§7You've invited §b%s",
     "command.argonauts.guild_invited": "§b%s §7has invited you to join guild %s",
     "command.argonauts.party_invited": "§b%s §7has invited you to join party %s",
-    "command.argonauts.click_to_accept": "§bClick to accept",
+    "command.argonauts.accept_button": "Accept",
+    "command.argonauts.decline_button": "Decline",
     "command.argonauts.join": "§7Join %s",
+    "command.argonauts.decline": "§7Decline the invite to %s",
 
     "command.argonauts.join_guild": "§7You've joined guild §b%s",
     "command.argonauts.join_party": "§7You've joined party §b%s",
+
+    "command.argonauts.decline_guild": "§7You've declined the invite to guild §b%s",
+    "command.argonauts.decline_party": "§7You've declined the invite to party §b%s",
+
+    "command.argonauts.guild_declined": "§b%s §7declined your invite to guild %s",
+    "command.argonauts.party_declined": "§b%s §7declined your invite to party %s",
 
     "command.argonauts.joined_guild": "§b%s §7has joined your guild",
     "command.argonauts.joined_party": "§b%s §7has joined your party",
@@ -94,6 +102,10 @@
     "command.argonauts.kick": "§7Kicked §b%s",
     "command.argonauts.guild_kicked": "§b%s §7has kicked you from guild %s",
     "command.argonauts.party_kicked": "§b%s §7has kicked you from party %s",
+
+    "command.argonauts.uninvite": "§7Revoked the invite for §b%s",
+    "command.argonauts.guild_uninvited": "§b%s §7revoked your invite to guild %s",
+    "command.argonauts.party_uninvited": "§b%s §7revoked your invite to party %s",
 
     "command.argonauts.add_fake_player": "§7Added fake player §b%s",
     "command.argonauts.remove_fake_player": "§7Removed fake player §b%s",
@@ -265,6 +277,7 @@
     "gui.argonauts.no_conditions": "No conditions",
     "gui.argonauts.actions": "Actions",
     "gui.argonauts.remove_member": "Remove Member",
+    "gui.argonauts.cancel_invite": "Cancel Invite",
     "gui.argonauts.remove": "Remove",
 
     "gui.argonauts.inventory.guild_button": "Guild",

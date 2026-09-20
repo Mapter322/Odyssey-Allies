@@ -39,11 +39,22 @@ public final class PartyKickCommand {
         if (party == null) throw TeamExceptions.NOT_IN_PARTY.create();
         if (!party.canManageMembers(player.getUUID())) throw TeamExceptions.NO_PERMISSION_MANAGE_MEMBERS.create();
         UUID targetId = TeamArguments.resolveMember(source, party, targetName);
-        if (targetId == null || !party.isMember(targetId)) throw TeamExceptions.PLAYER_NOT_IN_PARTY.create();
+        if (targetId == null) throw TeamExceptions.PLAYER_NOT_IN_PARTY.create();
+        boolean invited = party.isInvited(targetId);
+        if (!invited && !party.isMember(targetId)) throw TeamExceptions.PLAYER_NOT_IN_PARTY.create();
         if (player.getUUID().equals(targetId)) throw TeamExceptions.CANT_KICK_YOURSELF.create();
 
         Component name = TeamArguments.memberName(source.getServer(), party, targetId);
         PartyApi.API.leave(source.getLevel(), party, targetId);
+
+        if (invited) {
+            source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.uninvite", name), false);
+            ServerPlayer online = source.getServer().getPlayerList().getPlayer(targetId);
+            if (online != null) {
+                online.displayClientMessage(ModUtils.translatableWithStyle("command.argonauts.party_uninvited", player.getName(), party.displayName()), false);
+            }
+            return;
+        }
 
         source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.kick", name), false);
         ServerPlayer online = source.getServer().getPlayerList().getPlayer(targetId);

@@ -2,13 +2,15 @@ package earth.terrarium.argonauts.common.constants;
 
 import com.teamresourceful.resourcefullib.common.utils.CommonUtils;
 import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 
 public class ConstantComponents {
 
-    public static final Component CLICK_TO_ACCEPT = CommonUtils.serverTranslatable("command.argonauts.click_to_accept");
+    public static final Component ACCEPT = CommonUtils.serverTranslatable("command.argonauts.accept_button");
+    public static final Component DECLINE = CommonUtils.serverTranslatable("command.argonauts.decline_button");
 
     public static final Component MOTD = CommonUtils.serverTranslatable("motd.argonauts.title");
     public static final Component MOTD_HEADER = CommonUtils.serverTranslatable("motd.argonauts.header").copy().setStyle(Style.EMPTY
@@ -67,6 +69,7 @@ public class ConstantComponents {
     public static final Component SAVE = Component.translatable("gui.argonauts.save");
 
     public static final Component REMOVE_MEMBER = Component.translatable("gui.argonauts.remove_member");
+    public static final Component CANCEL_INVITE = Component.translatable("gui.argonauts.cancel_invite");
     public static final Component REMOVE = Component.translatable("gui.argonauts.remove");
     public static final Component SELECT_MEMBER = Component.translatable("gui.argonauts.select_member");
     public static final Component INVITE_MEMBER = Component.translatable("gui.argonauts.invite_member");
@@ -76,4 +79,14 @@ public class ConstantComponents {
     public static final Component INVENTORY_GUILD_BUTTON = Component.translatable("gui.argonauts.inventory.guild_button");
     public static final Component INVENTORY_PARTY_BUTTON = Component.translatable("gui.argonauts.inventory.party_button");
     public static final Component INVENTORY_CLAIM_BUTTON = Component.translatable("gui.argonauts.inventory.claim_button");
+
+    public static Component inviteButton(Component label, Component hover, String command, ChatFormatting color) {
+        Style style = Style.EMPTY
+            .withColor(ChatFormatting.DARK_GRAY)
+            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hover))
+            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command));
+        return Component.literal("[ ").withStyle(style)
+            .append(label.copy().withStyle(Style.EMPTY.withColor(color)))
+            .append(Component.literal(" ]"));
+    }
 }
