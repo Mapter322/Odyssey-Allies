@@ -79,7 +79,7 @@ public class RolesScreen extends BaseScreen {
 
     private static final Comparator<String> ROLE_ORDER = Comparator
         .comparingInt((String id) -> switch (id) {
-            case Role.ALL -> 0;
+            case Role.OUTSIDER -> 0;
             case Role.MEMBER -> 1;
             case Role.ALLY -> 2;
             default -> 3;
@@ -232,7 +232,7 @@ public class RolesScreen extends BaseScreen {
         boolean canEdit = this.guild.canManagePermissions(this.selfId);
         list.add(parentRow(role, width));
 
-        if (!role.id().equals(Role.ALL) && !role.id().equals(Role.ALLY)) {
+        if (!role.id().equals(Role.OUTSIDER) && !role.id().equals(Role.ALLY)) {
             list.add(section(ConstantComponents.MEMBER_PERMISSIONS));
             List<String> permissions = new ArrayList<>(MemberPermissionsApi.API.getGuildPermissions().keySet());
             permissions.sort(String::compareTo);
@@ -437,7 +437,7 @@ public class RolesScreen extends BaseScreen {
     }
 
     private LabelledEntry parentRow(Role role, int width) {
-        boolean canEdit = this.guild.canManagePermissions(this.selfId) && !role.id().equals(Role.ALL);
+        boolean canEdit = this.guild.canManagePermissions(this.selfId) && !role.id().equals(Role.OUTSIDER);
         String current = role.hasParent() ? role.parent() : "none";
 
         List<String> options = new ArrayList<>();

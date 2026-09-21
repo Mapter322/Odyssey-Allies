@@ -18,17 +18,17 @@ public final class GuildRoleDefaults {
 
     public static Map<String, Role> create(Team team) {
         Map<String, Role> roles = new HashMap<>();
-        roles.put(Role.ALL, createRole(Role.ALL, "", RoleDefaultsConfig.values(Role.ALL)));
-        roles.put(Role.MEMBER, createRole(Role.MEMBER, Role.ALL, RoleDefaultsConfig.values(Role.MEMBER)));
-        roles.put(Role.ALLY, createRole(Role.ALLY, Role.ALL, RoleDefaultsConfig.values(Role.ALLY)));
+        roles.put(Role.OUTSIDER, createRole(Role.OUTSIDER, "", RoleDefaultsConfig.values(Role.OUTSIDER)));
+        roles.put(Role.MEMBER, createRole(Role.MEMBER, Role.OUTSIDER, RoleDefaultsConfig.values(Role.MEMBER)));
+        roles.put(Role.ALLY, createRole(Role.ALLY, Role.OUTSIDER, RoleDefaultsConfig.values(Role.ALLY)));
         return roles;
     }
 
     public static boolean applyMissingDefaults(Team team, Map<String, Role> roles) {
-        if (roles.get(Role.ALL) == null) return false;
+        if (roles.get(Role.OUTSIDER) == null) return false;
 
         boolean changed = false;
-        changed |= applyValues(team, roles.get(Role.ALL), RoleDefaultsConfig.values(Role.ALL));
+        changed |= applyValues(team, roles.get(Role.OUTSIDER), RoleDefaultsConfig.values(Role.OUTSIDER));
         changed |= applyValues(team, roles.get(Role.MEMBER), RoleDefaultsConfig.values(Role.MEMBER));
         changed |= applyValues(team, roles.get(Role.ALLY), RoleDefaultsConfig.values(Role.ALLY));
         return changed;
@@ -63,6 +63,6 @@ public final class GuildRoleDefaults {
     }
 
     public static boolean isDefaultRole(String id) {
-        return Role.ALL.equals(id) || Role.MEMBER.equals(id) || Role.ALLY.equals(id);
+        return Role.OUTSIDER.equals(id) || Role.MEMBER.equals(id) || Role.ALLY.equals(id);
     }
 }

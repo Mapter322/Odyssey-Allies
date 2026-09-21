@@ -9,7 +9,7 @@
     "team.argonauts.member_status.allied": "§bAllied",
     "team.argonauts.member_status.fake_player": "§cFake Player",
 
-    "gui.argonauts.role.all": "All",
+    "gui.argonauts.role.outsider": "Outsider",
     "gui.argonauts.role.member": "Member",
     "gui.argonauts.role.ally": "Ally",
 

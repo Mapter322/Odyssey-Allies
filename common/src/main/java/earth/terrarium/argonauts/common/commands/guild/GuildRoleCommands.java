@@ -166,7 +166,7 @@ public final class GuildRoleCommands {
         if (!ROLE_NAME.matcher(roleId).matches() || roleId.equals("none")) throw TeamExceptions.INVALID_ROLE_NAME.create();
         if (guild.roles().containsKey(roleId)) throw TeamExceptions.ROLE_ALREADY_EXISTS.create();
 
-        GuildRoleApi.API.modifyRole(source.getLevel(), guild, new Role(roleId, Role.ALL));
+        GuildRoleApi.API.modifyRole(source.getLevel(), guild, new Role(roleId, Role.OUTSIDER));
         source.sendSuccess(() -> ModUtils.translatableWithStyle("command.argonauts.role.create", roleId), false);
     }
 
@@ -187,7 +187,7 @@ public final class GuildRoleCommands {
 
         Role role = guild.roles().get(roleId);
         if (role == null) throw TeamExceptions.ROLE_NOT_FOUND.create();
-        if (roleId.equals(Role.ALL)) throw TeamExceptions.ROLE_CANNOT_HAVE_PARENT.create();
+        if (roleId.equals(Role.OUTSIDER)) throw TeamExceptions.ROLE_CANNOT_HAVE_PARENT.create();
 
         String parentId = parent.toLowerCase(Locale.ROOT);
         if (parentId.equals("none")) parentId = "";
@@ -208,7 +208,7 @@ public final class GuildRoleCommands {
         if (targetId == null || !guild.isMember(targetId)) throw TeamExceptions.PLAYER_NOT_IN_GUILD.create();
         if (guild.isOwner(targetId)) throw TeamExceptions.CANNOT_CHANGE_OWNER_ROLE.create();
         if (!guild.roles().containsKey(roleId)) throw TeamExceptions.ROLE_NOT_FOUND.create();
-        if (roleId.equals(Role.ALL) || roleId.equals(Role.ALLY)) throw TeamExceptions.CANNOT_ASSIGN_ROLE.create();
+        if (roleId.equals(Role.OUTSIDER) || roleId.equals(Role.ALLY)) throw TeamExceptions.CANNOT_ASSIGN_ROLE.create();
 
         GuildRoleApi.API.modifyMemberRole(source.getLevel(), guild, targetId, roleId);
         Component display = TeamArguments.memberName(source.getServer(), guild, targetId);

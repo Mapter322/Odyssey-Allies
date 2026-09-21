@@ -26,11 +26,11 @@ public final class RoleDefaultsConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Argonauts.MOD_ID);
     private static final Map<String, String> FILE_NAMES = Map.of(
-        Role.ALL, "role_all.toml",
+        Role.OUTSIDER, "role_outsider.toml",
         Role.MEMBER, "role_member.toml",
         Role.ALLY, "role_ally.toml"
     );
-    private static final List<String> ROLES = List.of(Role.ALL, Role.MEMBER, Role.ALLY);
+    private static final List<String> ROLES = List.of(Role.OUTSIDER, Role.MEMBER, Role.ALLY);
     public static final List<String> CONDITION_PARENTS = List.of(
         "block-break",
         "block-place",
@@ -143,7 +143,7 @@ public final class RoleDefaultsConfig {
     }
 
     private static Map<String, TriState> generate(String role) {
-        TriState value = Role.ALL.equals(role) ? TriState.FALSE : TriState.TRUE;
+        TriState value = Role.OUTSIDER.equals(role) ? TriState.FALSE : TriState.TRUE;
         Map<String, TriState> values = new LinkedHashMap<>();
         MemberPermissionsApi.API.getGuildPermissions().keySet().forEach(permission -> values.put(permission, value));
         for (MemberSetting setting : MemberSettingsApi.API.getSettings(null)) {

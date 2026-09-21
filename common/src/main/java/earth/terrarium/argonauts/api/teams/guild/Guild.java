@@ -153,14 +153,14 @@ public record Guild(
 
     /**
      * Gets the role that applies to the player. Members and fake players use their assigned role,
-     * allies always use the ally role and everyone else uses the all role.
+     * allies always use the ally role and everyone else uses the outsider role.
      *
      * @param player the player
      * @return the role id
      */
     public String getRoleId(UUID player) {
         Member member = this.members().get(player);
-        if (member == null || member.status().isInvited()) return Role.ALL;
+        if (member == null || member.status().isInvited()) return Role.OUTSIDER;
         if (member.status().isAllied()) return Role.ALLY;
         return member.role().isEmpty() ? Role.MEMBER : member.role();
     }

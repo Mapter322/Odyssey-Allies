@@ -18,7 +18,7 @@ import java.util.Objects;
  */
 public class Role {
 
-    public static final String ALL = "all";
+    public static final String OUTSIDER = "outsider";
     public static final String MEMBER = "member";
     public static final String ALLY = "ally";
 
